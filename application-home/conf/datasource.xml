@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<datasources xmlns="http://www.appng.org/schema/platform" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.appng.org/schema/platform http://www.appng.org/schema/platform/appng-platform.xsd ">
+	<datasource id="jobs">
+		<config>
+			<title>jobs</title>
+			<meta-data bindClass="org.appng.application.scheduler.JobModel">
+				<field name="name" type="text">
+					<label>name</label>
+				</field>
+				<field name="origin" type="text">
+					<label>origin</label>
+				</field>
+				<field name="cronExpression" type="text">
+					<label>cronExpression</label>
+				</field>
+				<field name="nextFireTime" type="date" format="yyyy-MM-dd HH:mm:ss,SSS">
+					<label>nextFireTime</label>
+				</field>
+				<field name="actions" type="linkpanel">
+					<label>actions</label>
+				</field>
+			</meta-data>
+			<linkpanel id="other" location="both">
+				<link mode="intern" target="/jobs/create#tab_create">
+					<label>create.job</label>
+					<icon>new</icon>
+				</link>
+			</linkpanel>
+			<linkpanel id="actions" location="inline">
+				<link mode="intern" target="">
+					<condition expression="${current.running}" />
+					<label>running</label>
+					<icon>running</icon>
+				</link>
+				<link mode="intern" target="">
+					<condition expression="${not current.running and (current.nextFireTime ne null and current.cronExpression ne null)}" />
+					<label>scheduled</label>
+					<icon>scheduled</icon>
+				</link>
+				<link mode="intern" target="">
+					<condition expression="${not current.running and (current.nextFireTime eq null or current.cronExpression eq null)}" />
+					<label></label>
+					<icon>spacer</icon>
+				</link>
+				<link mode="intern" target="/jobs/update/#{name}#tab_update" default="true">
+					<label>update</label>
+					<icon>edit</icon>
+				</link>
+				<link mode="intern" target="/jobs&#63;form_action=schedule&#38;id=#{name}" show-disabled="true">
+					<condition expression="${current.nextFireTime eq null and current.cronExpression ne null}" />
+					<label>schedule</label>
+					<icon>schedule</icon>
+				</link>
+				<link mode="intern" target="/jobs&#63;form_action=unschedule&#38;id=#{name}" show-disabled="true">
+					<condition expression="${current.nextFireTime ne null or current.cronExpression eq null}" />
+					<label>unschedule</label>
+					<icon>unschedule</icon>
+				</link>
+				<link mode="intern" target="/jobs&#63;form_action=start&#38;id=#{name}" show-disabled="true">
+					<condition expression="${not current.running}" />
+					<label>start</label>
+					<icon>start</icon>
+				</link>
+				<link mode="intern" target="/jobs&#63;form_action=delete&#38;id=#{name}" show-disabled="true">
+					<condition expression="${not current.running}" />
+					<label>delete</label>
+					<icon>delete</icon>
+					<confirmation id="confirm.delete.job" params="#{name}"/>
+				</link>
+			</linkpanel>
+		</config>
+		<bean id="jobs" />
+	</datasource>
+
+	<datasource id="job">
+		<config>
+			<title>jobs</title>
+			<params>				
+				<param name="id" />
+			</params>
+			<meta-data bindClass="org.appng.application.scheduler.JobModel">
+				<field name="name" type="text" readonly="true">
+					<label>name</label>
+				</field>
+				<field name="cronExpression" type="text">
+					<label>cronExpression</label>
+				</field>
+				<field name="description" type="longtext">
+					<label>description</label>
+				</field>
+			</meta-data>
+		</config>
+		<bean id="jobs">
+			<option name="job" id="${id}" />
+		</bean>
+	</datasource>
+	
+	<datasource id="new-job">
+		<config>
+			<title>create.job</title>
+			<meta-data binding="jobModel" bindClass="org.appng.application.scheduler.form.JobForm">
+				<field name="availableJob" type="list:select">
+					<label>availableJob</label>
+				</field>
+				<field name="name" type="text">
+					<label>name</label>
+				</field>
+				<field name="cronExpression" type="text">
+					<label>cronExpression</label>
+				</field>
+				<field name="description" type="longtext">
+					<label>description</label>
+				</field>
+			</meta-data>
+		</config>
+		<bean id="jobs">
+			<option name="action" id="create" />
+		</bean>
+	</datasource>
+</datasources>

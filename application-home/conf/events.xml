@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<events xmlns="http://www.appng.org/schema/platform" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.appng.org/schema/platform http://www.appng.org/schema/platform/appng-platform.xsd">
+	<event id="jobEvent">
+		<config></config>
+
+		<action id="create">
+			<config>
+				<title>create.job</title>
+				<params>
+					<param name="form_action" />
+				</params>
+			</config>
+			<condition expression="${form_action eq 'create'}" />
+			<datasource id="new-job" />
+			<bean id="createJob">
+				<option name="action" id="create" />
+			</bean>
+		</action>
+
+		<action id="update">
+			<config>
+				<title>update</title>
+				<params>
+					<param name="form_action" />
+					<param name="id" />
+				</params>
+			</config>
+			<condition expression="${form_action eq 'update'}" />
+			<datasource id="job">
+				<params>
+					<param name="id">${id}</param>
+				</params>
+			</datasource>
+			<bean id="updateJob">
+				<option name="job" id="${id}" action="update" />
+			</bean>
+		</action>
+
+		<action id="schedule">
+			<config>
+				<title>schedule</title>
+				<params>
+					<param name="form_action" />
+					<param name="id" />
+				</params>
+			</config>
+			<condition expression="${form_action eq 'schedule'}" />
+			<bean id="setJobState">
+				<option name="job" id="${id}" action="schedule" />
+			</bean>
+		</action>
+
+		<action id="unschedule">
+			<config>
+				<title>unschedule</title>
+				<params>
+					<param name="form_action" />
+					<param name="id" />
+				</params>
+			</config>
+			<condition expression="${form_action eq 'unschedule'}" />
+			<bean id="setJobState">
+				<option name="job" id="${id}" action="unschedule" />
+			</bean>
+		</action>
+
+		<action id="start">
+			<config>
+				<title>start</title>
+				<params>
+					<param name="form_action" />
+					<param name="id" />
+				</params>
+			</config>
+			<condition expression="${form_action eq 'start'}" />
+			<bean id="setJobState">
+				<option name="job" id="${id}" action="start" />
+			</bean>
+		</action>
+
+		<action id="delete">
+			<config>
+				<title>delete</title>
+				<params>
+					<param name="form_action" />
+					<param name="id" />
+				</params>
+			</config>
+			<condition expression="${form_action eq 'delete'}" />
+			<bean id="setJobState">
+				<option name="job" id="${id}" action="delete" />
+			</bean>
+		</action>
+	</event>
+</events>

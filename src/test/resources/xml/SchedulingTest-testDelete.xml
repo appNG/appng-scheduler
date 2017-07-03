@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<messages xmlns="http://www.appng.org/schema/platform" ref="delete">
+    <message ref="delete" class="OK">Job &quot;appng-scheduler_mytestjob&quot; has been successfully deleted.</message>
+</messages>

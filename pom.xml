@@ -1,0 +1,85 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<artifactId>appng-scheduler</artifactId>
+	<version>1.11.1</version>
+	<name>Scheduler</name>
+	<description>Scheduling using Quartz Scheduler</description>
+
+	<parent>
+		<groupId>org.appng</groupId>
+		<artifactId>appng-application-parent</artifactId>
+		<version>1.14.1</version>
+	</parent>
+
+	<properties>
+		<projectId>APPNGSCHEDULER</projectId>
+		<hsqlPort>9001</hsqlPort>
+		<urlAlias>scheduler</urlAlias>
+		<displayName>Scheduler</displayName>
+		<longDescription><![CDATA[An application for scheduling using Quartz]]></longDescription>
+		<appNGVersion>${project.parent.version}</appNGVersion>
+	</properties>
+
+	<scm>
+		<connection>scm:git:ssh://git@github.com:appNG/appng-scheduler.git</connection>
+		<developerConnection>scm:git:ssh://git@github.com:appNG/appng-scheduler.git</developerConnection>
+		<url>https://github.com/appNG/appng-scheduler</url>
+	</scm>
+
+	<build>
+		<testResources>
+			<testResource>
+				<directory>src/test/resources</directory>
+				<filtering>true</filtering>
+			</testResource>
+		</testResources>
+		<plugins>
+			<plugin>
+				<artifactId>maven-release-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.appng</groupId>
+			<artifactId>appng-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.appng</groupId>
+			<artifactId>appng-testsupport</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.quartz-scheduler</groupId>
+			<artifactId>quartz</artifactId>
+			<version>2.2.3</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>javax.servlet.jsp</groupId>
+			<artifactId>jsp-api</artifactId>
+			<version>2.2</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+			<scope>provided</scope>
+		</dependency>
+	</dependencies>
+
+</project>
