@@ -10,7 +10,7 @@
 	<appng-version>${appNGVersion}</appng-version>
 
 	<roles>
-		<role>
+		<role admin-role="true">
 			<name>Scheduler Admin</name>
 			<description>a super administrator with all permissions</description>
 			<permission id="output-format.html" />
