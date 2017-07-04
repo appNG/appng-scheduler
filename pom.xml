@@ -2,9 +2,10 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>appng-scheduler</artifactId>
-	<version>1.11.1</version>
+	<version>1.11.2-SNAPSHOT</version>
 	<name>Scheduler</name>
 	<description>Scheduling using Quartz Scheduler</description>
+	<url>https://www.appng.org</url>
 
 	<parent>
 		<groupId>org.appng</groupId>
@@ -13,7 +14,7 @@
 	</parent>
 
 	<properties>
-		<projectId>APPNGSCHEDULER</projectId>
+		<projectId>SCHED</projectId>
 		<hsqlPort>9001</hsqlPort>
 		<urlAlias>scheduler</urlAlias>
 		<displayName>Scheduler</displayName>
@@ -26,6 +27,86 @@
 		<developerConnection>scm:git:ssh://git@github.com:appNG/appng-scheduler.git</developerConnection>
 		<url>https://github.com/appNG/appng-scheduler</url>
 	</scm>
+	<licenses>
+		<license>
+			<name>Apache 2.0</name>
+			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+			<distribution>repo</distribution>
+			<comments>A business-friendly OSS license</comments>
+		</license>
+	</licenses>
+
+	<issueManagement>
+		<system>JIRA</system>
+		<url>https://appng.org/jira/projects/SCHED/</url>
+	</issueManagement>
+	<developers>
+		<developer>
+			<id>mherlitzius</id>
+			<name>Matthias Herlitzius</name>
+			<email>matthias.herlitzius at appng.org</email>
+			<organization>aiticon GmbH</organization>
+			<organizationUrl>http://www.aiticon.com</organizationUrl>
+		</developer>
+		<developer>
+			<id>madness-inc</id>
+			<name>Matthias Müller</name>
+			<email>matthias.mueller at appng.org</email>
+			<organization>aiticon GmbH</organization>
+			<organizationUrl>http://www.aiticon.com</organizationUrl>
+		</developer>
+		<developer>
+			<id>stuemke</id>
+			<name>Claus Stümke</name>
+			<email>claus.stuemke at appng.org</email>
+			<organization>aiticon GmbH</organization>
+			<organizationUrl>http://www.aiticon.com</organizationUrl>
+		</developer>
+	</developers>
+
+
+	<profiles>
+		<profile>
+			<id>maven-central</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-gpg-plugin</artifactId>
+						<version>1.6</version>
+						<executions>
+							<execution>
+								<id>sign-artifacts</id>
+								<phase>verify</phase>
+								<goals>
+									<goal>sign</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.sonatype.plugins</groupId>
+						<artifactId>nexus-staging-maven-plugin</artifactId>
+						<version>1.6.7</version>
+						<extensions>true</extensions>
+						<configuration>
+							<serverId>sonatype</serverId>
+							<nexusUrl>https://oss.sonatype.org/</nexusUrl>
+							<autoReleaseAfterClose>false</autoReleaseAfterClose>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+			<distributionManagement>
+				<repository>
+					<id>sonatype</id>
+					<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+				</repository>
+			</distributionManagement>
+		</profile>
+	</profiles>
+
+
 
 	<build>
 		<testResources>
@@ -36,7 +117,32 @@
 		</testResources>
 		<plugins>
 			<plugin>
-				<artifactId>maven-release-plugin</artifactId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>generate-docs</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+						<phase>package</phase>
+					</execution>
+				</executions>
+				<configuration>
+					<additionalparam>-Xdoclint:all,-Xdoclint:-html</additionalparam>
+					<sourcepath>src/main/java:target/generated-sources/constants</sourcepath>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<executions>
+					<execution>
+						<goals>
+							<goal>jar-no-fork</goal>
+						</goals>
+						<phase>verify</phase>
+					</execution>
+				</executions>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
