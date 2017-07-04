@@ -1,0 +1,7 @@
+image::https://www.aiticon.com/assets/images/appng_logo_760px.jpg[]
+:snapshot: 1.11.3-SNAPSHOT
+:stable: 1.11.1
+
+== Welcome to appNG Scheduler
+
+appNG Scheduler is an appNG core application, providing job scheduling services. 
