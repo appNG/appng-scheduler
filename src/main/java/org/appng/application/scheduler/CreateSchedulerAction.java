@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 the original author or authors.
+ * Copyright 2011-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ import org.slf4j.LoggerFactory;
  * A {@link ActionProvider} to update the parameters of a {@link ScheduledJob}, such as name, description and execution
  * time (cron-syntax).
  * 
- * @author Matthias Müller 2011-2013
+ * @author Matthias Müller
  * 
  */
 public class CreateSchedulerAction extends SchedulerAware implements ActionProvider<JobForm> {
