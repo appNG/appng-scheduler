@@ -15,7 +15,6 @@
  */
 package org.appng.application.scheduler;
 
-import org.apache.log4j.Logger;
 import org.appng.api.ActionProvider;
 import org.appng.api.Environment;
 import org.appng.api.FieldProcessor;
@@ -28,6 +27,8 @@ import org.appng.application.scheduler.message.MessageConstants;
 import org.quartz.JobDetail;
 import org.quartz.JobKey;
 import org.quartz.SchedulerException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * An {@link ActionProvider} to update the parameters of a {@link ScheduledJob} , such as name, description and
@@ -37,7 +38,7 @@ import org.quartz.SchedulerException;
  * 
  */
 public class UpdateSchedulerAction extends SchedulerAware implements ActionProvider<JobModel> {
-	private static Logger log = Logger.getLogger(UpdateSchedulerAction.class);
+	private static Logger log = LoggerFactory.getLogger(UpdateSchedulerAction.class);
 
 	public void perform(Site site,Application application, Environment environment, Options options, Request request,
 			JobModel valueHolder, FieldProcessor fp) {

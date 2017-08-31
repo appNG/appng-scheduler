@@ -17,7 +17,6 @@ package org.appng.application.scheduler.form;
 
 import java.util.Set;
 
-import org.apache.log4j.Logger;
 import org.appng.api.Environment;
 import org.appng.api.FieldProcessor;
 import org.appng.api.FormValidator;
@@ -32,10 +31,12 @@ import org.quartz.JobKey;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.impl.matchers.GroupMatcher;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class JobForm implements FormValidator {
 
-	private static Logger log = Logger.getLogger(JobForm.class);
+	private static Logger log = LoggerFactory.getLogger(JobForm.class);
 	private static String JOB_NAME = "jobModel.name";
 
 	private JobModel jobModel;

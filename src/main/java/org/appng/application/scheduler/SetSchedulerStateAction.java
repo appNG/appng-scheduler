@@ -15,7 +15,6 @@
  */
 package org.appng.application.scheduler;
 
-import org.apache.log4j.Logger;
 import org.appng.api.ActionProvider;
 import org.appng.api.Environment;
 import org.appng.api.FieldProcessor;
@@ -28,6 +27,8 @@ import org.appng.application.scheduler.message.MessageConstants;
 import org.quartz.JobDetail;
 import org.quartz.JobKey;
 import org.quartz.SchedulerException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * An {@link ActionProvider} to enable/disable a {@link ScheduledJob}.
@@ -41,7 +42,7 @@ public class SetSchedulerStateAction extends SchedulerAware implements ActionPro
 	private static final String ACTION_START = "start";
 	private static final String ACTION_UNSCHEDULE = "unschedule";
 	private static final String ACTION_SCHEDULE = "schedule";
-	private static Logger log = Logger.getLogger(SetSchedulerStateAction.class);
+	private static Logger log = LoggerFactory.getLogger(SetSchedulerStateAction.class);
 
 	public void perform(Site site, Application application, Environment environment, Options options, Request request,
 			Void valueHolder, FieldProcessor fp) {
