@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.appng.application.scheduler;
+package org.appng.application.scheduler.business;
 
 import org.appng.api.ActionProvider;
 import org.appng.api.Environment;
@@ -23,7 +23,9 @@ import org.appng.api.Request;
 import org.appng.api.ScheduledJob;
 import org.appng.api.model.Application;
 import org.appng.api.model.Site;
-import org.appng.application.scheduler.message.MessageConstants;
+import org.appng.application.scheduler.Constants;
+import org.appng.application.scheduler.MessageConstants;
+import org.appng.application.scheduler.SchedulerUtils;
 import org.quartz.JobDetail;
 import org.quartz.JobKey;
 import org.quartz.SchedulerException;

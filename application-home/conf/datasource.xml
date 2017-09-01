@@ -4,7 +4,7 @@
 	<datasource id="jobs">
 		<config>
 			<title>jobs</title>
-			<meta-data bindClass="org.appng.application.scheduler.JobModel">
+			<meta-data bindClass="org.appng.application.scheduler.model.JobModel">
 				<field name="name" type="text">
 					<label>name</label>
 				</field>
@@ -79,7 +79,7 @@
 			<params>				
 				<param name="id" />
 			</params>
-			<meta-data bindClass="org.appng.application.scheduler.JobModel">
+			<meta-data bindClass="org.appng.application.scheduler.model.JobModel">
 				<field name="name" type="text" readonly="true">
 					<label>name</label>
 				</field>
@@ -99,7 +99,7 @@
 	<datasource id="new-job">
 		<config>
 			<title>create.job</title>
-			<meta-data binding="jobModel" bindClass="org.appng.application.scheduler.form.JobForm">
+			<meta-data binding="jobModel" bindClass="org.appng.application.scheduler.model.JobForm">
 				<field name="availableJob" type="list:select">
 					<label>availableJob</label>
 				</field>

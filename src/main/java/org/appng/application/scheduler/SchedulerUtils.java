@@ -22,7 +22,6 @@ import org.appng.api.FieldProcessor;
 import org.appng.api.Request;
 import org.appng.api.ScheduledJob;
 import org.appng.api.model.Site;
-import org.appng.application.scheduler.message.MessageConstants;
 import org.appng.xml.platform.FieldDef;
 import org.quartz.CronExpression;
 import org.quartz.CronScheduleBuilder;

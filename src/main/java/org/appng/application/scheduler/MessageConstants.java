@@ -13,13 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.appng.application.scheduler.message;
+package org.appng.application.scheduler;
 
 /**
- * All messaging constants are defined here.
- * 
- * @author nilwarn.gajanan, aiticon GmbH
- * 
+ * Constants for message keys
  */
 public class MessageConstants {
 

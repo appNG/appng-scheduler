@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.appng.application.scheduler;
+package org.appng.application.scheduler.model;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -21,6 +21,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
+import org.appng.application.scheduler.Constants;
+import org.appng.application.scheduler.SchedulerUtils;
 import org.quartz.CronTrigger;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;

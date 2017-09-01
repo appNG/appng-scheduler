@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.appng.application.scheduler;
+package org.appng.application.scheduler.business;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,7 +31,11 @@ import org.appng.api.model.Named;
 import org.appng.api.model.Site;
 import org.appng.api.support.OptionGroupFactory;
 import org.appng.api.support.OptionGroupFactory.OptionGroup;
-import org.appng.application.scheduler.form.JobForm;
+import org.appng.application.scheduler.Constants;
+import org.appng.application.scheduler.SchedulerUtils;
+import org.appng.application.scheduler.model.JobForm;
+import org.appng.application.scheduler.model.JobModel;
+import org.appng.application.scheduler.model.JobXmlModel;
 import org.appng.xml.platform.Label;
 import org.appng.xml.platform.Selection;
 import org.appng.xml.platform.SelectionType;
