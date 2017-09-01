@@ -56,8 +56,7 @@ public class RunJobEvent extends Event {
 			appName = jobDetail.getJobDataMap().getString(Constants.JOB_ORIGIN);
 
 			Application application = site.getApplication(appName);
-			String jobName = jobKey.getName();
-			String beanName = jobName.substring(appName.length() + SchedulerUtils.JOB_SEPARATOR.length());
+			String beanName = jobDetail.getJobDataMap().getString(Constants.JOB_BEAN_NAME);
 			ScheduledJob job = (ScheduledJob) application.getBean(beanName);
 			if (null == job) {
 				throw new BusinessException("ScheduledJob " + beanName + " not found in application " + appName);

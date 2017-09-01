@@ -65,9 +65,10 @@ public class CreateSchedulerAction extends SchedulerAware implements ActionProvi
 			String[] splittedJobName = jobName.split(SchedulerUtils.JOB_SEPARATOR);
 			String applicationName = splittedJobName[0];
 			Application app = site.getApplication(applicationName);
-			ScheduledJob scheduledJob = (ScheduledJob) app.getBean(splittedJobName[1]);
+			String beanName = splittedJobName[1];
+			ScheduledJob scheduledJob = (ScheduledJob) app.getBean(beanName);
 			JobKey jobKey = schedulerUtils.getJobKey(site.getName(), applicationName, jobModel.getName());
-			JobDetail jobDetail = schedulerUtils.getJobDetail(jobKey, site, applicationName, scheduledJob);
+			JobDetail jobDetail = schedulerUtils.getJobDetail(jobKey, site, applicationName, scheduledJob, beanName);
 
 			if (StringUtils.isNotBlank(locale)) {
 				jobDetail.getJobDataMap().put(Constants.JOB_LOCALE, locale);

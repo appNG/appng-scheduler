@@ -78,8 +78,8 @@ public class SchedulerUtils {
 		}
 	}
 
-	public void rescheduleJob(JobDetail jobDetail, String cronExpression, String id, String jobDesc, String triggerGroup)
-			throws SchedulerException {
+	public void rescheduleJob(JobDetail jobDetail, String cronExpression, String id, String jobDesc,
+			String triggerGroup) throws SchedulerException {
 		TriggerKey triggerKey = getTriggerKey(jobDetail, id);
 		jobDetail.getJobDataMap().put(Constants.JOB_CRON_EXPRESSION, cronExpression);
 		if (triggerKey != null) {
@@ -195,8 +195,8 @@ public class SchedulerUtils {
 
 	}
 
-	public JobDetail getJobDetail(JobKey jobKey, Site site, String applicationName, ScheduledJob scheduledJob)
-			throws SchedulerException {
+	public JobDetail getJobDetail(JobKey jobKey, Site site, String applicationName, ScheduledJob scheduledJob,
+			String beanName) throws SchedulerException {
 		JobDetail jobDetail = scheduler.getJobDetail(jobKey);
 		if (null == jobDetail) {
 			JobBuilder jobbuilder = JobBuilder.newJob(Job.class).withIdentity(jobKey).storeDurably();
@@ -208,6 +208,7 @@ public class SchedulerUtils {
 		jobDataMap.put(Constants.JOB_SCHEDULED_JOB, scheduledJob.getClass().getName());
 		jobDataMap.put(Constants.JOB_ORIGIN, applicationName);
 		jobDataMap.put(Constants.JOB_SITE_NAME, site.getName());
+		jobDataMap.put(Constants.JOB_BEAN_NAME, beanName);
 		if (null != scheduledJob.getJobDataMap()) {
 			jobDataMap.putAll(scheduledJob.getJobDataMap());
 		}

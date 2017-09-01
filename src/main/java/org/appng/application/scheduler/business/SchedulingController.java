@@ -54,7 +54,8 @@ public class SchedulingController extends SchedulerAware implements ApplicationC
 					}
 					try {
 						JobKey jobKey = schedulerUtils.getJobKey(site.getName(), a.getName(), jobBeanName);
-						JobDetail jobDetail = schedulerUtils.getJobDetail(jobKey, site, a.getName(), scheduledJob);
+						JobDetail jobDetail = schedulerUtils.getJobDetail(jobKey, site, a.getName(), scheduledJob,
+								jobBeanName);
 						boolean isNewJob = !scheduler.checkExists(jobKey);
 
 						boolean enabled = "true"

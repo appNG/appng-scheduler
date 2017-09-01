@@ -23,6 +23,7 @@ public class Constants {
 	public static final String JOB_ORIGIN = "origin";
 	public static final String JOB_LOCALE = "locale";
 	public static final String JOB_DESCRIPTION = "description";
+	public static final String JOB_BEAN_NAME = "jobBeanName";
 	public static final String JOB_SITE_NAME = "siteName";
 
 	public static final String OPT_JOB = "job";
