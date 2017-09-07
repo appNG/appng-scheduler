@@ -58,12 +58,10 @@ public class SchedulingController extends SchedulerAware implements ApplicationC
 								jobBeanName);
 						boolean isNewJob = !scheduler.checkExists(jobKey);
 
-						boolean enabled = "true"
-								.equalsIgnoreCase((String) jobDetail.getJobDataMap().get(Constants.JOB_ENABLED));
+						boolean enabled = jobDetail.getJobDataMap().getBoolean(Constants.JOB_ENABLED);
 
 						if (isNewJob && enabled) {
-							String cronExpression = (String) jobDetail.getJobDataMap()
-									.get(Constants.JOB_CRON_EXPRESSION);
+							String cronExpression = jobDetail.getJobDataMap().getString(Constants.JOB_CRON_EXPRESSION);
 							String description = scheduledJob.getDescription();
 							schedulerUtils.addJob(jobDetail, description, cronExpression);
 						} else {

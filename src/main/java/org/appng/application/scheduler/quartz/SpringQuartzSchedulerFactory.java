@@ -26,6 +26,7 @@ import org.appng.api.Scope;
 import org.appng.api.model.Properties;
 import org.appng.api.model.Site;
 import org.appng.api.support.environment.DefaultEnvironment;
+import org.appng.application.scheduler.Constants;
 import org.appng.core.model.ApplicationContext;
 import org.quartz.InterruptableJob;
 import org.quartz.Job;
@@ -54,9 +55,6 @@ public class SpringQuartzSchedulerFactory extends AdaptableJobFactory {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(SpringQuartzSchedulerFactory.class);
 
-	private static final String JOBDATA_HARD_INTERRUPTABLE = "hardInterruptable";
-	private static final String JOBDATA_RUN_ONCE = "runOnce";
-
 	@Autowired
 	private ApplicationContext applicationContext;
 
@@ -74,7 +72,7 @@ public class SpringQuartzSchedulerFactory extends AdaptableJobFactory {
 		final Environment environment = DefaultEnvironment.get(servletContext);
 
 		final String eventId = hashCode() + "-" + id.getAndIncrement();
-		if (Boolean.TRUE.equals(jobDetail.getJobDataMap().getBoolean(JOBDATA_HARD_INTERRUPTABLE))) {
+		if (jobDetail.getJobDataMap().getBoolean(Constants.JOB_HARD_INTERRUPTABLE)) {
 			return getInterruptableJob(jobDetail, jobKey, site, environment, eventId);
 		} else {
 			return getJob(jobDetail, jobKey, site, environment, eventId);
@@ -110,7 +108,7 @@ public class SpringQuartzSchedulerFactory extends AdaptableJobFactory {
 	private Job getInterruptableJob(final JobDetail jobDetail, final JobKey jobKey, final Site site,
 			final Environment environment, final String eventId) {
 		Properties platformProps = environment.getAttribute(Scope.PLATFORM, Platform.Environment.PLATFORM_CONFIG);
-		// this is a 'secret' site-property
+		// this is a 'secret' platform-property
 		final Integer waitTime = platformProps.getInteger("interruptableWaitTime", 5000);
 
 		return new InterruptableJob() {
@@ -151,9 +149,8 @@ public class SpringQuartzSchedulerFactory extends AdaptableJobFactory {
 
 	private void sendRunOnceEvent(final JobDetail jobDetail, final JobKey jobKey, final Site site,
 			RunJobEvent runJobEvent) {
-		boolean runOnce = jobDetail.getJobDataMap().getBoolean(JOBDATA_RUN_ONCE);
-		if (Boolean.TRUE.equals(runOnce)) {
-			LOGGER.info("job {} has option 'runOnce' set, no event will be send.", jobKey);
+		if (jobDetail.getJobDataMap().getBoolean(Constants.JOB_RUN_ONCE)) {
+			LOGGER.info("job {} has option '{}' set, no event will be send.", jobKey, Constants.JOB_RUN_ONCE);
 		} else {
 			site.sendEvent(runJobEvent);
 			LOGGER.info("sending {}", runJobEvent);

@@ -44,8 +44,8 @@ import org.quartz.SchedulerException;
 
 /**
  * 
- * A {@link DataProvider} which returns informations about all implementations
- * of {@link ScheduledJob} that where registered during application startup
+ * A {@link DataProvider} which returns informations about all implementations of {@link ScheduledJob} that where
+ * registered during application startup
  * 
  * @author Matthias Müller
  * 
@@ -101,8 +101,8 @@ public class SchedulerDataSource implements DataProvider {
 						if (jobClasses.length > 0) {
 							List<Named<String>> jobs = new ArrayList<Named<String>>();
 							for (int i = 0; i < jobClasses.length; i++) {
-								jobs.add(new NamedJob(jobClasses[i], a.getName() + SchedulerUtils.JOB_SEPARATOR
-										+ jobClasses[i]));
+								jobs.add(new NamedJob(jobClasses[i],
+										a.getName() + SchedulerUtils.JOB_SEPARATOR + jobClasses[i]));
 							}
 							OptionGroup applicationJobs = optionGroupFactory.fromNamed(a.getName(), a.getName(), jobs,
 									(Named<String>) null);

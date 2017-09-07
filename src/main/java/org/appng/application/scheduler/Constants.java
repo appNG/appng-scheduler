@@ -20,6 +20,8 @@ public class Constants {
 	public static final String JOB_CRON_EXPRESSION = "cronExpression";
 	public static final String JOB_SCHEDULED_JOB = "SCHEDULED_JOB";
 	public static final String JOB_ENABLED = "enabled";
+	public static final String JOB_HARD_INTERRUPTABLE = "hardInterruptable";
+	public static final String JOB_RUN_ONCE = "runOnce";
 	public static final String JOB_ORIGIN = "origin";
 	public static final String JOB_LOCALE = "locale";
 	public static final String JOB_DESCRIPTION = "description";

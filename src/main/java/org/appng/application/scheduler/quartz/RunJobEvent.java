@@ -23,7 +23,6 @@ import org.appng.api.messaging.Event;
 import org.appng.api.model.Application;
 import org.appng.api.model.Site;
 import org.appng.application.scheduler.Constants;
-import org.appng.application.scheduler.SchedulerUtils;
 import org.quartz.JobDetail;
 import org.quartz.JobKey;
 import org.quartz.Scheduler;
