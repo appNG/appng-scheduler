@@ -52,7 +52,7 @@ public class DriverDelegateWrapper implements DriverDelegate {
 
 	public void initialize(Logger logger, String tablePrefix, String schedName, String instanceId,
 			ClassLoadHelper classLoadHelper, boolean useProperties, String initString) throws NoSuchDelegateException {
-		if (StringUtils.isBlank(initString) || StringUtils.contains(initString, "delegate=")) {
+		if (StringUtils.isBlank(initString) || !StringUtils.contains(initString, "delegate=")) {
 			throw new NoSuchDelegateException("initString must contain delegate=<delegate-class-name>");
 		}
 		String[] realDelegate = initString.split("\\|")[0].split("=");
