@@ -44,7 +44,8 @@
 				<prop key="org.quartz.threadPool.threadCount">3</prop>
 				<prop key="org.quartz.scheduler.skipUpdateCheck">true</prop>
 				<prop key="org.quartz.scheduler.interruptJobsOnShutdown">true</prop>
-				<prop key="org.quartz.jobStore.driverDelegateClass">${quartzDriverDelegate}</prop>
+				<prop key="org.quartz.jobStore.driverDelegateClass">org.appng.application.scheduler.quartz.DriverDelegateWrapper</prop>
+				<prop key="org.quartz.jobStore.driverDelegateInitString">delegate=${quartzDriverDelegate}</prop>
 				<prop key="org.quartz.scheduler.instanceId">AUTO</prop>
 				<prop key="org.quartz.scheduler.instanceIdGenerator.class">org.quartz.simpl.HostnameInstanceIdGenerator</prop>
 				<prop key="org.quartz.jobStore.isClustered">${platform.messagingEnabled:false}</prop>

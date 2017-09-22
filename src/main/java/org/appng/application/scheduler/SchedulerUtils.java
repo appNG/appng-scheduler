@@ -22,12 +22,11 @@ import org.appng.api.FieldProcessor;
 import org.appng.api.Request;
 import org.appng.api.ScheduledJob;
 import org.appng.api.model.Site;
+import org.appng.application.scheduler.quartz.SchedulerJobDetail;
 import org.appng.xml.platform.FieldDef;
 import org.quartz.CronExpression;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.CronTrigger;
-import org.quartz.Job;
-import org.quartz.JobBuilder;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
 import org.quartz.JobExecutionContext;
@@ -199,8 +198,7 @@ public class SchedulerUtils {
 			String beanName) throws SchedulerException {
 		JobDetail jobDetail = scheduler.getJobDetail(jobKey);
 		if (null == jobDetail) {
-			JobBuilder jobbuilder = JobBuilder.newJob(Job.class).withIdentity(jobKey).storeDurably();
-			jobDetail = jobbuilder.build();
+			jobDetail = new SchedulerJobDetail(jobKey, scheduledJob.getDescription());
 		} else {
 			jobDetail.getJobDataMap().clear();
 		}
