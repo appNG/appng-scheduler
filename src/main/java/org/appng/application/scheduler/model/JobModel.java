@@ -29,9 +29,9 @@ public class JobModel implements Named<String>, Comparable<Named<String>> {
 	private String jobClass;
 	private boolean running;
 	private String cronExpression;
-	private String jobDataMap;
 	private Date nextFireTime;
 	private Date previousFireTime;
+	private boolean beanAvailable;
 
 	public String getAvailableJob() {
 		if (StringUtils.isBlank(availableJob)) {
@@ -107,6 +107,14 @@ public class JobModel implements Named<String>, Comparable<Named<String>> {
 
 	public void setPreviousFireTime(Date previousFireTime) {
 		this.previousFireTime = previousFireTime;
+	}
+	
+	public boolean isBeanAvailable() {
+		return beanAvailable;
+	}
+
+	public void setBeanAvailable(boolean beanAvailable) {
+		this.beanAvailable = beanAvailable;
 	}
 
 	public String getId() {

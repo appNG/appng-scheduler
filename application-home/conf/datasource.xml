@@ -17,6 +17,11 @@
 				<field name="nextFireTime" type="date" format="yyyy-MM-dd HH:mm:ss,SSS">
 					<label>nextFireTime</label>
 				</field>
+				<field name="beanAvailable" type="image">
+					<label id="status"></label>
+					<icon condition="${!current.beanAvailable}">led_red</icon>
+					<icon condition="${current.beanAvailable}">led_green</icon>
+				</field>
 				<field name="actions" type="linkpanel">
 					<label>actions</label>
 				</field>
@@ -48,17 +53,17 @@
 					<icon>edit</icon>
 				</link>
 				<link mode="intern" target="/jobs&#63;form_action=schedule&#38;id=#{name}" show-disabled="true">
-					<condition expression="${current.nextFireTime eq null and current.cronExpression ne null}" />
+					<condition expression="${current.beanAvailable and (current.nextFireTime eq null and current.cronExpression ne null)}" />
 					<label>schedule</label>
 					<icon>schedule</icon>
 				</link>
 				<link mode="intern" target="/jobs&#63;form_action=unschedule&#38;id=#{name}" show-disabled="true">
-					<condition expression="${current.nextFireTime ne null or current.cronExpression eq null}" />
+					<condition expression="${current.beanAvailable and (current.nextFireTime ne null or current.cronExpression eq null)}" />
 					<label>unschedule</label>
 					<icon>unschedule</icon>
 				</link>
 				<link mode="intern" target="/jobs&#63;form_action=start&#38;id=#{name}" show-disabled="true">
-					<condition expression="${not current.running}" />
+					<condition expression="${not current.running and current.beanAvailable}" />
 					<label>start</label>
 					<icon>start</icon>
 				</link>

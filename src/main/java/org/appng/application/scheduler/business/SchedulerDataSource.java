@@ -68,16 +68,15 @@ public class SchedulerDataSource implements DataProvider {
 
 	public DataContainer getData(Site site, Application application, Environment environment, Options options,
 			Request request, FieldProcessor fp) {
-		String siteName = site.getName();
 		DataContainer data = new DataContainer(fp);
 
 		String jobId = options.getOptionValue(Constants.OPT_JOB, Constants.ATTR_ID);
 		String actionId = options.getOptionValue(Constants.OPT_ACTION, Constants.ATTR_ID);
 		String actionForm = request.getParameter(Constants.FORM_ACTION);
 		try {
-			JobXmlModel jobXmlModel = new JobXmlModel(siteName);
+			JobXmlModel jobXmlModel = new JobXmlModel();
 			if (null != jobId && !"".equals(jobId) && !ACTION_DELETE.equals(actionForm)) {
-				JobModel job = jobXmlModel.getJob(jobId, scheduler);
+				JobModel job = jobXmlModel.getJob(jobId, scheduler, site);
 				data.setItem(job);
 			} else {
 				if (ACTION_CREATE.equals(actionId)) {
@@ -111,7 +110,7 @@ public class SchedulerDataSource implements DataProvider {
 					}
 					data.getSelections().add(selection);
 				} else {
-					List<JobModel> jobs = jobXmlModel.getJobs(scheduler);
+					List<JobModel> jobs = jobXmlModel.getJobs(scheduler, site);
 					data.setPage(jobs, fp.getPageable());
 				}
 			}
