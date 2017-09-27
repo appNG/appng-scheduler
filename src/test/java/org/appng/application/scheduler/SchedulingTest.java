@@ -28,6 +28,7 @@ import org.appng.application.scheduler.business.SchedulingController;
 import org.appng.application.scheduler.model.JobForm;
 import org.appng.application.scheduler.model.JobModel;
 import org.appng.testsupport.TestBase;
+import org.appng.testsupport.validation.WritingXmlValidator;
 import org.appng.xml.platform.Data;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
@@ -41,11 +42,16 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-@ContextConfiguration(locations = { "classpath:beans.xml" }, inheritLocations = true, initializers = SchedulingTest.class)
+@ContextConfiguration(locations = {
+		"classpath:beans.xml" }, inheritLocations = true, initializers = SchedulingTest.class)
 public class SchedulingTest extends TestBase {
 
 	@Autowired
 	SchedulingController controller;
+
+	static {
+		WritingXmlValidator.writeXml = false;
+	}
 
 	@Override
 	protected java.util.Properties getProperties() {
