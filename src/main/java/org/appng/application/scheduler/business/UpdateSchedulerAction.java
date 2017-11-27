@@ -48,7 +48,7 @@ public class UpdateSchedulerAction extends SchedulerAware implements ActionProvi
 
 		String siteName = site.getName();
 
-		String id = options.getOption(Constants.OPT_JOB).getAttribute(Constants.ATTR_ID);
+		String id = options.getString(Constants.OPT_JOB, Constants.ATTR_ID);
 		String cronExpn = valueHolder.getCronExpression();
 		String jobDesc = valueHolder.getDescription();
 

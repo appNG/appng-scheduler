@@ -50,15 +50,14 @@ public class SetSchedulerStateAction extends SchedulerAware implements ActionPro
 			Void valueHolder, FieldProcessor fp) {
 		String siteName = site.getName();
 
-		String action = options.getOption(Constants.OPT_JOB).getAttribute(Constants.ATTR_ACTION);
-		String id = options.getOption(Constants.OPT_JOB).getAttribute(Constants.ATTR_ID);
+		String action = options.getString(Constants.OPT_JOB, Constants.ATTR_ACTION);
+		String id = options.getString(Constants.OPT_JOB, Constants.ATTR_ID);
 		try {
 			SchedulerUtils schedulerUtils = new SchedulerUtils(scheduler, fp, request);
 
 			JobKey jobKey = new JobKey(id, siteName);
 			JobDetail jobDetail = scheduler.getJobDetail(jobKey);
 			if (ACTION_SCHEDULE.equals(action)) {
-				scheduler.getJobDetail(jobKey);
 				if (null == jobDetail) {
 					fp.addErrorMessage(request.getMessage(MessageConstants.JOB_NOT_EXISTS_ERROR, id));
 				} else {

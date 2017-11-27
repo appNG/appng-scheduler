@@ -59,6 +59,7 @@ public class SchedulingTest extends TestBase {
 		properties.put("indexExpression", "0 0/5 * * * ? 2042");
 		properties.put("indexEnabled", "false");
 		properties.put("site.name", "localhost");
+		properties.put("validateJobsOnStartup", "false");
 		return properties;
 	}
 

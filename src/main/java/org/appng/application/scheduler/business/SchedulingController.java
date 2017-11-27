@@ -17,6 +17,7 @@ package org.appng.application.scheduler.business;
 
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.appng.api.ApplicationController;
 import org.appng.api.Environment;
 import org.appng.api.FieldProcessor;
@@ -29,6 +30,7 @@ import org.appng.xml.platform.FieldDef;
 import org.appng.xml.platform.Linkpanel;
 import org.appng.xml.platform.Messages;
 import org.appng.xml.platform.MetaData;
+import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
 import org.quartz.JobKey;
 import org.quartz.SchedulerException;
@@ -43,6 +45,9 @@ public class SchedulingController extends SchedulerAware implements ApplicationC
 	public boolean start(Site site, Application application, Environment env) {
 		try {
 			SchedulerUtils schedulerUtils = new SchedulerUtils(scheduler, getLoggingFieldProcessor());
+			if(application.getProperties().getBoolean("validateJobsOnStartup")){
+				validateJobs(site, schedulerUtils);
+			}
 
 			for (Application a : site.getApplications()) {
 				String[] jobBeanNames = a.getBeanNames(ScheduledJob.class);
@@ -79,6 +84,38 @@ public class SchedulingController extends SchedulerAware implements ApplicationC
 			return false;
 		}
 		return true;
+	}
+
+	private void validateJobs(Site site, SchedulerUtils schedulerUtils) {
+		try {
+			for (JobKey jobKey : schedulerUtils.getJobsForSite(site.getName())) {
+				boolean jobOK = false;
+				JobDetail jobDetail = schedulerUtils.getJobDetail(jobKey);
+				JobDataMap jobData = jobDetail.getJobDataMap();
+				String appName = jobData.getString(Constants.JOB_ORIGIN);
+				String beanName = jobData.getString(Constants.JOB_BEAN_NAME);
+				if (StringUtils.isBlank(beanName)) {
+					beanName = jobKey.getName().substring(appName.length() + 1);
+					jobData.put(Constants.JOB_BEAN_NAME, beanName);
+					schedulerUtils.saveJob(jobDetail);
+				}
+				Application app = site.getApplication(appName);
+				if (null == app) {
+					LOGGER.warn("application '{}' of site '{}' not found for job '{}'", appName, site.getName(),
+							jobKey.getName());
+				} else if (null == app.getBean(beanName, ScheduledJob.class)) {
+					LOGGER.error("bean named '{}' not found in application '{}' of site '{}' for job '{}'", beanName,
+							appName, site.getName(), jobKey.getName());
+				} else {
+					jobOK = true;
+				}
+				if (!jobOK && null != jobData.getString(Constants.JOB_CRON_EXPRESSION)) {
+					schedulerUtils.deleteTrigger(jobDetail, jobKey.getName());
+				}
+			}
+		} catch (SchedulerException e) {
+			LOGGER.error("error while retrieving jobs for site " + site.getName(), e);
+		}
 	}
 
 	public boolean removeSite(Site site, Application application, Environment environment) {
