@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<applicationRootConfig xmlns="http://www.appng.org/schema/platform" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.appng.org/schema/platform http://www.appng.org/schema/platform/appng-platform.xsd">
+	<name>Scheduler</name>
+	<config>
+		<permissions>
+			<permission mode="set" ref="debug" />
+		</permissions>
+		<session>
+			<session-params></session-params>
+		</session>
+	</config>
+	<navigation location="top" id="topnav">
+		<link mode="intern" target="/jobs">
+			<label>jobs</label>
+		</link>
+	</navigation>
+	<pages>
+		<page id="jobs" type="index">
+			<config>
+				<title>jobs</title>
+				<url-schema>
+					<url-params>
+						<url-param name="action" />
+						<url-param name="id" />
+					</url-params>
+					<get-params>
+						<get-param name="form_action" />
+						<get-param name="id" />
+					</get-params>
+					<post-params>
+						<post-param name="form_action" />
+					</post-params>
+				</url-schema>
+			</config>
+			<structure>
+				<section>
+					<element>
+						<datasource id="jobs" />
+					</element>
+					<element>
+						<action id="schedule" eventId="jobEvent" onSuccess="/jobs#tab_jobs">
+							<condition expression="${false}" />
+							<params>
+								<param name="form_action">${form_action}</param>
+								<param name="id">${id}</param>
+							</params>
+						</action>
+					</element>
+					<element>
+						<action id="unschedule" eventId="jobEvent" onSuccess="/jobs#tab_jobs">
+							<condition expression="${false}" />
+							<params>
+								<param name="form_action">${form_action}</param>
+								<param name="id">${id}</param>
+							</params>
+						</action>
+					</element>
+					<element>
+						<action id="start" eventId="jobEvent" onSuccess="/jobs#tab_jobs">
+							<condition expression="${false}" />
+							<params>
+								<param name="form_action">${form_action}</param>
+								<param name="id">${id}</param>
+							</params>
+						</action>
+					</element>
+					<element>
+						<action id="delete" eventId="jobEvent" onSuccess="/jobs#tab_jobs">
+							<condition expression="${false}" />
+							<params>
+								<param name="form_action">${form_action}</param>
+								<param name="id">${id}</param>
+							</params>
+						</action>
+					</element>
+				</section>
+				
+				<!-- create -->
+				<section>
+					<element>
+						<action eventId="jobEvent" id="create" onSuccess="/jobs#tab_jobs">
+							<params>
+								<param name="form_action">${form_action}</param>
+							</params>
+							<condition expression="${action eq 'create'}" />
+						</action>
+					</element>
+				</section>
+				<section>
+					<element>
+						<action id="update" eventId="jobEvent" onSuccess="/jobs#tab_jobs">
+							<condition expression="${action eq 'update'}" />
+							<params>
+								<param name="form_action">${form_action}</param>
+								<param name="id">${id}</param>
+							</params>
+						</action>
+					</element>
+				</section>
+			</structure>
+		</page>
+	</pages>
+</applicationRootConfig>

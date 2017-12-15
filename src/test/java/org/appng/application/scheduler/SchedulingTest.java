@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 the original author or authors.
+ * Copyright 2011-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,8 +24,11 @@ import org.appng.api.FieldProcessor;
 import org.appng.api.ProcessingException;
 import org.appng.api.model.Application;
 import org.appng.api.support.CallableAction;
-import org.appng.application.scheduler.form.JobForm;
+import org.appng.application.scheduler.business.SchedulingController;
+import org.appng.application.scheduler.model.JobForm;
+import org.appng.application.scheduler.model.JobModel;
 import org.appng.testsupport.TestBase;
+import org.appng.testsupport.validation.WritingXmlValidator;
 import org.appng.xml.platform.Data;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
@@ -39,11 +42,16 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-@ContextConfiguration(locations = { "classpath:beans.xml" }, inheritLocations = true, initializers = SchedulingTest.class)
+@ContextConfiguration(locations = {
+		"classpath:beans.xml" }, inheritLocations = true, initializers = SchedulingTest.class)
 public class SchedulingTest extends TestBase {
 
 	@Autowired
 	SchedulingController controller;
+
+	static {
+		WritingXmlValidator.writeXml = false;
+	}
 
 	@Override
 	protected java.util.Properties getProperties() {
@@ -51,6 +59,7 @@ public class SchedulingTest extends TestBase {
 		properties.put("indexExpression", "0 0/5 * * * ? 2042");
 		properties.put("indexEnabled", "false");
 		properties.put("site.name", "localhost");
+		properties.put("validateJobsOnStartup", "false");
 		return properties;
 	}
 

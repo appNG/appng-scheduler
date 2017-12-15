@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 the original author or authors.
+ * Copyright 2011-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,9 +20,13 @@ public class Constants {
 	public static final String JOB_CRON_EXPRESSION = "cronExpression";
 	public static final String JOB_SCHEDULED_JOB = "SCHEDULED_JOB";
 	public static final String JOB_ENABLED = "enabled";
+	public static final String JOB_HARD_INTERRUPTABLE = "hardInterruptable";
+	public static final String JOB_RUN_ONCE = "runOnce";
+	public static final String JOB_ALLOW_CONCURRENT_EXECUTIONS ="allowConcurrentExecutions";
 	public static final String JOB_ORIGIN = "origin";
 	public static final String JOB_LOCALE = "locale";
 	public static final String JOB_DESCRIPTION = "description";
+	public static final String JOB_BEAN_NAME = "jobBeanName";
 	public static final String JOB_SITE_NAME = "siteName";
 
 	public static final String OPT_JOB = "job";

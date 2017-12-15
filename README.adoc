@@ -1,0 +1,14 @@
+image::https://www.aiticon.com/assets/images/appng_logo_760px.jpg[]
+:snapshot: 1.11.4-SNAPSHOT
+:stable: 1.11.3
+:current: {snapshot}
+
+[caption="Apache License 2.0",link=LICENSE]
+image::https://img.shields.io/badge/License-Apache%202-blue.svg?style=flat-square[]
+
+[caption="Maven Central",link=http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22org.appng%22%20AND%20a%3A%22appng-scheduler%22]
+image::https://img.shields.io/maven-central/v/org.appng/appng-scheduler.svg?style=flat-square[]
+
+== Welcome to appNG Scheduler
+
+appNG Scheduler is an appNG privileged application, providing job scheduling services.

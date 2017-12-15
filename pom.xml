@@ -2,7 +2,7 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>appng-scheduler</artifactId>
-	<version>1.11.3</version>
+	<version>1.11.4</version>
 	<name>Scheduler</name>
 	<description>Scheduling using Quartz Scheduler</description>
 	<url>https://www.appng.org</url>
@@ -10,7 +10,7 @@
 	<parent>
 		<groupId>org.appng</groupId>
 		<artifactId>appng-application-parent</artifactId>
-		<version>1.14.1</version>
+		<version>1.15.0</version>
 	</parent>
 
 	<properties>
@@ -170,22 +170,23 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.quartz-scheduler</groupId>
-			<artifactId>quartz</artifactId>
-			<version>2.2.3</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>javax.servlet.jsp</groupId>
-			<artifactId>jsp-api</artifactId>
-			<version>2.2</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
+			<version>5.1.44</version>
 			<scope>provided</scope>
 		</dependency>
 	</dependencies>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.appng</groupId>
+				<artifactId>appng-application-bom</artifactId>
+				<type>pom</type>
+				<scope>import</scope>
+				<version>${appNGVersion}</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 
 </project>

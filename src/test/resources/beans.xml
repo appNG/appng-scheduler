@@ -15,7 +15,7 @@
 		http://www.springframework.org/schema/util
 		http://www.springframework.org/schema/util/spring-util.xsd">
 
-	<bean id="schedulingController" class="org.appng.application.scheduler.SchedulingController">
+	<bean id="schedulingController" class="org.appng.application.scheduler.business.SchedulingController">
 		<property name="scheduler" ref="scheduler" />
 	</bean>
 
@@ -38,23 +38,23 @@
 		</property>
 	</bean>
 
-	<bean id="jobs" class="org.appng.application.scheduler.SchedulerDataSource">
+	<bean id="jobs" class="org.appng.application.scheduler.business.SchedulerDataSource">
 		<property name="scheduler" ref="scheduler" />
 	</bean>
 
-	<bean id="updateJob" class="org.appng.application.scheduler.UpdateSchedulerAction">
+	<bean id="updateJob" class="org.appng.application.scheduler.business.UpdateSchedulerAction">
 		<property name="scheduler" ref="scheduler" />
 	</bean>
 
-	<bean id="createJob" class="org.appng.application.scheduler.CreateSchedulerAction">
+	<bean id="createJob" class="org.appng.application.scheduler.business.CreateSchedulerAction">
 		<property name="scheduler" ref="scheduler" />
 	</bean>
 
-	<bean id="setJobState" class="org.appng.application.scheduler.SetSchedulerStateAction">
+	<bean id="setJobState" class="org.appng.application.scheduler.business.SetSchedulerStateAction">
 		<property name="scheduler" ref="scheduler" />
 	</bean>
 
-	<bean id="indexJob" class="org.appng.application.scheduler.search.IndexJob">
+	<bean id="indexJob" class="org.appng.application.scheduler.job.IndexJob">
 		<property name="description" value="Search job" />
 		<property name="jobDataMap">
 			<map>

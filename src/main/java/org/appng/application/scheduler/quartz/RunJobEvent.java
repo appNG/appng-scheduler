@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 the original author or authors.
+ * Copyright 2011-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ import org.appng.api.messaging.Event;
 import org.appng.api.model.Application;
 import org.appng.api.model.Site;
 import org.appng.application.scheduler.Constants;
-import org.appng.application.scheduler.SchedulerUtils;
 import org.quartz.JobDetail;
 import org.quartz.JobKey;
 import org.quartz.Scheduler;
@@ -56,8 +55,7 @@ public class RunJobEvent extends Event {
 			appName = jobDetail.getJobDataMap().getString(Constants.JOB_ORIGIN);
 
 			Application application = site.getApplication(appName);
-			String jobName = jobKey.getName();
-			String beanName = jobName.substring(appName.length() + SchedulerUtils.JOB_SEPARATOR.length());
+			String beanName = jobDetail.getJobDataMap().getString(Constants.JOB_BEAN_NAME);
 			ScheduledJob job = (ScheduledJob) application.getBean(beanName);
 			if (null == job) {
 				throw new BusinessException("ScheduledJob " + beanName + " not found in application " + appName);

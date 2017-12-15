@@ -1,85 +1,93 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <data xmlns="http://www.appng.org/schema/platform">
-    <resultset hits="2" lastchunk="0" firstchunk="0" previouschunk="0" nextchunk="0" chunksize="25" chunkname="jobs" chunk="0">
+    <resultset chunk="0" chunkname="jobs" chunksize="25" nextchunk="0" previouschunk="0" firstchunk="0" lastchunk="0" hits="2">
         <result>
-            <field type="text" name="name">
+            <field name="name" type="text">
                 <value>application_indexJob</value>
             </field>
-            <field type="text" name="origin">
+            <field name="origin" type="text">
                 <value>application</value>
             </field>
-            <field type="text" name="cronExpression">
+            <field name="cronExpression" type="text">
                 <value>0 0/5 * * * ? 2042</value>
             </field>
-            <field type="date" name="nextFireTime">
+            <field name="nextFireTime" type="date">
                 <value>2042-01-01 00:00:00,000</value>
             </field>
-            <linkpanel location="inline" id="actions">
-                <link target="" mode="intern" id="actions[2]">
+            <field name="beanAvailable" type="image">
+                <value>false</value>
+                <icon type="class">led_red</icon>
+            </field>
+            <linkpanel id="actions" location="inline">
+                <link id="actions[2]" mode="intern" target="">
                     <label id="scheduled">Job is scheduled</label>
                     <icon>scheduled</icon>
                 </link>
-                <link default="true" target="/jobs/update/application_indexJob#tab_update" mode="intern" id="actions[4]">
+                <link id="actions[4]" mode="intern" target="/jobs/update/application_indexJob#tab_update" default="true">
                     <label id="update">Update</label>
                     <icon>edit</icon>
                 </link>
-                <link disabled="true" target="" mode="intern" id="actions[5]">
+                <link id="actions[5]" mode="intern" target="" disabled="true">
                     <label id="schedule">Activate</label>
                     <icon>schedule</icon>
                 </link>
-                <link target="/jobs?form_action=unschedule&amp;id=application_indexJob" mode="intern" id="actions[6]">
+                <link id="actions[6]" mode="intern" target="" disabled="true">
                     <label id="unschedule">Deactivate</label>
                     <icon>unschedule</icon>
                 </link>
-                <link target="/jobs?form_action=start&amp;id=application_indexJob" mode="intern" id="actions[7]">
+                <link id="actions[7]" mode="intern" target="" disabled="true">
                     <label id="start">Start</label>
                     <icon>start</icon>
                 </link>
-                <link target="/jobs?form_action=delete&amp;id=application_indexJob" mode="intern" id="actions[8]">
+                <link id="actions[8]" mode="intern" target="/jobs?form_action=delete&amp;id=application_indexJob">
                     <label id="delete">Delete</label>
                     <icon>delete</icon>
-                    <confirmation params="#{name}" id="confirm.delete.job">Do you really want to delete the job &quot;application_indexJob&quot;?</confirmation>
+                    <confirmation id="confirm.delete.job" params="#{name}">Do you really want to delete the job "application_indexJob"?</confirmation>
                 </link>
             </linkpanel>
         </result>
         <result>
-            <field type="text" name="name">
+            <field name="name" type="text">
                 <value>appng-scheduler_anotherJob</value>
             </field>
-            <field type="text" name="origin">
+            <field name="origin" type="text">
                 <value>appng-scheduler</value>
             </field>
-            <field type="text" name="cronExpression">
+            <field name="cronExpression" type="text">
                 <value>0 0/20 * * * ? 2042</value>
             </field>
-            <field type="date" name="nextFireTime">
+            <field name="nextFireTime" type="date">
                 <value>2042-01-01 00:00:00,000</value>
             </field>
-            <linkpanel location="inline" id="actions">
-                <link target="" mode="intern" id="actions[2]">
+            <field name="beanAvailable" type="image">
+                <value>true</value>
+                <icon type="class">led_green</icon>
+            </field>
+            <linkpanel id="actions" location="inline">
+                <link id="actions[2]" mode="intern" target="">
                     <label id="scheduled">Job is scheduled</label>
                     <icon>scheduled</icon>
                 </link>
-                <link default="true" target="/jobs/update/appng-scheduler_anotherJob#tab_update" mode="intern" id="actions[4]">
+                <link id="actions[4]" mode="intern" target="/jobs/update/appng-scheduler_anotherJob#tab_update" default="true">
                     <label id="update">Update</label>
                     <icon>edit</icon>
                 </link>
-                <link disabled="true" target="" mode="intern" id="actions[5]">
+                <link id="actions[5]" mode="intern" target="" disabled="true">
                     <label id="schedule">Activate</label>
                     <icon>schedule</icon>
                 </link>
-                <link target="/jobs?form_action=unschedule&amp;id=appng-scheduler_anotherJob" mode="intern" id="actions[6]">
+                <link id="actions[6]" mode="intern" target="/jobs?form_action=unschedule&amp;id=appng-scheduler_anotherJob">
                     <label id="unschedule">Deactivate</label>
                     <icon>unschedule</icon>
                 </link>
-                <link target="/jobs?form_action=start&amp;id=appng-scheduler_anotherJob" mode="intern" id="actions[7]">
+                <link id="actions[7]" mode="intern" target="/jobs?form_action=start&amp;id=appng-scheduler_anotherJob">
                     <label id="start">Start</label>
                     <icon>start</icon>
                 </link>
-                <link target="/jobs?form_action=delete&amp;id=appng-scheduler_anotherJob" mode="intern" id="actions[8]">
+                <link id="actions[8]" mode="intern" target="/jobs?form_action=delete&amp;id=appng-scheduler_anotherJob">
                     <label id="delete">Delete</label>
                     <icon>delete</icon>
-                    <confirmation params="#{name}" id="confirm.delete.job">Do you really want to delete the job &quot;appng-scheduler_anotherJob&quot;?</confirmation>
+                    <confirmation id="confirm.delete.job" params="#{name}">Do you really want to delete the job "appng-scheduler_anotherJob"?</confirmation>
                 </link>
             </linkpanel>
         </result>
