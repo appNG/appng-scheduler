@@ -67,7 +67,8 @@ public class DriverDelegateWrapper implements DriverDelegate {
 
 	public SchedulerJobDetail selectJobDetail(Connection conn, JobKey jobKey, ClassLoadHelper loadHelper)
 			throws ClassNotFoundException, IOException, SQLException {
-		return new SchedulerJobDetail(delegate.selectJobDetail(conn, jobKey, loadHelper));
+		JobDetail jobDetail = delegate.selectJobDetail(conn, jobKey, loadHelper);
+		return null != jobDetail ? new SchedulerJobDetail(jobDetail) : null;
 	}
 
 	// delegate methods
