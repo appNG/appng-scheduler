@@ -1,0 +1,34 @@
+Release Notes - appNG Scheduler - Version 1.11.6 (2018-05-11)
+-------------------------------------------------------------
+* [SCHED-24] - Release version 1.11.6
+* [SCHED-23] - Add a changelog.txt
+* [SCHED-21] - Scheduler does not work with MSSQLDelegate
+* [SCHED-8] - add "contributing" file
+
+Release Notes - appNG Scheduler - Version 1.11.5 (2017-12-18)
+-------------------------------------------------------------
+* [SCHED-20] - Build and release 1.11.5
+* [SCHED-19] - NPE when starting from freshly installed appNG
+
+Release Notes - appNG Scheduler - Version 1.11.4 (2017-12-15)
+-------------------------------------------------------------
+* [SCHED-18] - Build and release 1.11.4
+* [SCHED-17] - Build against appNG 1.15.x
+* [SCHED-16] - In the job overview, a job that can not be executed should be marked with a red status
+* [SCHED-15] - Job can not be executed when name does not match bean name
+* [SCHED-14] - Use appng-application-parent 1.14.4
+* [SCHED-13] - Reorganize package structure and some resource names, minor refactorings
+* [SCHED-12] - Update license headers
+* [SCHED-11] - Make sure the same job can not be started twice
+* [SCHED-10] - Do not use log4j Logger
+* [SCHED-9] - Normalize line endings
+
+Release Notes - appNG Scheduler - Version 1.11.3 (2017-07-04)
+-------------------------------------------------------------
+* [SCHED-6] - add/update readme.adoc
+* [SCHED-4] - Build Release 1.11.3 and deploy to Maven Central
+* [SCHED-3] - Add admin-role for Scheduler Admin in application.xml
+
+Release Notes - appNG Scheduler - Version 1.11.2 (2017-07-04)
+-------------------------------------------------------------
+* [SCHED-2] - Build Release 1.11.2 and deploy to Maven Central
