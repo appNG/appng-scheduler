@@ -89,6 +89,7 @@ public class SpringQuartzSchedulerFactory extends AdaptableJobFactory {
 				RunJobEvent runJobEvent = new RunJobEvent(eventId, jobKey, site.getName());
 				try {
 					runJobEvent.perform(environment, site);
+					context.setResult(runJobEvent.getJobResult());
 				} catch (Exception e) {
 					throw new JobExecutionException(e);
 				}
@@ -121,6 +122,7 @@ public class SpringQuartzSchedulerFactory extends AdaptableJobFactory {
 					public void run() {
 						try {
 							runJobEvent.perform(environment, site);
+							context.setResult(runJobEvent.getJobResult());
 						} catch (Exception e) {
 							LOGGER.error("Caught Exception on job execution: ", e);
 						}

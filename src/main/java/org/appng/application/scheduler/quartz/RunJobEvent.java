@@ -23,6 +23,7 @@ import org.appng.api.messaging.Event;
 import org.appng.api.model.Application;
 import org.appng.api.model.Site;
 import org.appng.application.scheduler.Constants;
+import org.appng.application.scheduler.model.JobResult;
 import org.quartz.JobDetail;
 import org.quartz.JobKey;
 import org.quartz.Scheduler;
@@ -37,11 +38,16 @@ public class RunJobEvent extends Event {
 	private static final String SCHEDULER_APPLICATION = "schedulerApplication";
 	private String id;
 	private JobKey jobKey;
+	private JobResult jobResult;
 
 	public RunJobEvent(String id, JobKey jobKey, String siteName) {
 		super(siteName);
 		this.id = id;
 		this.jobKey = jobKey;
+	}
+
+	public JobResult getJobResult() {
+		return jobResult;
 	}
 
 	public void perform(Environment environment, Site site) throws InvalidConfigurationException, BusinessException {
@@ -66,6 +72,7 @@ public class RunJobEvent extends Event {
 			sw.start();
 			job.execute(site, application);
 			sw.stop();
+			this.jobResult = new JobResult(job.getResult(), appName, site.getName(), jobKey.getName());
 			Object[] args = new Object[] { jobKey, appName, site.getName(), sw.getTotalTimeMillis() };
 			logger.debug("executing job {} for application {} in site {} took {}ms", args);
 

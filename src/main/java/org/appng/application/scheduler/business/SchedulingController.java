@@ -36,16 +36,20 @@ import org.quartz.JobKey;
 import org.quartz.SchedulerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 
 public class SchedulingController extends SchedulerAware implements ApplicationController {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(SchedulingController.class);
 
+	@Autowired
+	private RecordingJobListener recordingJobListener;
+
 	public boolean start(Site site, Application application, Environment env) {
 		try {
 			SchedulerUtils schedulerUtils = new SchedulerUtils(scheduler, getLoggingFieldProcessor());
-			if(application.getProperties().getBoolean("validateJobsOnStartup")){
+			if (application.getProperties().getBoolean("validateJobsOnStartup")) {
 				validateJobs(site, schedulerUtils);
 			}
 
@@ -78,6 +82,7 @@ public class SchedulingController extends SchedulerAware implements ApplicationC
 					}
 				}
 			}
+			scheduler.getListenerManager().addJobListener(recordingJobListener);
 			scheduler.start();
 		} catch (SchedulerException e) {
 			LOGGER.error("error while starting scheduler", e);

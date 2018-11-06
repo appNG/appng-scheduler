@@ -21,6 +21,10 @@
 	<bean id="schedulingController" class="org.appng.application.scheduler.business.SchedulingController">
 		<property name="scheduler" ref="scheduler" />
 	</bean>
+	
+	<bean id="records" class="org.appng.application.scheduler.business.Records">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
 
 	<bean id="scheduler" class="org.appng.application.scheduler.quartz.SchedulerFactoryBean" lazy-init="false">
 		<constructor-arg value="${quartzDriverDelegate}" />
@@ -51,6 +55,10 @@
 				<prop key="org.quartz.jobStore.clusterCheckinInterval">${quartzClusterCheckinInterval:20000}</prop>
 			</props>
 		</property>
+	</bean>
+	
+	<bean id="recordingJobListener" class="org.appng.application.scheduler.business.RecordingJobListener">
+		<property name="dataSource" ref="dataSource" />
 	</bean>
 
 	<bean id="jobs" class="org.appng.application.scheduler.business.SchedulerDataSource">
