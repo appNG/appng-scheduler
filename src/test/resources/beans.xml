@@ -67,8 +67,12 @@
 		<constructor-arg index="0" value="javax.sql.DataSource" />
 	</bean>
 	
-	<bean id="recordingJobListener" class="org.appng.application.scheduler.business.RecordingJobListener">
+	<bean id="jobRecordService" class="org.appng.application.scheduler.service.JobRecordService">
 		<property name="dataSource" ref="dataSource" />
+	</bean>
+	
+	<bean id="recordingJobListener" class="org.appng.application.scheduler.quartz.RecordingJobListener">
+		<property name="jobRecordService" ref="jobRecordService" />
 	</bean>
 
 	<!-- this is needed to support the dictionary view of appng-manager -->

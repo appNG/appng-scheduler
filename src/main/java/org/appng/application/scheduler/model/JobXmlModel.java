@@ -37,7 +37,6 @@ import org.quartz.impl.matchers.GroupMatcher;
 
 public class JobXmlModel {
 
-
 	public List<JobModel> getJobs(Scheduler scheduler, Site site) throws SchedulerException {
 		List<JobModel> list = new ArrayList<JobModel>();
 		Set<JobKey> jobKeys = scheduler.getJobKeys(GroupMatcher.jobGroupEquals(site.getName()));

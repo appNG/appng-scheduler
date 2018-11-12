@@ -22,9 +22,6 @@
 		<property name="scheduler" ref="scheduler" />
 	</bean>
 	
-	<bean id="records" class="org.appng.application.scheduler.business.Records">
-		<property name="dataSource" ref="dataSource" />
-	</bean>
 
 	<bean id="scheduler" class="org.appng.application.scheduler.quartz.SchedulerFactoryBean" lazy-init="false">
 		<constructor-arg value="${quartzDriverDelegate}" />
@@ -57,10 +54,18 @@
 		</property>
 	</bean>
 	
-	<bean id="recordingJobListener" class="org.appng.application.scheduler.business.RecordingJobListener">
+	<bean id="jobRecordService" class="org.appng.application.scheduler.service.JobRecordService">
 		<property name="dataSource" ref="dataSource" />
 	</bean>
+	
+	<bean id="recordingJobListener" class="org.appng.application.scheduler.quartz.RecordingJobListener">
+		<property name="jobRecordService" ref="jobRecordService" />
+	</bean>
 
+	<bean id="records" class="org.appng.application.scheduler.business.Records">
+		<property name="jobRecordService" ref="jobRecordService" />
+	</bean>
+	
 	<bean id="jobs" class="org.appng.application.scheduler.business.SchedulerDataSource">
 		<property name="scheduler" ref="scheduler" />
 	</bean>

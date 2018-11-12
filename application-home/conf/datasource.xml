@@ -126,6 +126,10 @@
 	<datasource id="records">
 		<config>
 			<title>records.list</title>
+			<params>
+				<param name="applicationFilter" />
+				<param name="jobFilter" />
+			</params>
 			<meta-data bindClass="org.appng.application.scheduler.model.JobRecord">
 				<field name="siteName" type="text">
 					<label>record.site</label>
