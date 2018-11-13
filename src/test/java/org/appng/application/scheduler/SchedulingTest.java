@@ -60,6 +60,7 @@ public class SchedulingTest extends TestBase {
 		properties.put("indexEnabled", "false");
 		properties.put("site.name", "localhost");
 		properties.put("validateJobsOnStartup", "false");
+		properties.put("houseKeepingEnabled", "false");
 		return properties;
 	}
 

@@ -11,6 +11,7 @@ import org.quartz.JobListener;
 public class RecordingJobListener implements JobListener {
 
 	private JobRecordService jobRecordService;
+	private boolean enabled;
 
 	public void setJobRecordService(JobRecordService jobRecordService) {
 		this.jobRecordService = jobRecordService;
@@ -33,11 +34,22 @@ public class RecordingJobListener implements JobListener {
 
 	@Override
 	public void jobWasExecuted(JobExecutionContext context, JobExecutionException jobException) {
-		Object result = context.getResult();
-		if (result instanceof JobResult) {
-			jobRecordService.recordJob((JobResult) result, context.getFireTime(), new Date(), context.getJobRunTime(),
-					context.getJobDetail().getJobDataMap(), jobException, context.getTrigger().getJobKey().getName());
+		if (isEnabled()) {
+			Object result = context.getResult();
+			if (result instanceof JobResult) {
+				jobRecordService.recordJob((JobResult) result, context.getFireTime(), new Date(),
+						context.getJobRunTime(), context.getJobDetail().getJobDataMap(), jobException,
+						context.getTrigger().getJobKey().getName());
+			}
 		}
+	}
+
+	public boolean isEnabled() {
+		return enabled;
+	}
+
+	public void setEnabled(boolean enabled) {
+		this.enabled = enabled;
 	}
 
 }

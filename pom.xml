@@ -195,6 +195,23 @@
 							</arguments>
 						</configuration>
 					</execution>
+					<execution>
+						<id>property constants</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>java</goal>
+						</goals>
+						<configuration>
+							<classpathScope>compile</classpathScope>
+							<executable>java</executable>
+							<mainClass>org.appng.xml.ApplicationPropertyConstantCreator</mainClass>
+							<arguments>
+								<argument>application-home/application.xml</argument>
+								<argument>org.appng.application.scheduler.PropertyConstants</argument>
+								<argument>target/generated-sources/constants</argument>
+							</arguments>
+						</configuration>
+					</execution>
 				</executions>
 			</plugin>
 		</plugins>

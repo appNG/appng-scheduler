@@ -5,6 +5,7 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.appng.api.model.Application;
 import org.appng.api.model.Site;
+import org.appng.application.scheduler.PropertyConstants;
 import org.appng.application.scheduler.model.JobRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -47,7 +48,7 @@ public class RecordsRestController {
 		if (null == auths) {
 			return false;
 		}
-		String token = application.getProperties().getString("bearerToken");
+		String token = application.getProperties().getString(PropertyConstants.BEARER_TOKEN);
 		if (StringUtils.isNotBlank(token) && !auths.contains("Bearer " + token)) {
 			return false;
 		}

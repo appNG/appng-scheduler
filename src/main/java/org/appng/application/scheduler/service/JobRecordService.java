@@ -2,58 +2,61 @@ package org.appng.application.scheduler.service;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
-
-import javax.sql.DataSource;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.appng.api.ScheduledJobResult;
 import org.appng.api.ScheduledJobResult.ExecutionResult;
+import org.appng.api.model.Application;
+import org.appng.api.model.Site;
 import org.appng.application.scheduler.Constants;
+import org.appng.application.scheduler.PropertyConstants;
 import org.appng.application.scheduler.model.JobRecord;
 import org.appng.application.scheduler.model.JobResult;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionException;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
 public class JobRecordService {
 
-	private DataSource dataSource;
+	private NamedParameterJdbcTemplate jdbcTemplate;
 
 	public void recordJob(JobResult jobResult, Date fireTime, Date endTime, long jobRunTime, JobDataMap jobDataMap,
 			JobExecutionException jobException, String triggerName) {
 
-		JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
-		Object[] args = new Object[11];
-		args[0] = jobResult.getApplicationName();
-		args[1] = jobResult.getSiteName();
-		args[2] = jobResult.getJobName();
-		args[3] = fireTime;
-		args[4] = endTime;
-		args[5] = jobRunTime / 1000;
-		args[6] = jobDataMap.getBoolean(Constants.JOB_RUN_ONCE);
 		// if the result is set, take it otherwise set it depending on the existence of an exception
-		args[7] = null != jobResult.getResult() ? jobResult.getResult().toString()
+		String result = null != jobResult.getResult() ? jobResult.getResult().toString()
 				: null == jobException ? ExecutionResult.SUCCESS.toString() : ExecutionResult.FAIL.toString();
-		args[8] = null == jobException ? null : ExceptionUtils.getStackTrace(jobException);
-		args[9] = jobResult.getCustomData();
-		args[10] = triggerName;
+
+		MapSqlParameterSource paramsMap = new MapSqlParameterSource();
+		paramsMap.addValue("application", jobResult.getApplicationName());
+		paramsMap.addValue("site", jobResult.getSiteName());
+		paramsMap.addValue("job_name", jobResult.getJobName());
+		paramsMap.addValue("start", fireTime);
+		paramsMap.addValue("end", endTime);
+		paramsMap.addValue("duration", jobRunTime / 1000);
+		paramsMap.addValue("run_once", jobDataMap.getBoolean(Constants.JOB_RUN_ONCE));
+		paramsMap.addValue("result", result);
+		paramsMap.addValue("stacktraces", null == jobException ? null : ExceptionUtils.getStackTrace(jobException));
+		paramsMap.addValue("custom_data", jobResult.getCustomData());
+		paramsMap.addValue("triggername", triggerName);
+
 		jdbcTemplate.update(
-				"INSERT INTO job_execution_record (application,site,job_name,start,end,duration,run_once,result,stacktraces,custom_data,triggername) VALUES (?,?,?,?,?,?,?,?,?,?,?)",
-				args);
+				"INSERT INTO job_execution_record (application,site,job_name,start,end,duration,run_once,result,stacktraces,custom_data,triggername) VALUES (:application,:site,:job_name,:start,:end,:duration,:run_once,:result,:stacktraces,:custom_data,:triggername)",
+				paramsMap);
 	}
 
 	public List<String> getDistinctElements(String siteName, String fieldName) {
-		Object[] args = { siteName };
-		List<String> applications = new JdbcTemplate(dataSource).query("SELECT DISTINCT " + fieldName
-				+ " FROM job_execution_record WHERE site = ? ORDER BY " + fieldName + " DESC", args,
+		MapSqlParameterSource paramsMap = new MapSqlParameterSource();
+		paramsMap.addValue("site", siteName);
+		List<String> applications = jdbcTemplate.query("SELECT DISTINCT " + fieldName
+				+ " FROM job_execution_record WHERE site = :site ORDER BY " + fieldName + " DESC", paramsMap,
 				new RowMapper<String>() {
-
 					@Override
 					public String mapRow(ResultSet rs, int rowNum) throws SQLException {
 						return rs.getString(fieldName);
@@ -65,7 +68,6 @@ public class JobRecordService {
 
 	public List<JobRecord> getRecords(String siteName, String applicationFilter, String jobFilter, String start,
 			String end, String result, String duration) {
-		NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(dataSource);
 		MapSqlParameterSource paramsMap = new MapSqlParameterSource();
 
 		StringBuilder sql = new StringBuilder(
@@ -83,7 +85,7 @@ public class JobRecordService {
 
 		sql.append(" ORDER BY start DESC;");
 
-		List<JobRecord> records = template.query(sql.toString(), paramsMap, new RowMapper<JobRecord>() {
+		List<JobRecord> records = jdbcTemplate.query(sql.toString(), paramsMap, new RowMapper<JobRecord>() {
 
 			@Override
 			public JobRecord mapRow(ResultSet rs, int rowNum) throws SQLException {
@@ -124,12 +126,33 @@ public class JobRecordService {
 		return first;
 	}
 
-	public DataSource getDataSource() {
-		return dataSource;
+	public String cleanUp(Site site, Application application) {
+		if (StringUtils.isNoneBlank(application.getProperties().getString(PropertyConstants.RECORD_LIFE_TIME))) {
+			Integer lifetime = application.getProperties().getInteger(PropertyConstants.RECORD_LIFE_TIME);
+			MapSqlParameterSource paramsMap = new MapSqlParameterSource();
+
+			LocalDate outdated = LocalDate.now().minusDays(lifetime);
+			paramsMap.addValue("outdated", outdated);
+			paramsMap.addValue("site", site.getName());
+
+			Long count = jdbcTemplate.queryForObject(
+					"SELECT count(*) FROM job_execution_record WHERE site = :site AND start < :outdated ;", paramsMap,
+					Long.class);
+			if (count.longValue() > 0) {
+				jdbcTemplate.update("DELETE FROM job_execution_record WHERE site = :site AND start < :outdated ;",
+						paramsMap);
+			}
+			return count.toString();
+		}
+		return null;
 	}
 
-	public void setDataSource(DataSource dataSource) {
-		this.dataSource = dataSource;
+	public NamedParameterJdbcTemplate getJdbcTemplate() {
+		return jdbcTemplate;
+	}
+
+	public void setJdbcTemplate(NamedParameterJdbcTemplate jdbcTemplate) {
+		this.jdbcTemplate = jdbcTemplate;
 	}
 
 }

@@ -52,12 +52,17 @@
 		</property>
 	</bean>
 
+	<bean id="jdbcTemplate" class="org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate">
+		<constructor-arg ref="dataSource" />
+	</bean>
+
 	<bean id="jobRecordService" class="org.appng.application.scheduler.service.JobRecordService">
-		<property name="dataSource" ref="dataSource" />
+		<property name="jdbcTemplate" ref="jdbcTemplate" />
 	</bean>
 
 	<bean id="recordingJobListener" class="org.appng.application.scheduler.quartz.RecordingJobListener">
 		<property name="jobRecordService" ref="jobRecordService" />
+		<property name="enabled" value="${enableJobRecord}" />
 	</bean>
 
 	<bean id="records" class="org.appng.application.scheduler.business.Records">
@@ -89,6 +94,18 @@
 				<entry key="jspFileType" value="${platform.jspFileType}" />
 			</map>
 		</property>
+	</bean>
+	
+	
+	<bean id="houseKeepingJob" class="org.appng.application.scheduler.job.JobRecordHouseKeepingJob">
+		<property name="description" value="Job Record House Keeping Job" />
+		<property name="jobDataMap">
+			<map>
+				<entry key="enabled" value="${houseKeepingEnabled}" />
+				<entry key="cronExpression" value="${indexExpression}" />
+			</map>
+		</property>
+		<property name="jobRecordService" ref="jobRecordService" />
 	</bean>
 
 	<!-- this is needed to support the dictionary view of appng-manager -->

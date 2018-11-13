@@ -63,16 +63,17 @@
 		</property>
 	</bean>
 
-	<bean id="dataSource" class="org.mockito.Mockito" factory-method="mock" primary="true">
-		<constructor-arg index="0" value="javax.sql.DataSource" />
+	<bean id="jdbcTemplate" class="org.mockito.Mockito" factory-method="mock" primary="true">
+		<constructor-arg index="0" value="org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate" />
 	</bean>
 	
 	<bean id="jobRecordService" class="org.appng.application.scheduler.service.JobRecordService">
-		<property name="dataSource" ref="dataSource" />
+		<property name="jdbcTemplate" ref="jdbcTemplate" />
 	</bean>
 	
 	<bean id="recordingJobListener" class="org.appng.application.scheduler.quartz.RecordingJobListener">
 		<property name="jobRecordService" ref="jobRecordService" />
+		<property name="enabled" value="true" />
 	</bean>
 
 	<!-- this is needed to support the dictionary view of appng-manager -->
