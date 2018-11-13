@@ -3,6 +3,8 @@ package org.appng.application.scheduler.model;
 import org.appng.api.ScheduledJobResult;
 import org.appng.api.ScheduledJobResult.ExecutionResult;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 public class JobResult {
 	private String applicationName;
 	private String siteName;
@@ -44,6 +46,7 @@ public class JobResult {
 		this.jobName = jobName;
 	}
 
+	@JsonIgnore
 	public ScheduledJobResult getScheduledJobResult() {
 		return scheduledJobResult;
 	}

@@ -38,5 +38,6 @@
 		<property id="quartzDriverDelegate" description="the driver delegate for quartz">org.quartz.impl.jdbcjobstore.StdJDBCDelegate</property>
 		<property id="quartzIsClustered" description="set to true to enable quartz clustering support">false</property>
 		<property id="quartzClusterCheckinInterval" description="the intervall in ms to check for failed jobs on the cluster">20000</property>
+		<property id="bearerToken" description="shared secret for the job records rest API. API is not available if this property is blank"></property>
 	</properties>
 </application>

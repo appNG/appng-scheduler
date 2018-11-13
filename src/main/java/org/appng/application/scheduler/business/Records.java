@@ -49,22 +49,21 @@ public class Records implements DataProvider {
 
 		addFilter(site, filter, aFilter, jFilter, result, duration, start, end);
 
-		List<JobRecord> records = jobRecordService.getRecords(site, aFilter, jFilter, start, end, result, duration);
+		List<JobRecord> records = jobRecordService.getRecords(site.getName(), aFilter, jFilter, start, end, result,
+				duration);
 		dc.setPage(records, fieldProcessor.getPageable());
 		return dc;
 	}
 
 	private void addFilter(Site site, SelectionGroup filter, String aFilter, String jFilter, String result,
 			String duration, String start, String end) {
-		List<String> appNames = jobRecordService.getDistinctElements(site.getName(),
-				MessageConstants.FILTER_RECORD_APPLICATION_NAME);
+		List<String> appNames = jobRecordService.getDistinctElements(site.getName(), "application");
 		appNames.add(0, "");
 		Selection appFilter = new SelectionBuilder<String>(APPLICATION_FILTER).title(APPLICATION_FILTER).select(aFilter)
 				.options(appNames).build();
 		filter.getSelections().add(appFilter);
 
-		List<String> jobNames = jobRecordService.getDistinctElements(site.getName(),
-				MessageConstants.FILTER_RECORD_JOB_NAME);
+		List<String> jobNames = jobRecordService.getDistinctElements(site.getName(), "job_name");
 		jobNames.add(0, "");
 		Selection jobFilter = new SelectionBuilder<String>(JOB_FILTER).title(JOB_FILTER).select(jFilter)
 				.options(jobNames).build();

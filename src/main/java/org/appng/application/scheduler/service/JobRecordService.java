@@ -11,7 +11,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.appng.api.ScheduledJobResult;
 import org.appng.api.ScheduledJobResult.ExecutionResult;
-import org.appng.api.model.Site;
 import org.appng.application.scheduler.Constants;
 import org.appng.application.scheduler.model.JobRecord;
 import org.appng.application.scheduler.model.JobResult;
@@ -49,21 +48,6 @@ public class JobRecordService {
 				args);
 	}
 
-	// public List<String> getApplications(String name) {
-	// Object[] args = { name };
-	// List<String> applications = new JdbcTemplate(dataSource).query(
-	// "SELECT DISTINCT application FROM job_execution_record WHERE site = ? ORDER BY application DESC", args,
-	// new RowMapper<String>() {
-	//
-	// @Override
-	// public String mapRow(ResultSet rs, int rowNum) throws SQLException {
-	// return rs.getString("application");
-	// }
-	// });
-	//
-	// return applications;
-	// }
-
 	public List<String> getDistinctElements(String siteName, String fieldName) {
 		Object[] args = { siteName };
 		List<String> applications = new JdbcTemplate(dataSource).query("SELECT DISTINCT " + fieldName
@@ -79,46 +63,25 @@ public class JobRecordService {
 		return applications;
 	}
 
-	public List<JobRecord> getRecords(Site site, String applicationFilter, String jobFilter, String start, String end,
-			String result, String duration) {
+	public List<JobRecord> getRecords(String siteName, String applicationFilter, String jobFilter, String start,
+			String end, String result, String duration) {
 		NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(dataSource);
 		MapSqlParameterSource paramsMap = new MapSqlParameterSource();
 
 		StringBuilder sql = new StringBuilder(
-				"SELECT site,application,job_name,duration,start,end,result FROM job_execution_record WHERE site = :site ");
-		paramsMap.addValue("site", site.getName());
+				"SELECT site,application,job_name,duration,start,end,result,stacktraces FROM job_execution_record ");
 
-		if (StringUtils.isNotBlank(applicationFilter)) {
-			sql.append(" AND application = :application ");
-			paramsMap.addValue("application", applicationFilter);
-		}
+		boolean first = true;
 
-		if (StringUtils.isNotBlank(jobFilter)) {
-			sql.append(" AND job_name = :job ");
-			paramsMap.addValue("job", jobFilter);
-		}
+		first = addFiler("site", "=", siteName, sql, paramsMap, first);
+		first = addFiler("application", "=", applicationFilter, sql, paramsMap, first);
+		first = addFiler("job_name", "=", jobFilter, sql, paramsMap, first);
+		first = addFiler("result", "=", result, sql, paramsMap, first);
+		first = addFiler("start", ">", start, sql, paramsMap, first);
+		first = addFiler("start", "<", end, sql, paramsMap, first, "end");
+		first = addFiler("duration", ">=", duration, sql, paramsMap, first);
 
-		if (StringUtils.isNotBlank(result)) {
-			sql.append(" AND result = :result ");
-			paramsMap.addValue("result", result);
-		}
-
-		if (StringUtils.isNotBlank(start)) {
-			sql.append(" AND start > :start ");
-			paramsMap.addValue("start", start);
-		}
-
-		if (StringUtils.isNotBlank(end)) {
-			sql.append(" AND start < :end ");
-			paramsMap.addValue("end", end);
-		}
-
-		if (StringUtils.isNotBlank(duration)) {
-			sql.append(" AND duration > :duration ");
-			paramsMap.addValue("duration", duration);
-		}
-
-		sql.append("ORDER BY start DESC;");
+		sql.append(" ORDER BY start DESC;");
 
 		List<JobRecord> records = template.query(sql.toString(), paramsMap, new RowMapper<JobRecord>() {
 
@@ -133,11 +96,32 @@ public class JobRecordService {
 				record.setDuration(rs.getLong("duration"));
 				record.setScheduledJobResult(new ScheduledJobResult());
 				record.getScheduledJobResult().setResult(ExecutionResult.valueOf(rs.getString("result")));
+				record.setStacktraces(rs.getString("stacktraces"));
 				return record;
 			}
 		});
 
 		return records;
+	}
+
+	private boolean addFiler(String filterName, String operator, String filterValue, StringBuilder sql,
+			MapSqlParameterSource paramsMap, boolean first) {
+		return addFiler(filterName, operator, filterValue, sql, paramsMap, first, filterName);
+	}
+
+	private boolean addFiler(String filterName, String operator, String filterValue, StringBuilder sql,
+			MapSqlParameterSource paramsMap, boolean first, String paramName) {
+		if (StringUtils.isNotBlank(filterValue)) {
+			sql.append(first ? " WHERE " : " AND ");
+			sql.append(filterName);
+			sql.append(" ");
+			sql.append(operator);
+			sql.append(" :");
+			sql.append(paramName);
+			paramsMap.addValue(paramName, filterValue);
+			return false;
+		}
+		return first;
 	}
 
 	public DataSource getDataSource() {

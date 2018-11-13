@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xmlns:p="http://www.springframework.org/schema/p" xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
-	xmlns:oxm="http://www.springframework.org/schema/oxm" xmlns:util="http://www.springframework.org/schema/util"
-	xmlns:context="http://www.springframework.org/schema/context"
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p" xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:oxm="http://www.springframework.org/schema/oxm" xmlns:util="http://www.springframework.org/schema/util" xmlns:context="http://www.springframework.org/schema/context"
 	xsi:schemaLocation="http://www.springframework.org/schema/beans 
 		http://www.springframework.org/schema/beans/spring-beans.xsd
 		http://www.springframework.org/schema/aop 
@@ -21,7 +19,7 @@
 	<bean id="schedulingController" class="org.appng.application.scheduler.business.SchedulingController">
 		<property name="scheduler" ref="scheduler" />
 	</bean>
-	
+
 
 	<bean id="scheduler" class="org.appng.application.scheduler.quartz.SchedulerFactoryBean" lazy-init="false">
 		<constructor-arg value="${quartzDriverDelegate}" />
@@ -53,11 +51,11 @@
 			</props>
 		</property>
 	</bean>
-	
+
 	<bean id="jobRecordService" class="org.appng.application.scheduler.service.JobRecordService">
 		<property name="dataSource" ref="dataSource" />
 	</bean>
-	
+
 	<bean id="recordingJobListener" class="org.appng.application.scheduler.quartz.RecordingJobListener">
 		<property name="jobRecordService" ref="jobRecordService" />
 	</bean>
@@ -65,7 +63,7 @@
 	<bean id="records" class="org.appng.application.scheduler.business.Records">
 		<property name="jobRecordService" ref="jobRecordService" />
 	</bean>
-	
+
 	<bean id="jobs" class="org.appng.application.scheduler.business.SchedulerDataSource">
 		<property name="scheduler" ref="scheduler" />
 	</bean>
@@ -98,5 +96,14 @@
 		<value>messages-scheduler</value>
 		<value>messages-core</value>
 	</util:list>
+
+	<bean id="objectMapper" class="com.fasterxml.jackson.databind.ObjectMapper">
+	</bean>
+
+
+	<bean class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
+		<property name="objectMapper" ref="objectMapper" />
+		<property name="prettyPrint" value="true" />
+	</bean>
 
 </beans>
