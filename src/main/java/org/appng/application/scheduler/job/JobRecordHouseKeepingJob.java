@@ -15,28 +15,24 @@ public class JobRecordHouseKeepingJob implements ScheduledJob {
 
 	private ScheduledJobResult result;
 
-	@Override
-	public String getDescription() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+	private Map<String, Object> jobDataMap;
 
-	@Override
-	public void setDescription(String description) {
-		// TODO Auto-generated method stub
+	private String description;
 
-	}
-
-	@Override
 	public Map<String, Object> getJobDataMap() {
-		// TODO Auto-generated method stub
-		return null;
+		return jobDataMap;
 	}
 
-	@Override
-	public void setJobDataMap(Map<String, Object> map) {
-		// TODO Auto-generated method stub
+	public void setJobDataMap(Map<String, Object> jobDataMap) {
+		this.jobDataMap = jobDataMap;
+	}
 
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
 	}
 
 	@Override
@@ -56,6 +52,7 @@ public class JobRecordHouseKeepingJob implements ScheduledJob {
 		this.jobRecordService = jobRecordService;
 	}
 
+	@Override
 	public ScheduledJobResult getResult() {
 		return result;
 	}

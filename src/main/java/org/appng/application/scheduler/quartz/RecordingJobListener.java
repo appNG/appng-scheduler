@@ -24,12 +24,12 @@ public class RecordingJobListener implements JobListener {
 
 	@Override
 	public void jobToBeExecuted(JobExecutionContext context) {
-
+		// we are not interested on jobs to e executed we just want to get triggered when the job is done
 	}
 
 	@Override
 	public void jobExecutionVetoed(JobExecutionContext context) {
-
+		// we are not interested on jobs to e executed we just want to get triggered when the job is done
 	}
 
 	@Override

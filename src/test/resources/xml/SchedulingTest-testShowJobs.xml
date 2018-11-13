@@ -9,7 +9,7 @@
                 <value>application</value>
             </field>
             <field name="cronExpression" type="text">
-                <value></value>
+                <value>0 0/5 * * * ? 2042</value>
             </field>
             <field name="nextFireTime" type="date">
                 <value></value>

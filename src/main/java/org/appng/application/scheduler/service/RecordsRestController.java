@@ -25,7 +25,8 @@ public class RecordsRestController {
 	private JobRecordService jobRecordService;
 
 	@RequestMapping(value = "/jobRecords", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public ResponseEntity<?> getJobRecords(@RequestParam(required = false, name = "application") String applicationName,
+	public ResponseEntity<List<JobRecord>> getJobRecords(
+			@RequestParam(required = false, name = "application") String applicationName,
 			@RequestParam(required = false, name = "job") String jobName,
 			@RequestParam(required = false, name = "startedAfter") String startedAfter,
 			@RequestParam(required = false, name = "startedBefore") String startedBefore,
@@ -49,10 +50,7 @@ public class RecordsRestController {
 			return false;
 		}
 		String token = application.getProperties().getString(PropertyConstants.BEARER_TOKEN);
-		if (StringUtils.isNotBlank(token) && !auths.contains("Bearer " + token)) {
-			return false;
-		}
-		return true;
+		return StringUtils.isNotBlank(token) && auths.contains("Bearer " + token);
 	}
 
 	public JobRecordService getJobRecordService() {

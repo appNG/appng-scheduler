@@ -24,37 +24,64 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
 public class JobRecordService {
 
+	private static final String QUERY_INSERT = "INSERT INTO job_execution_record (application,site,job_name,start,end,duration,run_once,result,stacktraces,custom_data,triggername) VALUES (:application,:site,:job_name,:start,:end,:duration,:run_once,:result,:stacktraces,:custom_data,:triggername)";
+	private static final String QUERY_SELECT_RECORD = "SELECT site,application,job_name,duration,start,end,result,stacktraces FROM job_execution_record ";
+	private static final String QUERY_DELETE_OUTDATED = "DELETE FROM job_execution_record WHERE site = :site AND start < :outdated ;";
+	private static final String QUERY_COUNT_OUTDATED = "SELECT count(*) FROM job_execution_record WHERE site = :site AND start < :outdated ;";
+
+	private static final String FIELD_NAME_TRIGGERNAME = "triggername";
+	private static final String FIELD_NAME_CUSTOM_DATA = "custom_data";
+	private static final String FIELD_NAME_STACKTRACES = "stacktraces";
+	private static final String FIELD_NAME_RESULT = "result";
+	private static final String FIELD_NAME_RUN_ONCE = "run_once";
+	private static final String FIELD_NAME_DURATION = "duration";
+	private static final String FIELD_NAME_END = "end";
+	private static final String FIELD_NAME_START = "start";
+	private static final String FIELD_NAME_JOB_NAME = "job_name";
+	private static final String FIELD_NAME_SITE = "site";
+	private static final String FIELD_NAME_APPLICATION = "application";
+
 	private NamedParameterJdbcTemplate jdbcTemplate;
 
 	public void recordJob(JobResult jobResult, Date fireTime, Date endTime, long jobRunTime, JobDataMap jobDataMap,
 			JobExecutionException jobException, String triggerName) {
 
 		// if the result is set, take it otherwise set it depending on the existence of an exception
-		String result = null != jobResult.getResult() ? jobResult.getResult().toString()
-				: null == jobException ? ExecutionResult.SUCCESS.toString() : ExecutionResult.FAIL.toString();
+		String result = null;
+		result = getResult(jobResult, jobException);
 
 		MapSqlParameterSource paramsMap = new MapSqlParameterSource();
-		paramsMap.addValue("application", jobResult.getApplicationName());
-		paramsMap.addValue("site", jobResult.getSiteName());
-		paramsMap.addValue("job_name", jobResult.getJobName());
-		paramsMap.addValue("start", fireTime);
-		paramsMap.addValue("end", endTime);
-		paramsMap.addValue("duration", jobRunTime / 1000);
-		paramsMap.addValue("run_once", jobDataMap.getBoolean(Constants.JOB_RUN_ONCE));
-		paramsMap.addValue("result", result);
-		paramsMap.addValue("stacktraces", null == jobException ? null : ExceptionUtils.getStackTrace(jobException));
-		paramsMap.addValue("custom_data", jobResult.getCustomData());
-		paramsMap.addValue("triggername", triggerName);
+		paramsMap.addValue(FIELD_NAME_APPLICATION, jobResult.getApplicationName());
+		paramsMap.addValue(FIELD_NAME_SITE, jobResult.getSiteName());
+		paramsMap.addValue(FIELD_NAME_JOB_NAME, jobResult.getJobName());
+		paramsMap.addValue(FIELD_NAME_START, fireTime);
+		paramsMap.addValue(FIELD_NAME_END, endTime);
+		paramsMap.addValue(FIELD_NAME_DURATION, jobRunTime / 1000);
+		paramsMap.addValue(FIELD_NAME_RUN_ONCE, jobDataMap.getBoolean(Constants.JOB_RUN_ONCE));
+		paramsMap.addValue(FIELD_NAME_RESULT, result);
+		paramsMap.addValue(FIELD_NAME_STACKTRACES,
+				null == jobException ? null : ExceptionUtils.getStackTrace(jobException));
+		paramsMap.addValue(FIELD_NAME_CUSTOM_DATA, jobResult.getCustomData());
+		paramsMap.addValue(FIELD_NAME_TRIGGERNAME, triggerName);
 
-		jdbcTemplate.update(
-				"INSERT INTO job_execution_record (application,site,job_name,start,end,duration,run_once,result,stacktraces,custom_data,triggername) VALUES (:application,:site,:job_name,:start,:end,:duration,:run_once,:result,:stacktraces,:custom_data,:triggername)",
-				paramsMap);
+		jdbcTemplate.update(QUERY_INSERT, paramsMap);
+	}
+
+	private String getResult(JobResult jobResult, JobExecutionException jobException) {
+		if (null != jobResult.getResult()) {
+			return jobResult.getResult().toString();
+		} else {
+			if (null == jobException) {
+				return ExecutionResult.SUCCESS.toString();
+			}
+			return ExecutionResult.FAIL.toString();
+		}
 	}
 
 	public List<String> getDistinctElements(String siteName, String fieldName) {
 		MapSqlParameterSource paramsMap = new MapSqlParameterSource();
-		paramsMap.addValue("site", siteName);
-		List<String> applications = jdbcTemplate.query("SELECT DISTINCT " + fieldName
+		paramsMap.addValue(FIELD_NAME_SITE, siteName);
+		return jdbcTemplate.query("SELECT DISTINCT " + fieldName
 				+ " FROM job_execution_record WHERE site = :site ORDER BY " + fieldName + " DESC", paramsMap,
 				new RowMapper<String>() {
 					@Override
@@ -62,48 +89,44 @@ public class JobRecordService {
 						return rs.getString(fieldName);
 					}
 				});
-
-		return applications;
 	}
 
 	public List<JobRecord> getRecords(String siteName, String applicationFilter, String jobFilter, String start,
 			String end, String result, String duration) {
 		MapSqlParameterSource paramsMap = new MapSqlParameterSource();
 
-		StringBuilder sql = new StringBuilder(
-				"SELECT site,application,job_name,duration,start,end,result,stacktraces FROM job_execution_record ");
+		StringBuilder sql = new StringBuilder(QUERY_SELECT_RECORD);
 
 		boolean first = true;
 
-		first = addFiler("site", "=", siteName, sql, paramsMap, first);
-		first = addFiler("application", "=", applicationFilter, sql, paramsMap, first);
-		first = addFiler("job_name", "=", jobFilter, sql, paramsMap, first);
-		first = addFiler("result", "=", result, sql, paramsMap, first);
-		first = addFiler("start", ">", start, sql, paramsMap, first);
-		first = addFiler("start", "<", end, sql, paramsMap, first, "end");
-		first = addFiler("duration", ">=", duration, sql, paramsMap, first);
+		first = addFiler(FIELD_NAME_SITE, "=", siteName, sql, paramsMap, first);
+		first = addFiler(FIELD_NAME_APPLICATION, "=", applicationFilter, sql, paramsMap, first);
+		first = addFiler(FIELD_NAME_JOB_NAME, "=", jobFilter, sql, paramsMap, first);
+		first = addFiler(FIELD_NAME_RESULT, "=", result, sql, paramsMap, first);
+		first = addFiler(FIELD_NAME_START, ">", start, sql, paramsMap, first);
+		first = addFiler(FIELD_NAME_START, "<", end, sql, paramsMap, first, FIELD_NAME_END);
+		addFiler(FIELD_NAME_DURATION, ">=", duration, sql, paramsMap, first);
 
 		sql.append(" ORDER BY start DESC;");
 
-		List<JobRecord> records = jdbcTemplate.query(sql.toString(), paramsMap, new RowMapper<JobRecord>() {
+		return jdbcTemplate.query(sql.toString(), paramsMap, new RowMapper<JobRecord>() {
 
 			@Override
 			public JobRecord mapRow(ResultSet rs, int rowNum) throws SQLException {
 				JobRecord record = new JobRecord();
-				record.setSiteName(rs.getString("site"));
-				record.setJobName(rs.getString("job_name"));
-				record.setApplicationName(rs.getString("application"));
-				record.setStart(rs.getTimestamp("start"));
-				record.setEnd(rs.getTimestamp("end"));
-				record.setDuration(rs.getLong("duration"));
+				record.setSiteName(rs.getString(FIELD_NAME_SITE));
+				record.setJobName(rs.getString(FIELD_NAME_JOB_NAME));
+				record.setApplicationName(rs.getString(FIELD_NAME_APPLICATION));
+				record.setStart(rs.getTimestamp(FIELD_NAME_START));
+				record.setEnd(rs.getTimestamp(FIELD_NAME_END));
+				record.setDuration(rs.getLong(FIELD_NAME_DURATION));
 				record.setScheduledJobResult(new ScheduledJobResult());
-				record.getScheduledJobResult().setResult(ExecutionResult.valueOf(rs.getString("result")));
-				record.setStacktraces(rs.getString("stacktraces"));
+				record.getScheduledJobResult().setResult(ExecutionResult.valueOf(rs.getString(FIELD_NAME_RESULT)));
+				record.setStacktraces(rs.getString(FIELD_NAME_STACKTRACES));
 				return record;
 			}
 		});
 
-		return records;
 	}
 
 	private boolean addFiler(String filterName, String operator, String filterValue, StringBuilder sql,
@@ -133,14 +156,11 @@ public class JobRecordService {
 
 			LocalDate outdated = LocalDate.now().minusDays(lifetime);
 			paramsMap.addValue("outdated", outdated);
-			paramsMap.addValue("site", site.getName());
+			paramsMap.addValue(FIELD_NAME_SITE, site.getName());
 
-			Long count = jdbcTemplate.queryForObject(
-					"SELECT count(*) FROM job_execution_record WHERE site = :site AND start < :outdated ;", paramsMap,
-					Long.class);
+			Long count = jdbcTemplate.queryForObject(QUERY_COUNT_OUTDATED, paramsMap, Long.class);
 			if (count.longValue() > 0) {
-				jdbcTemplate.update("DELETE FROM job_execution_record WHERE site = :site AND start < :outdated ;",
-						paramsMap);
+				jdbcTemplate.update(QUERY_DELETE_OUTDATED, paramsMap);
 			}
 			return count.toString();
 		}

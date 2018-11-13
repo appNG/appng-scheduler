@@ -47,7 +47,7 @@ public class Records implements DataProvider {
 		String start = request.getParameter(START_AFTER_FILTER);
 		String end = request.getParameter(START_BEFORE_FILTER);
 
-		addFilter(site, filter, aFilter, jFilter, result, duration, start, end);
+		addFilter(site, filter, request);
 
 		List<JobRecord> records = jobRecordService.getRecords(site.getName(), aFilter, jFilter, start, end, result,
 				duration);
@@ -55,22 +55,22 @@ public class Records implements DataProvider {
 		return dc;
 	}
 
-	private void addFilter(Site site, SelectionGroup filter, String aFilter, String jFilter, String result,
-			String duration, String start, String end) {
+	private void addFilter(Site site, SelectionGroup filter, Request request) {
 		List<String> appNames = jobRecordService.getDistinctElements(site.getName(), "application");
 		appNames.add(0, "");
-		Selection appFilter = new SelectionBuilder<String>(APPLICATION_FILTER).title(APPLICATION_FILTER).select(aFilter)
+		Selection appFilter = new SelectionBuilder<String>(APPLICATION_FILTER)
+				.title(MessageConstants.FILTER_RECORD_APPLICATION_NAME).select(request.getParameter(APPLICATION_FILTER))
 				.options(appNames).build();
 		filter.getSelections().add(appFilter);
 
 		List<String> jobNames = jobRecordService.getDistinctElements(site.getName(), "job_name");
 		jobNames.add(0, "");
-		Selection jobFilter = new SelectionBuilder<String>(JOB_FILTER).title(JOB_FILTER).select(jFilter)
-				.options(jobNames).build();
+		Selection jobFilter = new SelectionBuilder<String>(JOB_FILTER).title(MessageConstants.FILTER_RECORD_JOB_NAME)
+				.select(request.getParameter(JOB_FILTER)).options(jobNames).build();
 		filter.getSelections().add(jobFilter);
 
 		Selection resultFilter = new SelectionBuilder<String>(RESULT_FILTER)
-				.title(MessageConstants.FILTER_RECORD_RESULT).select(result)
+				.title(MessageConstants.FILTER_RECORD_RESULT).select(request.getParameter(RESULT_FILTER))
 				.options(Lists.newArrayList("", ExecutionResult.SUCCESS.toString(), ExecutionResult.FAIL.toString()))
 				.build();
 		filter.getSelections().add(resultFilter);
@@ -78,14 +78,16 @@ public class Records implements DataProvider {
 		SelectionFactory selectionFactory = new SelectionFactory();
 
 		filter.getSelections().add(selectionFactory.getTextSelection(MIN_DURATION_FILTER,
-				MessageConstants.FILTER_RECORD_MIN_DURATION, duration));
+				MessageConstants.FILTER_RECORD_MIN_DURATION, request.getParameter(MIN_DURATION_FILTER)));
 
 		Selection startedAfterFilter = selectionFactory.getDateSelection(START_AFTER_FILTER,
-				MessageConstants.FILTER_RECORD_STARTED_AFTER, start, START_FILTER_DATE_TIME_FORMAT);
+				MessageConstants.FILTER_RECORD_STARTED_AFTER, request.getParameter(START_AFTER_FILTER),
+				START_FILTER_DATE_TIME_FORMAT);
 		filter.getSelections().add(startedAfterFilter);
 
 		Selection startedBeforeFilter = selectionFactory.getDateSelection(START_BEFORE_FILTER,
-				MessageConstants.FILTER_RECORD_STARTED_BEFORE, end, START_FILTER_DATE_TIME_FORMAT);
+				MessageConstants.FILTER_RECORD_STARTED_BEFORE, request.getParameter(START_BEFORE_FILTER),
+				START_FILTER_DATE_TIME_FORMAT);
 		filter.getSelections().add(startedBeforeFilter);
 	}
 
