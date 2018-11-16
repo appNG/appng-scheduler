@@ -233,6 +233,11 @@
 			<version>5.1.44</version>
 			<scope>provided</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<version>1.16.10</version>
+		</dependency>
 	</dependencies>
 
 	<dependencyManagement>

@@ -14,10 +14,6 @@
 		http://www.springframework.org/schema/util
 		http://www.springframework.org/schema/util/spring-util.xsd">
 
-	<bean id="schedulingController" class="org.appng.application.scheduler.business.SchedulingController">
-		<property name="scheduler" ref="scheduler" />
-	</bean>
-
 	<bean id="scheduler" class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
 		<property name="schedulerName">
 			<value>Scheduler_${site.name}</value>
@@ -67,15 +63,6 @@
 		<constructor-arg index="0" value="org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate" />
 	</bean>
 	
-	<bean id="jobRecordService" class="org.appng.application.scheduler.service.JobRecordService">
-		<property name="jdbcTemplate" ref="jdbcTemplate" />
-	</bean>
-	
-	<bean id="recordingJobListener" class="org.appng.application.scheduler.quartz.RecordingJobListener">
-		<property name="jobRecordService" ref="jobRecordService" />
-		<property name="enabled" value="true" />
-	</bean>
-
 	<!-- this is needed to support the dictionary view of appng-manager -->
 	<util:list id="messageSources">
 		<value>messages-scheduler</value>

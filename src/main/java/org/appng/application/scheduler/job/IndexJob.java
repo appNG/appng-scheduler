@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2017 the original author or authors.
+ * Copyright 2011-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,8 @@ import org.appng.search.indexer.GlobalIndexer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import lombok.Data;
+
 /**
  * A {@link ScheduledJob} that builds to global search index for a {@link Site}.
  * 
@@ -35,6 +37,7 @@ import org.slf4j.LoggerFactory;
  *
  * @see GlobalIndexer
  */
+@Data
 public class IndexJob implements ScheduledJob {
 
 	private static final Logger LOG = LoggerFactory.getLogger(IndexJob.class);
@@ -49,21 +52,4 @@ public class IndexJob implements ScheduledJob {
 		new GlobalIndexer(indexer).doIndex(site, jspFileType);
 		LOG.debug("finished IndexJob ({}) for site {}", description, site.getName());
 	}
-
-	public Map<String, Object> getJobDataMap() {
-		return jobDataMap;
-	}
-
-	public void setJobDataMap(Map<String, Object> jobDataMap) {
-		this.jobDataMap = jobDataMap;
-	}
-
-	public String getDescription() {
-		return description;
-	}
-
-	public void setDescription(String description) {
-		this.description = description;
-	}
-
 }

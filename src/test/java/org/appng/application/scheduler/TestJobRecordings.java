@@ -44,6 +44,7 @@ public class TestJobRecordings extends TestBase {
 	protected java.util.Properties getProperties() {
 		Properties properties = new Properties();
 		properties.put("indexExpression", "0 0/5 * * * ? 2042");
+		properties.put("houseKeepingExpression", "0 0/5 * * * ? 2042");
 		properties.put("indexEnabled", "false");
 		properties.put("site.name", "localhost");
 		properties.put("validateJobsOnStartup", "false");

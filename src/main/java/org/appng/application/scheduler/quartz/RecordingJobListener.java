@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2017 the original author or authors.
+ * Copyright 2011-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,8 @@ import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.quartz.JobListener;
 import org.quartz.Scheduler;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 /**
  * A {@link JobListener} to be added to the {@link Scheduler} to get triggered when a job has ended. It saves some data
@@ -31,12 +33,15 @@ import org.quartz.Scheduler;
  * @author Claus Stümke
  *
  */
+@Component
 public class RecordingJobListener implements JobListener {
 
 	private JobRecordService jobRecordService;
+
+	@Value("${enableJobRecord:true}")
 	private boolean enabled;
 
-	public void setJobRecordService(JobRecordService jobRecordService) {
+	public RecordingJobListener(JobRecordService jobRecordService) {
 		this.jobRecordService = jobRecordService;
 	}
 
@@ -57,7 +62,7 @@ public class RecordingJobListener implements JobListener {
 
 	@Override
 	public void jobWasExecuted(JobExecutionContext context, JobExecutionException jobException) {
-		if (isEnabled()) {
+		if (enabled) {
 			Object result = context.getResult();
 			if (result instanceof JobResult) {
 				jobRecordService.recordJob((JobResult) result, context.getFireTime(), new Date(),
@@ -65,14 +70,6 @@ public class RecordingJobListener implements JobListener {
 						context.getTrigger().getJobKey().getName());
 			}
 		}
-	}
-
-	public boolean isEnabled() {
-		return enabled;
-	}
-
-	public void setEnabled(boolean enabled) {
-		this.enabled = enabled;
 	}
 
 }

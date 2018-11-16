@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2017 the original author or authors.
+ * Copyright 2011-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ import org.quartz.JobExecutionException;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.stereotype.Component;
 
 /**
  * Service class to deal with saving, deleting and querying for saved job execution records.
@@ -43,6 +44,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
  * @author Claus Stümke
  *
  */
+@Component
 public class JobRecordService {
 
 	private static final String QUERY_INSERT = "INSERT INTO job_execution_record (application,site,job_name,start,end,duration,run_once,result,stacktraces,custom_data,triggername) VALUES (:application,:site,:job_name,:start,:end,:duration,:run_once,:result,:stacktraces,:custom_data,:triggername)";
@@ -63,6 +65,10 @@ public class JobRecordService {
 	private static final String FIELD_NAME_APPLICATION = "application";
 
 	private NamedParameterJdbcTemplate jdbcTemplate;
+
+	public JobRecordService(NamedParameterJdbcTemplate jdbcTemplate) {
+		this.jdbcTemplate = jdbcTemplate;
+	}
 
 	public void recordJob(JobResult jobResult, Date fireTime, Date endTime, long jobRunTime, JobDataMap jobDataMap,
 			JobExecutionException jobException, String triggerName) {
@@ -186,14 +192,6 @@ public class JobRecordService {
 			return count.toString();
 		}
 		return null;
-	}
-
-	public NamedParameterJdbcTemplate getJdbcTemplate() {
-		return jdbcTemplate;
-	}
-
-	public void setJdbcTemplate(NamedParameterJdbcTemplate jdbcTemplate) {
-		this.jdbcTemplate = jdbcTemplate;
 	}
 
 }

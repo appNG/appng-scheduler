@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2017 the original author or authors.
+ * Copyright 2011-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import org.appng.api.model.Application;
 import org.appng.api.model.Site;
 import org.appng.application.scheduler.PropertyConstants;
 import org.appng.application.scheduler.model.JobRecord;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -42,8 +41,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class RecordsRestController {
 
-	@Autowired
 	private JobRecordService jobRecordService;
+
+	public RecordsRestController(JobRecordService jobRecordService) {
+		this.jobRecordService = jobRecordService;
+	}
 
 	@RequestMapping(value = "/jobRecords", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 	public ResponseEntity<List<JobRecord>> getJobRecords(
@@ -71,14 +73,6 @@ public class RecordsRestController {
 		}
 		String token = application.getProperties().getString(PropertyConstants.BEARER_TOKEN);
 		return StringUtils.isNotBlank(token) && auths.contains("Bearer " + token);
-	}
-
-	public JobRecordService getJobRecordService() {
-		return jobRecordService;
-	}
-
-	public void setJobRecordService(JobRecordService jobRecordService) {
-		this.jobRecordService = jobRecordService;
 	}
 
 }

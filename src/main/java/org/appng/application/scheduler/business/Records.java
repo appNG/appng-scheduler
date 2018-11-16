@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2017 the original author or authors.
+ * Copyright 2011-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import org.appng.application.scheduler.model.JobRecord;
 import org.appng.application.scheduler.service.JobRecordService;
 import org.appng.xml.platform.Selection;
 import org.appng.xml.platform.SelectionGroup;
+import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Lists;
 
@@ -42,6 +43,8 @@ import com.google.common.collect.Lists;
  * @author Claus Stümke
  *
  */
+
+@Component
 public class Records implements DataProvider {
 
 	private static final String START_FILTER_DATE_TIME_FORMAT = "yyyy-MM-dd HH:mm";
@@ -53,6 +56,10 @@ public class Records implements DataProvider {
 	private static final String RESULT_FILTER = "re";
 
 	private JobRecordService jobRecordService;
+
+	public Records(JobRecordService jobRecordService) {
+		this.jobRecordService = jobRecordService;
+	}
 
 	@Override
 	public DataContainer getData(Site site, Application application, Environment environment, Options options,

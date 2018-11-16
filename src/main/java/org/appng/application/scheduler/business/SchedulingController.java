@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2017 the original author or authors.
+ * Copyright 2011-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,18 +34,24 @@ import org.appng.xml.platform.MetaData;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
 import org.quartz.JobKey;
+import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Component;
 
+@Component
 public class SchedulingController extends SchedulerAware implements ApplicationController {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(SchedulingController.class);
 
-	@Autowired
 	private RecordingJobListener recordingJobListener;
+
+	public SchedulingController(RecordingJobListener recordingJobListener, Scheduler scheduler) {
+		this.recordingJobListener = recordingJobListener;
+		this.scheduler = scheduler;
+	}
 
 	public boolean start(Site site, Application application, Environment env) {
 		try {

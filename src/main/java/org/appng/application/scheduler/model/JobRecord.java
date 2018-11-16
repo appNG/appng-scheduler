@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2017 the original author or authors.
+ * Copyright 2011-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,52 +19,26 @@ import java.util.Date;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
+import lombok.Data;
+
 /**
  * Model class representig a row in the job record table.
  * 
  * @author Claus Stümke
  *
  */
-
+@Data
 public class JobRecord extends JobResult {
 
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd@HH:mm:ss.SSSZ")
 	private Date start;
+
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd@HH:mm:ss.SSSZ")
 	private Date end;
-	private Long duration;
-	private String stacktraces;
-
-	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd@HH:mm:ss.SSSZ")
-	public Date getStart() {
-		return start;
-	}
-
-	public void setStart(Date start) {
-		this.start = start;
-	}
-
-	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd@HH:mm:ss.SSSZ")
-	public Date getEnd() {
-		return end;
-	}
-
-	public void setEnd(Date end) {
-		this.end = end;
-	}
 
 	@JsonFormat(shape = JsonFormat.Shape.NUMBER_FLOAT)
-	public Long getDuration() {
-		return duration;
-	}
+	private Long duration;
 
-	public void setDuration(Long duration) {
-		this.duration = duration;
-	}
+	private String stacktraces;
 
-	public String getStacktraces() {
-		return stacktraces;
-	}
-
-	public void setStacktraces(String stacktraces) {
-		this.stacktraces = stacktraces;
-	}
 }

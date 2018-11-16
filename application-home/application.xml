@@ -33,6 +33,7 @@
 		<property id="featureIndexing">true</property>
 		<property id="indexEnabled">true</property>
 		<property id="indexExpression">0 0 3 * * ?</property>
+		<property id="houseKeepingExpression">0 0 2 * * ?</property>
 		<property id="indexTimeout" description="The timeout in milliseconds when indexing files">2000</property>
 		<property id="validateJobsOnStartup" description="validate jobs on startup">true</property>
 		<property id="quartzDriverDelegate" description="the driver delegate for quartz">org.quartz.impl.jdbcjobstore.StdJDBCDelegate</property>

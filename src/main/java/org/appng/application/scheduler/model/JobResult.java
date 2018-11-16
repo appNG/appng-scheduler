@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2017 the original author or authors.
+ * Copyright 2011-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,10 +20,18 @@ import org.appng.api.ScheduledJobResult.ExecutionResult;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import lombok.Data;
+
+@Data
 public class JobResult {
+
 	private String applicationName;
+
 	private String siteName;
+
 	private String jobName;
+
+	@JsonIgnore
 	private ScheduledJobResult scheduledJobResult;
 
 	public JobResult() {
@@ -35,39 +43,6 @@ public class JobResult {
 		this.applicationName = application;
 		this.siteName = site;
 		this.jobName = name;
-	}
-
-	public String getApplicationName() {
-		return applicationName;
-	}
-
-	public String getSiteName() {
-		return siteName;
-	}
-
-	public String getJobName() {
-		return jobName;
-	}
-
-	public void setApplicationName(String applicationName) {
-		this.applicationName = applicationName;
-	}
-
-	public void setSiteName(String siteName) {
-		this.siteName = siteName;
-	}
-
-	public void setJobName(String jobName) {
-		this.jobName = jobName;
-	}
-
-	@JsonIgnore
-	public ScheduledJobResult getScheduledJobResult() {
-		return scheduledJobResult;
-	}
-
-	public void setScheduledJobResult(ScheduledJobResult scheduledJobResult) {
-		this.scheduledJobResult = scheduledJobResult;
 	}
 
 	public ExecutionResult getResult() {
