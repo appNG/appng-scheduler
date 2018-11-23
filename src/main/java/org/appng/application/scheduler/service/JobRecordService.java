@@ -126,13 +126,13 @@ public class JobRecordService {
 
 		boolean first = true;
 
-		first = addFiler(FIELD_NAME_SITE, "=", siteName, sql, paramsMap, first);
-		first = addFiler(FIELD_NAME_APPLICATION, "=", applicationFilter, sql, paramsMap, first);
-		first = addFiler(FIELD_NAME_JOB_NAME, "=", jobFilter, sql, paramsMap, first);
-		first = addFiler(FIELD_NAME_RESULT, "=", result, sql, paramsMap, first);
-		first = addFiler(FIELD_NAME_START, ">", start, sql, paramsMap, first);
+		first = addFilter(FIELD_NAME_SITE, "=", siteName, sql, paramsMap, first);
+		first = addFilter(FIELD_NAME_APPLICATION, "=", applicationFilter, sql, paramsMap, first);
+		first = addFilter(FIELD_NAME_JOB_NAME, "=", jobFilter, sql, paramsMap, first);
+		first = addFilter(FIELD_NAME_RESULT, "=", result, sql, paramsMap, first);
+		first = addFilter(FIELD_NAME_START, ">", start, sql, paramsMap, first);
 		first = addFiler(FIELD_NAME_START, "<", end, sql, paramsMap, first, FIELD_NAME_END);
-		addFiler(FIELD_NAME_DURATION, ">=", duration, sql, paramsMap, first);
+		addFilter(FIELD_NAME_DURATION, ">=", duration, sql, paramsMap, first);
 
 		sql.append(" ORDER BY start DESC;");
 
@@ -156,7 +156,7 @@ public class JobRecordService {
 
 	}
 
-	private boolean addFiler(String filterName, String operator, String filterValue, StringBuilder sql,
+	private boolean addFilter(String filterName, String operator, String filterValue, StringBuilder sql,
 			MapSqlParameterSource paramsMap, boolean first) {
 		return addFiler(filterName, operator, filterValue, sql, paramsMap, first, filterName);
 	}

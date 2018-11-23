@@ -119,12 +119,4 @@ public class Records implements DataProvider {
 		filter.getSelections().add(startedBeforeFilter);
 	}
 
-	public JobRecordService getJobRecordService() {
-		return jobRecordService;
-	}
-
-	public void setJobRecordService(JobRecordService jobRecordService) {
-		this.jobRecordService = jobRecordService;
-	}
-
 }
