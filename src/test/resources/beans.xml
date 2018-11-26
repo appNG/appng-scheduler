@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xmlns:p="http://www.springframework.org/schema/p" xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
-	xmlns:oxm="http://www.springframework.org/schema/oxm" xmlns:util="http://www.springframework.org/schema/util"
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p" xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:oxm="http://www.springframework.org/schema/oxm" xmlns:util="http://www.springframework.org/schema/util"
 	xsi:schemaLocation="http://www.springframework.org/schema/beans 
 		http://www.springframework.org/schema/beans/spring-beans.xsd
 		http://www.springframework.org/schema/aop 
@@ -14,10 +13,6 @@
 		http://www.springframework.org/schema/oxm/spring-oxm.xsd
 		http://www.springframework.org/schema/util
 		http://www.springframework.org/schema/util/spring-util.xsd">
-
-	<bean id="schedulingController" class="org.appng.application.scheduler.business.SchedulingController">
-		<property name="scheduler" ref="scheduler" />
-	</bean>
 
 	<bean id="scheduler" class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
 		<property name="schedulerName">
@@ -64,6 +59,10 @@
 		</property>
 	</bean>
 
+	<bean id="jdbcTemplate" class="org.mockito.Mockito" factory-method="mock" primary="true">
+		<constructor-arg index="0" value="org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate" />
+	</bean>
+	
 	<!-- this is needed to support the dictionary view of appng-manager -->
 	<util:list id="messageSources">
 		<value>messages-scheduler</value>

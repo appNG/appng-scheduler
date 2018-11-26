@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2017 the original author or authors.
+ * Copyright 2011-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,7 +70,7 @@ public class SchedulerUtils {
 
 	public void scheduleJob(JobDetail jobDetail, String cronExpression, String id, String jobDesc, String triggerGroup)
 			throws SchedulerException {
-		List<? extends Trigger> triggersOfJob= scheduler.getTriggersOfJob(jobDetail.getKey());
+		List<? extends Trigger> triggersOfJob = scheduler.getTriggersOfJob(jobDetail.getKey());
 		if (0 == triggersOfJob.size()) {
 			addCronTrigger(jobDetail, cronExpression, id, jobDesc, triggerGroup);
 		} else {
@@ -157,7 +157,7 @@ public class SchedulerUtils {
 
 	public boolean isValidExpression(String cronExpression) {
 		if (null == cronExpression || !CronExpression.isValidExpression(cronExpression)) {
-			addMessage(request, fp, MessageConstants.CRONEXPRESSION_INVALID, true, true, "jobModel.cronExpression");
+			addMessage(request, fp, MessageConstants.JOB_CRONEXPRESSION_INVALID, true, true, "jobModel.cronExpression");
 			return false;
 		}
 		return true;

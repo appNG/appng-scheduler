@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<datasources xmlns="http://www.appng.org/schema/platform" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://www.appng.org/schema/platform http://www.appng.org/schema/platform/appng-platform.xsd ">
+<datasources xmlns="http://www.appng.org/schema/platform" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.appng.org/schema/platform http://www.appng.org/schema/platform/appng-platform.xsd ">
 	<datasource id="jobs">
 		<config>
 			<title>jobs</title>
@@ -71,7 +70,7 @@
 					<condition expression="${not current.running}" />
 					<label>delete</label>
 					<icon>delete</icon>
-					<confirmation id="confirm.delete.job" params="#{name}"/>
+					<confirmation id="confirm.delete.job" params="#{name}" />
 				</link>
 			</linkpanel>
 		</config>
@@ -81,7 +80,7 @@
 	<datasource id="job">
 		<config>
 			<title>jobs</title>
-			<params>				
+			<params>
 				<param name="id" />
 			</params>
 			<meta-data bindClass="org.appng.application.scheduler.model.JobModel">
@@ -100,7 +99,7 @@
 			<option name="job" id="${id}" />
 		</bean>
 	</datasource>
-	
+
 	<datasource id="new-job">
 		<config>
 			<title>create.job</title>
@@ -121,6 +120,94 @@
 		</config>
 		<bean id="jobs">
 			<option name="action" id="create" />
+		</bean>
+	</datasource>
+
+	<datasource id="records">
+		<config>
+			<title>records.list</title>
+			<params>
+			</params>
+			<meta-data bindClass="org.appng.application.scheduler.model.JobRecord">
+				<field name="siteName" type="text">
+					<label>record.site</label>
+				</field>
+				<field name="applicationName" type="text">
+					<label>record.application</label>
+				</field>
+				<field name="jobName" type="text">
+					<label>record.jobName</label>
+				</field>
+				<field name="duration" type="decimal">
+					<label>record.duration</label>
+				</field>
+				<field name="start" type="date">
+					<label>record.start</label>
+				</field>
+				<field name="end" type="date">
+					<label>record.end</label>
+				</field>
+				<field name="result" type="image">
+					<label id="record.result"></label>
+					<icon condition="${'FAIL' eq current.result}">led_red</icon>
+					<icon condition="${'SUCCESS'eq current.result}">led_green</icon>
+				</field>
+				<field name="actions" type="linkpanel">
+					<label>actions</label>
+				</field>
+
+			</meta-data>
+			<linkpanel id="actions" location="inline">
+				<link mode="intern" target="/records/${current.id}">
+					<label>record.details</label>
+					<icon>edit</icon>
+				</link>
+			</linkpanel>
+		</config>
+		<bean id="records" />
+	</datasource>
+
+
+	<datasource id="record">
+		<config>
+			<title>records.item</title>
+			<params>
+				<param name="recordId" />
+			</params>
+			<meta-data bindClass="org.appng.application.scheduler.model.JobRecord">
+				<field name="siteName" type="text" readonly="true">
+					<label>record.site</label>
+				</field>
+				<field name="applicationName" type="text" readonly="true">
+					<label>record.application</label>
+				</field>
+				<field name="jobName" type="text" readonly="true">
+					<label>record.jobName</label>
+				</field>
+				<field name="duration" type="decimal" readonly="true">
+					<label>record.duration</label>
+				</field>
+				<field name="start" type="date" readonly="true">
+					<label>record.start</label>
+				</field>
+				<field name="end" type="date" readonly="true">
+					<label>record.end</label>
+				</field>
+				<field name="customData" type="longtext" readonly="true">
+					<label>record.customData</label>
+				</field>
+				<field name="stacktraces" type="longtext" readonly="true">
+					<label>record.stacktraces</label>
+				</field>
+				<field name="result" type="image" readonly="true">
+					<label id="record.result"></label>
+					<icon condition="${'FAIL' eq current.result}">led_red</icon>
+					<icon condition="${'SUCCESS'eq current.result}">led_green</icon>
+				</field>
+			</meta-data>
+		</config>
+		<bean id="records">
+			<option name="id" value="${recordId}" />
 		</bean>
 	</datasource>
 </datasources>

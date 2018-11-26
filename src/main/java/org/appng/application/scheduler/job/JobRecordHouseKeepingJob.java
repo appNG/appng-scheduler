@@ -17,39 +17,37 @@ package org.appng.application.scheduler.job;
 
 import java.util.Map;
 
-import org.appng.api.Platform;
 import org.appng.api.ScheduledJob;
+import org.appng.api.ScheduledJobResult;
+import org.appng.api.ScheduledJobResult.ExecutionResult;
 import org.appng.api.model.Application;
 import org.appng.api.model.Site;
-import org.appng.api.search.Consumer;
-import org.appng.api.search.DocumentEvent;
-import org.appng.api.search.DocumentProducer;
-import org.appng.search.indexer.GlobalIndexer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.appng.application.scheduler.service.JobRecordService;
 
 import lombok.Data;
 
 /**
- * A {@link ScheduledJob} that builds to global search index for a {@link Site}.
+ * A {@link ScheduledJob} to remove old job records from the database.
  * 
- * @author Matthias Müller
+ * @author Claus Stümke
  *
- * @see GlobalIndexer
  */
 @Data
-public class IndexJob implements ScheduledJob {
+public class JobRecordHouseKeepingJob implements ScheduledJob {
 
-	private static final Logger LOG = LoggerFactory.getLogger(IndexJob.class);
+	private JobRecordService jobRecordService;
+
+	private ScheduledJobResult result;
 
 	private Map<String, Object> jobDataMap;
+
 	private String description;
 
 	public void execute(Site site, Application application) throws Exception {
-		LOG.debug("started IndexJob ({}) for site {}", description, site.getName());
-		Consumer<DocumentEvent, DocumentProducer> indexer = application.getFeatureProvider().getIndexer();
-		String jspFileType = (String) getJobDataMap().get(Platform.Property.JSP_FILE_TYPE);
-		new GlobalIndexer(indexer).doIndex(site, jspFileType);
-		LOG.debug("finished IndexJob ({}) for site {}", description, site.getName());
+		String details = jobRecordService.cleanUp(site, application);
+		this.result = new ScheduledJobResult();
+		this.result.setResult(ExecutionResult.SUCCESS);
+		this.result.setCustomData(details);
 	}
+
 }
