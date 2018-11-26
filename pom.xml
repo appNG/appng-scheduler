@@ -19,6 +19,7 @@
 		<displayName>Scheduler</displayName>
 		<longDescription><![CDATA[An application for scheduling using Quartz]]></longDescription>
 		<appNGVersion>${project.parent.version}</appNGVersion>
+		<application.homeFolder>application-home</application.homeFolder>
 	</properties>
 
 	<scm>
@@ -118,7 +119,7 @@
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>build-helper-maven-plugin</artifactId>
-				<version>1.9.1</version>
+				<version>3.0.0</version>
 				<configuration>
 					<sources>
 						<source>target/generated-sources/constants</source>
@@ -132,6 +133,7 @@
 						</goals>
 					</execution>
 				</executions>
+
 			</plugin>
 			<plugin>
 				<artifactId>maven-javadoc-plugin</artifactId>
@@ -174,45 +176,46 @@
 				</executions>
 			</plugin>
 			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>exec-maven-plugin</artifactId>
-				<version>1.5.0</version>
+				<groupId>org.appng</groupId>
+				<artifactId>appng-maven-plugin</artifactId>
+				<version>${appNGVersion}</version>
 				<executions>
 					<execution>
-						<id>message constants</id>
-						<phase>generate-sources</phase>
+						<id>applicationConstants</id>
 						<goals>
-							<goal>java</goal>
+							<goal>generateApplicationConstants</goal>
 						</goals>
 						<configuration>
-							<classpathScope>compile</classpathScope>
-							<executable>java</executable>
-							<mainClass>org.appng.tools.file.PropertyConstantCreator</mainClass>
-							<arguments>
-								<argument>application-home/dictionary/messages-scheduler.properties</argument>
-								<argument>org.appng.application.scheduler.MessageConstants</argument>
-								<argument>target/generated-sources/constants</argument>
-							</arguments>
+							<filePath>${application.homeFolder}/application.xml</filePath>
+							<targetClass>org.appng.application.scheduler.PropertyConstants</targetClass>
+							<outfolder>${application.constants.generatedOutputFolder}</outfolder>
 						</configuration>
 					</execution>
 					<execution>
-						<id>property constants</id>
-						<phase>generate-sources</phase>
+						<id>messageConstants</id>
 						<goals>
-							<goal>java</goal>
+							<goal>generateMessageConstants</goal>
 						</goals>
 						<configuration>
-							<classpathScope>compile</classpathScope>
-							<executable>java</executable>
-							<mainClass>org.appng.xml.ApplicationPropertyConstantCreator</mainClass>
-							<arguments>
-								<argument>application-home/application.xml</argument>
-								<argument>org.appng.application.scheduler.PropertyConstants</argument>
-								<argument>target/generated-sources/constants</argument>
-							</arguments>
+							<filePath>${application.homeFolder}/dictionary/messages-scheduler.properties</filePath>
+							<targetClass>org.appng.application.scheduler.MessageConstants</targetClass>
+							<outfolder>${application.constants.generatedOutputFolder}</outfolder>
 						</configuration>
 					</execution>
 				</executions>
+				<dependencies>
+					<!-- application xsd may change. use project version -->
+					<dependency>
+						<groupId>org.appng</groupId>
+						<artifactId>appng-xmlapi</artifactId>
+						<version>${appNGVersion}</version>
+					</dependency>
+					<dependency>
+						<groupId>commons-io</groupId>
+						<artifactId>commons-io</artifactId>
+						<version>2.6</version>
+					</dependency>
+				</dependencies>
 			</plugin>
 		</plugins>
 	</build>

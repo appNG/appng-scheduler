@@ -33,7 +33,7 @@
         </meta-data>
         <linkpanel id="actions" location="inline">
             <link id="actions[1]" mode="intern" target="/records/${current.id}">
-                <label id="record.details">record.details</label>
+                <label id="record.details">Show Details</label>
                 <icon>edit</icon>
             </link>
         </linkpanel>

@@ -49,7 +49,7 @@ public class TestJobRecordings extends TestBase {
 	JobExecutionContext jobContext;
 
 	static {
-		WritingXmlValidator.writeXml = true;
+		WritingXmlValidator.writeXml = false;
 	}
 
 	@Override
