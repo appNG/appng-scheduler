@@ -48,10 +48,13 @@ import org.springframework.stereotype.Component;
 public class JobRecordService {
 
 	private static final String QUERY_INSERT = "INSERT INTO job_execution_record (application,site,job_name,start,end,duration,run_once,result,stacktraces,custom_data,triggername) VALUES (:application,:site,:job_name,:start,:end,:duration,:run_once,:result,:stacktraces,:custom_data,:triggername)";
-	private static final String QUERY_SELECT_RECORD = "SELECT site,application,job_name,duration,start,end,result,stacktraces FROM job_execution_record ";
+	private static final String QUERY_SELECT_RECORDS = "SELECT id,site,application,job_name,duration,start,end,result,stacktraces,custom_data,triggername FROM job_execution_record ";
+	private static final String QUERY_SELECT_RECORDBY_ID_AND_SITE = QUERY_SELECT_RECORDS
+			+ " where site = :site and id= :id";
 	private static final String QUERY_DELETE_OUTDATED = "DELETE FROM job_execution_record WHERE site = :site AND start < :outdated ;";
 	private static final String QUERY_COUNT_OUTDATED = "SELECT count(*) FROM job_execution_record WHERE site = :site AND start < :outdated ;";
 
+	private static final String FIELD_NAME_ID = "id";
 	private static final String FIELD_NAME_TRIGGERNAME = "triggername";
 	private static final String FIELD_NAME_CUSTOM_DATA = "custom_data";
 	private static final String FIELD_NAME_STACKTRACES = "stacktraces";
@@ -122,7 +125,7 @@ public class JobRecordService {
 			String end, String result, String duration) {
 		MapSqlParameterSource paramsMap = new MapSqlParameterSource();
 
-		StringBuilder sql = new StringBuilder(QUERY_SELECT_RECORD);
+		StringBuilder sql = new StringBuilder(QUERY_SELECT_RECORDS);
 
 		boolean first = true;
 
@@ -136,23 +139,7 @@ public class JobRecordService {
 
 		sql.append(" ORDER BY start DESC;");
 
-		return jdbcTemplate.query(sql.toString(), paramsMap, new RowMapper<JobRecord>() {
-
-			@Override
-			public JobRecord mapRow(ResultSet rs, int rowNum) throws SQLException {
-				JobRecord record = new JobRecord();
-				record.setSiteName(rs.getString(FIELD_NAME_SITE));
-				record.setJobName(rs.getString(FIELD_NAME_JOB_NAME));
-				record.setApplicationName(rs.getString(FIELD_NAME_APPLICATION));
-				record.setStart(rs.getTimestamp(FIELD_NAME_START));
-				record.setEnd(rs.getTimestamp(FIELD_NAME_END));
-				record.setDuration(rs.getLong(FIELD_NAME_DURATION));
-				record.setScheduledJobResult(new ScheduledJobResult());
-				record.getScheduledJobResult().setResult(ExecutionResult.valueOf(rs.getString(FIELD_NAME_RESULT)));
-				record.setStacktraces(rs.getString(FIELD_NAME_STACKTRACES));
-				return record;
-			}
-		});
+		return jdbcTemplate.query(sql.toString(), paramsMap, new RecordRowMapper());
 
 	}
 
@@ -192,6 +179,35 @@ public class JobRecordService {
 			return count.toString();
 		}
 		return null;
+	}
+
+	public JobRecord getRecord(String siteName, String recordId) {
+		MapSqlParameterSource paramsMap = new MapSqlParameterSource();
+		paramsMap.addValue("site", siteName);
+		paramsMap.addValue("id", recordId);
+
+		JobRecord res = jdbcTemplate.queryForObject(QUERY_SELECT_RECORDBY_ID_AND_SITE, paramsMap,
+				new RecordRowMapper());
+
+		return res;
+	}
+
+	private class RecordRowMapper implements RowMapper<JobRecord> {
+		public JobRecord mapRow(ResultSet rs, int rowNum) throws SQLException {
+			JobRecord record = new JobRecord();
+			record.setId(rs.getInt(FIELD_NAME_ID));
+			record.setSiteName(rs.getString(FIELD_NAME_SITE));
+			record.setJobName(rs.getString(FIELD_NAME_JOB_NAME));
+			record.setApplicationName(rs.getString(FIELD_NAME_APPLICATION));
+			record.setStart(rs.getTimestamp(FIELD_NAME_START));
+			record.setEnd(rs.getTimestamp(FIELD_NAME_END));
+			record.setDuration(rs.getLong(FIELD_NAME_DURATION));
+			record.setScheduledJobResult(new ScheduledJobResult());
+			record.getScheduledJobResult().setResult(ExecutionResult.valueOf(rs.getString(FIELD_NAME_RESULT)));
+			record.getScheduledJobResult().setCustomData(rs.getString(FIELD_NAME_CUSTOM_DATA));
+			record.setStacktraces(rs.getString(FIELD_NAME_STACKTRACES));
+			return record;
+		}
 	}
 
 }

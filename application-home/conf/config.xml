@@ -107,15 +107,15 @@
 				<title>records</title>
 				<url-schema>
 					<url-params>
-						<url-param name="id" />
+						<url-param name="recordId" />
 					</url-params>
 					<get-params>
-					<get-param name="ap" />
-					<get-param name="job" />
-					<get-param name="sa" />
-					<get-param name="sb" />
-					<get-param name="du" />
-					<get-param name="re" />
+						<get-param name="ap" />
+						<get-param name="job" />
+						<get-param name="sa" />
+						<get-param name="sb" />
+						<get-param name="du" />
+						<get-param name="re" />
 					</get-params>
 				</url-schema>
 			</config>
@@ -123,6 +123,14 @@
 				<section>
 					<element>
 						<datasource id="records" />
+					</element>
+					<element>
+						<action eventId="jobEvent" id="showRecordDetails">
+							<condition expression="${not empty recordId}" />
+							<params>
+								<param name="recordId">${recordId}</param>
+							</params>
+						</action>
 					</element>
 				</section>
 			</structure>

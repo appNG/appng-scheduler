@@ -17,6 +17,7 @@ package org.appng.application.scheduler.business;
 
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.appng.api.DataContainer;
 import org.appng.api.DataProvider;
 import org.appng.api.Environment;
@@ -65,21 +66,30 @@ public class Records implements DataProvider {
 	public DataContainer getData(Site site, Application application, Environment environment, Options options,
 			Request request, FieldProcessor fieldProcessor) {
 		DataContainer dc = new DataContainer(fieldProcessor);
-		SelectionGroup filter = new SelectionGroup();
-		dc.getSelectionGroups().add(filter);
+		String recordId = options.getOptionValue("id", "value");
 
-		String aFilter = request.getParameter(APPLICATION_FILTER);
-		String jFilter = request.getParameter(JOB_FILTER);
-		String result = request.getParameter(RESULT_FILTER);
-		String duration = request.getParameter(MIN_DURATION_FILTER);
-		String start = request.getParameter(START_AFTER_FILTER);
-		String end = request.getParameter(START_BEFORE_FILTER);
+		if (StringUtils.isNotBlank(recordId)) {
 
-		addFilter(site, filter, request);
+			JobRecord item = jobRecordService.getRecord(site.getName(), recordId);
+			dc.setItem(item);
 
-		List<JobRecord> records = jobRecordService.getRecords(site.getName(), aFilter, jFilter, start, end, result,
-				duration);
-		dc.setPage(records, fieldProcessor.getPageable());
+		} else {
+			SelectionGroup filter = new SelectionGroup();
+			dc.getSelectionGroups().add(filter);
+
+			String aFilter = request.getParameter(APPLICATION_FILTER);
+			String jFilter = request.getParameter(JOB_FILTER);
+			String result = request.getParameter(RESULT_FILTER);
+			String duration = request.getParameter(MIN_DURATION_FILTER);
+			String start = request.getParameter(START_AFTER_FILTER);
+			String end = request.getParameter(START_BEFORE_FILTER);
+
+			addFilter(site, filter, request);
+
+			List<JobRecord> records = jobRecordService.getRecords(site.getName(), aFilter, jFilter, start, end, result,
+					duration);
+			dc.setPage(records, fieldProcessor.getPageable());
+		}
 		return dc;
 	}
 

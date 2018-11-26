@@ -30,6 +30,9 @@ import lombok.Data;
 @Data
 public class JobRecord extends JobResult {
 
+	@JsonFormat(shape = JsonFormat.Shape.NUMBER_INT)
+	private Integer id;
+
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd@HH:mm:ss.SSSZ")
 	private Date start;
 
