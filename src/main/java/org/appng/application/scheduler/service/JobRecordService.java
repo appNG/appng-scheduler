@@ -47,12 +47,12 @@ import org.springframework.stereotype.Component;
 @Component
 public class JobRecordService {
 
-	private static final String QUERY_INSERT = "INSERT INTO job_execution_record (application,site,job_name,start,end,duration,run_once,result,stacktraces,custom_data,triggername) VALUES (:application,:site,:job_name,:start,:end,:duration,:run_once,:result,:stacktraces,:custom_data,:triggername)";
-	private static final String QUERY_SELECT_RECORDS = "SELECT id,site,application,job_name,duration,start,end,result,stacktraces,custom_data,triggername FROM job_execution_record ";
+	private static final String QUERY_INSERT = "INSERT INTO job_execution_record (application,site,job_name,start_time,end_time,duration,run_once,result,stacktraces,custom_data,triggername) VALUES (:application,:site,:job_name,:start_time,:end_time,:duration,:run_once,:result,:stacktraces,:custom_data,:triggername)";
+	private static final String QUERY_SELECT_RECORDS = "SELECT id,site,application,job_name,duration,start_time,end_time,result,stacktraces,custom_data,triggername FROM job_execution_record ";
 	private static final String QUERY_SELECT_RECORDBY_ID_AND_SITE = QUERY_SELECT_RECORDS
 			+ " where site = :site and id= :id";
-	private static final String QUERY_DELETE_OUTDATED = "DELETE FROM job_execution_record WHERE site = :site AND start < :outdated ;";
-	private static final String QUERY_COUNT_OUTDATED = "SELECT count(*) FROM job_execution_record WHERE site = :site AND start < :outdated ;";
+	private static final String QUERY_DELETE_OUTDATED = "DELETE FROM job_execution_record WHERE site = :site AND start_time < :outdated ;";
+	private static final String QUERY_COUNT_OUTDATED = "SELECT count(*) FROM job_execution_record WHERE site = :site AND start_time < :outdated ;";
 
 	private static final String FIELD_NAME_ID = "id";
 	private static final String FIELD_NAME_TRIGGERNAME = "triggername";
@@ -61,8 +61,8 @@ public class JobRecordService {
 	private static final String FIELD_NAME_RESULT = "result";
 	private static final String FIELD_NAME_RUN_ONCE = "run_once";
 	private static final String FIELD_NAME_DURATION = "duration";
-	private static final String FIELD_NAME_END = "end";
-	private static final String FIELD_NAME_START = "start";
+	private static final String FIELD_NAME_END = "end_time";
+	private static final String FIELD_NAME_START = "start_time";
 	private static final String FIELD_NAME_JOB_NAME = "job_name";
 	private static final String FIELD_NAME_SITE = "site";
 	private static final String FIELD_NAME_APPLICATION = "application";
@@ -137,7 +137,7 @@ public class JobRecordService {
 		first = addFiler(FIELD_NAME_START, "<", end, sql, paramsMap, first, FIELD_NAME_END);
 		addFilter(FIELD_NAME_DURATION, ">=", duration, sql, paramsMap, first);
 
-		sql.append(" ORDER BY start DESC;");
+		sql.append(" ORDER BY start_time DESC;");
 
 		return jdbcTemplate.query(sql.toString(), paramsMap, new RecordRowMapper());
 
