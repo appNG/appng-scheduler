@@ -32,9 +32,9 @@
             </field>
         </meta-data>
         <linkpanel id="actions" location="inline">
-            <link id="actions[1]" mode="intern" target="/records/${current.id}">
+            <link id="actions[1]" mode="intern" target="/records/${current.id}" default="true">
                 <label id="record.details">Show Details</label>
-                <icon>edit</icon>
+                <icon>detail</icon>
             </link>
         </linkpanel>
     </config>
