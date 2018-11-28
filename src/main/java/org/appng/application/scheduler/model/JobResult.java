@@ -15,6 +15,8 @@
  */
 package org.appng.application.scheduler.model;
 
+import java.io.Serializable;
+
 import org.appng.api.ScheduledJobResult;
 import org.appng.api.ScheduledJobResult.ExecutionResult;
 
@@ -22,8 +24,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import lombok.Data;
 
+@SuppressWarnings("serial")
 @Data
-public class JobResult {
+public class JobResult implements Serializable {
 
 	private String applicationName;
 

@@ -158,9 +158,9 @@
 
 			</meta-data>
 			<linkpanel id="actions" location="inline">
-				<link mode="intern" target="/records/${current.id}">
+				<link mode="intern" target="/records/${current.id}" default="true">
 					<label>record.details</label>
-					<icon>edit</icon>
+					<icon>detail</icon>
 				</link>
 			</linkpanel>
 		</config>
