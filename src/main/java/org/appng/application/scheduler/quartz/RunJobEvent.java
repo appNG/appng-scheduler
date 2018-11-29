@@ -19,6 +19,7 @@ import org.appng.api.BusinessException;
 import org.appng.api.Environment;
 import org.appng.api.InvalidConfigurationException;
 import org.appng.api.ScheduledJob;
+import org.appng.api.ScheduledJobResult;
 import org.appng.api.messaging.Event;
 import org.appng.api.model.Application;
 import org.appng.api.model.Site;
@@ -68,11 +69,12 @@ public class RunJobEvent extends Event {
 			}
 			job.setJobDataMap(jobDetail.getJobDataMap());
 
+			this.jobResult = new JobResult(new ScheduledJobResult(), appName, site.getName(), jobKey.getName());
 			StopWatch sw = new StopWatch();
 			sw.start();
 			job.execute(site, application);
 			sw.stop();
-			this.jobResult = new JobResult(job.getResult(), appName, site.getName(), jobKey.getName());
+			this.jobResult.setScheduledJobResult(job.getResult());
 			Object[] args = new Object[] { jobKey, appName, site.getName(), sw.getTotalTimeMillis() };
 			logger.debug("executing job {} for application {} in site {} took {}ms", args);
 

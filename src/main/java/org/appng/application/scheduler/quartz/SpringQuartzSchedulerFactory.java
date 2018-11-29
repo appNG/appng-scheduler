@@ -91,6 +91,7 @@ public class SpringQuartzSchedulerFactory extends AdaptableJobFactory {
 					runJobEvent.perform(environment, site);
 					context.setResult(runJobEvent.getJobResult());
 				} catch (Exception e) {
+					context.setResult(runJobEvent.getJobResult());
 					throw new JobExecutionException(e);
 				}
 				sendRunOnceEvent(jobDetail, jobKey, site, runJobEvent);
@@ -124,6 +125,7 @@ public class SpringQuartzSchedulerFactory extends AdaptableJobFactory {
 							runJobEvent.perform(environment, site);
 							context.setResult(runJobEvent.getJobResult());
 						} catch (Exception e) {
+							context.setResult(runJobEvent.getJobResult());
 							LOGGER.error("Caught Exception on job execution: ", e);
 						}
 						sendRunOnceEvent(jobDetail, jobKey, site, runJobEvent);
