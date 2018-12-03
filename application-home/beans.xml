@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p" xmlns:aop="http://www.springframework.org/schema/aop"
-	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:oxm="http://www.springframework.org/schema/oxm" xmlns:util="http://www.springframework.org/schema/util" xmlns:context="http://www.springframework.org/schema/context"
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:p="http://www.springframework.org/schema/p" xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:oxm="http://www.springframework.org/schema/oxm" xmlns:util="http://www.springframework.org/schema/util"
+	xmlns:context="http://www.springframework.org/schema/context"
 	xsi:schemaLocation="http://www.springframework.org/schema/beans 
 		http://www.springframework.org/schema/beans/spring-beans.xsd
 		http://www.springframework.org/schema/aop 
@@ -78,12 +80,12 @@
 			</map>
 		</property>
 	</bean>
-	
-	
+
 	<bean id="houseKeepingJob" class="org.appng.application.scheduler.job.JobRecordHouseKeepingJob">
 		<property name="description" value="Job Record House Keeping Job" />
 		<property name="jobDataMap">
 			<map>
+				<entry key="runOnce" value="true" />
 				<entry key="enabled" value="${houseKeepingEnabled}" />
 				<entry key="cronExpression" value="${houseKeepingExpression}" />
 			</map>
@@ -97,9 +99,7 @@
 		<value>messages-core</value>
 	</util:list>
 
-	<bean id="objectMapper" class="com.fasterxml.jackson.databind.ObjectMapper">
-	</bean>
-
+	<bean id="objectMapper" class="com.fasterxml.jackson.databind.ObjectMapper" />
 
 	<bean class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
 		<property name="objectMapper" ref="objectMapper" />

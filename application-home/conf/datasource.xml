@@ -184,8 +184,14 @@
 				<field name="jobName" type="text" readonly="true">
 					<label>record.jobName</label>
 				</field>
+				<field name="triggerName" type="text" readonly="true">
+					<label>record.triggerName</label>
+				</field>
 				<field name="duration" type="decimal" readonly="true">
 					<label>record.duration</label>
+				</field>
+				<field name="runOnce" type="checkbox" readonly="true">
+					<label>record.runOnce</label>
 				</field>
 				<field name="start" type="date" readonly="true">
 					<label>record.start</label>

@@ -29,10 +29,10 @@ import lombok.Data;
 public class JobResult implements Serializable {
 
 	private String applicationName;
-
 	private String siteName;
-
 	private String jobName;
+	private String triggerName;
+	private boolean runOnce;
 
 	@JsonIgnore
 	private ScheduledJobResult scheduledJobResult;

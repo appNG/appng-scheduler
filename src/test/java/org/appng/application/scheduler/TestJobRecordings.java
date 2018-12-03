@@ -99,7 +99,7 @@ public class TestJobRecordings extends TestBase {
 				eq("SELECT DISTINCT job_name FROM job_execution_record WHERE site = :site ORDER BY job_name DESC"),
 				any(MapSqlParameterSource.class), any(RowMapper.class));
 		verify(jdbcTemplate).query(eq(
-				"SELECT id,site,application,job_name,duration,start_time,end_time,result,stacktraces,custom_data,triggername FROM job_execution_record  WHERE site = :site ORDER BY start_time DESC;"),
+				"SELECT * FROM job_execution_record WHERE site = :site ORDER BY start_time DESC;"),
 				any(MapSqlParameterSource.class), any(RowMapper.class));
 
 	}
@@ -125,7 +125,7 @@ public class TestJobRecordings extends TestBase {
 				eq("SELECT DISTINCT job_name FROM job_execution_record WHERE site = :site ORDER BY job_name DESC"),
 				any(MapSqlParameterSource.class), any(RowMapper.class));
 		verify(jdbcTemplate).query(eq(
-				"SELECT id,site,application,job_name,duration,start_time,end_time,result,stacktraces,custom_data,triggername FROM job_execution_record  WHERE site = :site AND application = :application AND job_name = :job_name AND result = :result AND start_time > :start_time AND start_time < :end_time AND duration >= :duration ORDER BY start_time DESC;"),
+				"SELECT * FROM job_execution_record WHERE site = :site AND application = :application AND job_name = :job_name AND result = :result AND start_time > :start_time AND start_time < :end_time AND duration >= :duration ORDER BY start_time DESC;"),
 				any(MapSqlParameterSource.class), any(RowMapper.class));
 	}
 

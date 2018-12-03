@@ -1,12 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<applicationRootConfig xmlns="http://www.appng.org/schema/platform" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.appng.org/schema/platform http://www.appng.org/schema/platform/appng-platform.xsd">
+<applicationRootConfig xmlns="http://www.appng.org/schema/platform" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.appng.org/schema/platform http://www.appng.org/schema/platform/appng-platform.xsd">
 	<name>Scheduler</name>
 	<config>
 		<permissions>
 			<permission mode="set" ref="debug" />
 		</permissions>
 		<session>
-			<session-params></session-params>
+			<session-params>
+				<session-param name="ap" />
+				<session-param name="job" />
+				<session-param name="sa" />
+				<session-param name="sb" />
+				<session-param name="du" />
+				<session-param name="re" />
+			</session-params>
 		</session>
 	</config>
 	<navigation location="top" id="topnav">
