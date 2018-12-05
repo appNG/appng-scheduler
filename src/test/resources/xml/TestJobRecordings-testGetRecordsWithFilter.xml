@@ -2,7 +2,11 @@
 <datasource xmlns="http://www.appng.org/schema/platform" id="records">
     <config>
         <title id="records.list">Recorded Job Executions</title>
-        <params/>
+        <params>
+            <param name="jobId"/>
+            <param name="path"/>
+            <param name="tab"/>
+        </params>
         <meta-data bindClass="org.appng.application.scheduler.model.JobRecord">
             <field name="siteName" type="text" binding="siteName">
                 <label id="record.site">Site</label>
@@ -32,7 +36,7 @@
             </field>
         </meta-data>
         <linkpanel id="actions" location="inline">
-            <link id="actions[1]" mode="intern" target="/records/${current.id}" default="true">
+            <link id="actions[1]" mode="intern" target="/${current.id}" default="true">
                 <label id="record.details">Show Details</label>
                 <icon>detail</icon>
             </link>

@@ -127,6 +127,9 @@
 		<config>
 			<title>records.list</title>
 			<params>
+				<param name="jobId" />
+				<param name="path" />
+				<param name="tab" />
 			</params>
 			<meta-data bindClass="org.appng.application.scheduler.model.JobRecord">
 				<field name="siteName" type="text">
@@ -158,13 +161,15 @@
 
 			</meta-data>
 			<linkpanel id="actions" location="inline">
-				<link mode="intern" target="/records/${current.id}" default="true">
+				<link mode="intern" target="${path}/${current.id}${tab}" default="true">
 					<label>record.details</label>
 					<icon>detail</icon>
 				</link>
 			</linkpanel>
 		</config>
-		<bean id="records" />
+		<bean id="records">
+			<option name="jobId" value="${jobId}" />
+		</bean>
 	</datasource>
 
 

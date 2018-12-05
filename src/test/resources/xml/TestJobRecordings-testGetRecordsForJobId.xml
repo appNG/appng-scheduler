@@ -3,7 +3,7 @@
     <config>
         <title id="records.list">Recorded Job Executions</title>
         <params>
-            <param name="jobId"/>
+            <param name="jobId">foo</param>
             <param name="path"/>
             <param name="tab"/>
         </params>
@@ -43,34 +43,6 @@
         </linkpanel>
     </config>
     <data>
-        <selectionGroup>
-            <selection id="ap">
-                <title id="filter.record.applicationName">Application</title>
-                <option value="" name="" selected="false"/>
-            </selection>
-            <selection id="job">
-                <title id="filter.record.jobName">Job Name</title>
-                <option value="" name="" selected="false"/>
-            </selection>
-            <selection id="re">
-                <title id="filter.record.result">Result</title>
-                <option value="" name="" selected="false"/>
-                <option value="SUCCESS" name="SUCCESS" selected="false"/>
-                <option value="FAIL" name="FAIL" selected="false"/>
-            </selection>
-            <selection id="du" type="text">
-                <title id="filter.record.minDuration">Min Duration (s)</title>
-                <option value="" name="du"/>
-            </selection>
-            <selection id="sa" type="date" format="yyyy-MM-dd HH:mm">
-                <title id="filter.record.startedAfter">Started After</title>
-                <option value="" name="sa"/>
-            </selection>
-            <selection id="sb" type="date" format="yyyy-MM-dd HH:mm">
-                <title id="filter.record.startedBefore">Started Before</title>
-                <option value="" name="sb"/>
-            </selection>
-        </selectionGroup>
         <resultset chunk="0" chunkname="records" chunksize="25" nextchunk="0" previouschunk="0" firstchunk="0" lastchunk="-1" hits="0"/>
     </data>
 </datasource>
