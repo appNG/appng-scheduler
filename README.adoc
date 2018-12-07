@@ -32,3 +32,8 @@ There are some filter which can be provided as GET parameter
 * startedBefore: filter for jobs where start time is before given time (format yyyy.MM.dd hh:mm:ss)
 * result: SUCCEESS or FAIL to filter for successful or failed jobs
 * minDuration: filter for jobs with a duration in seconds which equal or higher than the given value
+
+==== Icinga/Nagios check script
+Job executions can be monitored by icinga or nagios. A check script is available at scripts/icinga. With the range definition it is possible 
+to check each kind of minimum or maximum number of executions for a certain job in a configurable time period. Check the usage of the script 
+with --help 
