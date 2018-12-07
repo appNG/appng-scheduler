@@ -50,11 +50,11 @@ class JobExecutions(nagiosplugin.Resource):
 @click.option('--jobname', '-j', type=click.STRING, help='Name of the scheduled job to e monitored',required=True)
 @click.option('--hours', '-h', type=click.INT, default=24, help='time period in hours where number of executions are checked. Default is 24')
 @click.option('--warn', '-w', type=click.STRING, default='1:', help='Range definition for warning. Default is 1: (warning if less than 1)')
-@click.option('--crit', '-c', type=click.STRING, default='1:', help='Range definition for critical. Default is 1: (warning if less than 1)')
+@click.option('--crit', '-c', type=click.STRING, default='1:', help='Range definition for critical. Default is 1: (critical if less than 1)')
 
 @nagiosplugin.guarded
 def main(warn, crit, url, token, jobname, hours):
-    """ Nagios/Icinga Check script for checking successful executions of scheduled jobs in appNG """
+    """ Nagios/Icinga check script for checking successful executions of scheduled jobs in appNG """
     check = nagiosplugin.Check(
         JobExecutions(url, token, jobname, hours),
         nagiosplugin.ScalarContext('JobExecutions', warn, crit))
