@@ -45,8 +45,8 @@ class JobExecutions(nagiosplugin.Resource):
 def main(warn, crit, url, token, jobname, hours, sslverify):
     """ Nagios/Icinga check script for checking successful executions of scheduled jobs in appNG """
     check = nagiosplugin.Check(
-        JobExecutions(url, token, jobname, hours),
-        nagiosplugin.ScalarContext('JobExecutions', warn, crit))
+        JobExecutions(url, token, jobname, hours, sslverify),
+        nagiosplugin.ScalarContext('JobExecutions', str(warn), str(crit)))
     check.main()
     return 0
 
