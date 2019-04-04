@@ -67,8 +67,11 @@ public class Records implements DataProvider {
 			Request request, FieldProcessor fieldProcessor) {
 		DataContainer dc = new DataContainer(fieldProcessor);
 		String recordId = options.getOptionValue("id", "value");
-
-		if (StringUtils.isNotBlank(recordId)) {
+		String jobId = options.getOptionValue("jobId", "value");
+		if (StringUtils.isNotBlank(jobId)) {
+			List<JobRecord> records = jobRecordService.getRecords(site.getName(), null, jobId, null, null, null, null);
+			dc.setPage(records, fieldProcessor.getPageable());
+		} else if (StringUtils.isNotBlank(recordId)) {
 
 			JobRecord item = jobRecordService.getRecord(site.getName(), recordId);
 			dc.setItem(item);

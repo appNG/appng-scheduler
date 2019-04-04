@@ -3,6 +3,7 @@ package org.appng.application.scheduler;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -90,7 +91,7 @@ public class TestJobRecordings extends TestBase {
 	public void testGetRecords() throws Exception {
 
 		CallableDataSource datasource = getDataSource("records").getCallableDataSource();
-		Data perform = datasource.perform("page");
+		datasource.perform("page");
 		validate(datasource.getDatasource());
 		verify(jdbcTemplate).query(eq(
 				"SELECT DISTINCT application FROM job_execution_record WHERE site = :site ORDER BY application DESC"),
@@ -98,8 +99,27 @@ public class TestJobRecordings extends TestBase {
 		verify(jdbcTemplate).query(
 				eq("SELECT DISTINCT job_name FROM job_execution_record WHERE site = :site ORDER BY job_name DESC"),
 				any(MapSqlParameterSource.class), any(RowMapper.class));
-		verify(jdbcTemplate).query(eq(
-				"SELECT * FROM job_execution_record WHERE site = :site ORDER BY start_time DESC;"),
+		verify(jdbcTemplate).query(
+				eq("SELECT * FROM job_execution_record WHERE site = :site ORDER BY start_time DESC;"),
+				any(MapSqlParameterSource.class), any(RowMapper.class));
+
+	}
+
+	@SuppressWarnings("unchecked")
+	@Test
+	public void testGetRecordsForJobId() throws Exception {
+
+		CallableDataSource datasource = getDataSource("records").withParam("jobId", "foo").getCallableDataSource();
+		datasource.perform("page");
+		validate(datasource.getDatasource());
+		verify(jdbcTemplate, never()).query(eq(
+				"SELECT DISTINCT application FROM job_execution_record WHERE site = :site ORDER BY application DESC"),
+				any(MapSqlParameterSource.class), any(RowMapper.class));
+		verify(jdbcTemplate, never()).query(
+				eq("SELECT DISTINCT job_name FROM job_execution_record WHERE site = :site ORDER BY job_name DESC"),
+				any(MapSqlParameterSource.class), any(RowMapper.class));
+		verify(jdbcTemplate, times(1)).query(eq(
+				"SELECT * FROM job_execution_record WHERE site = :site AND job_name = :job_name ORDER BY start_time DESC;"),
 				any(MapSqlParameterSource.class), any(RowMapper.class));
 
 	}

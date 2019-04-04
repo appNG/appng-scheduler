@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<applicationRootConfig xmlns="http://www.appng.org/schema/platform" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://www.appng.org/schema/platform http://www.appng.org/schema/platform/appng-platform.xsd">
+<applicationRootConfig xmlns="http://www.appng.org/schema/platform" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.appng.org/schema/platform http://www.appng.org/schema/platform/appng-platform.xsd">
 	<name>Scheduler</name>
 	<config>
 		<permissions>
@@ -33,6 +32,7 @@
 					<url-params>
 						<url-param name="action" />
 						<url-param name="id" />
+						<url-param name="recordId" />
 					</url-params>
 					<get-params>
 						<get-param name="form_action" />
@@ -107,6 +107,24 @@
 							</params>
 						</action>
 					</element>
+					<element>
+						<datasource id="records">
+							<condition expression="${action eq 'update'}" />
+							<params>
+								<param name="jobId">${id}</param>
+								<param name="path">/jobs/update/${id}</param>
+								<param name="tab">#tab_update</param>
+							</params>
+						</datasource>
+					</element>
+					<element>
+						<action eventId="jobEvent" id="showRecordDetails">
+							<condition expression="${not empty recordId}" />
+							<params>
+								<param name="recordId">${recordId}</param>
+							</params>
+						</action>
+					</element>
 				</section>
 			</structure>
 		</page>
@@ -130,7 +148,11 @@
 			<structure>
 				<section>
 					<element>
-						<datasource id="records" />
+						<datasource id="records">
+							<params>
+								<param name="path">/records</param>
+							</params>
+						</datasource>
 					</element>
 					<element>
 						<action eventId="jobEvent" id="showRecordDetails">
