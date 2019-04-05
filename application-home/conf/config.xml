@@ -1,18 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<applicationRootConfig xmlns="http://www.appng.org/schema/platform" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://www.appng.org/schema/platform http://www.appng.org/schema/platform/appng-platform.xsd">
+<applicationRootConfig xmlns="http://www.appng.org/schema/platform" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.appng.org/schema/platform http://www.appng.org/schema/platform/appng-platform.xsd">
 	<name>Scheduler</name>
 	<config>
 		<permissions>
 			<permission mode="set" ref="debug" />
 		</permissions>
 		<session>
-			<session-params></session-params>
+			<session-params>
+				<session-param name="ap" />
+				<session-param name="job" />
+				<session-param name="sa" />
+				<session-param name="sb" />
+				<session-param name="du" />
+				<session-param name="re" />
+			</session-params>
 		</session>
 	</config>
 	<navigation location="top" id="topnav">
 		<link mode="intern" target="/jobs">
 			<label>jobs</label>
+		</link>
+		<link mode="intern" target="/records">
+			<label>records</label>
 		</link>
 	</navigation>
 	<pages>
@@ -23,6 +32,7 @@
 					<url-params>
 						<url-param name="action" />
 						<url-param name="id" />
+						<url-param name="recordId" />
 					</url-params>
 					<get-params>
 						<get-param name="form_action" />
@@ -75,7 +85,7 @@
 						</action>
 					</element>
 				</section>
-				
+
 				<!-- create -->
 				<section>
 					<element>
@@ -94,6 +104,61 @@
 							<params>
 								<param name="form_action">${form_action}</param>
 								<param name="id">${id}</param>
+							</params>
+						</action>
+					</element>
+					<element>
+						<datasource id="records">
+							<condition expression="${action eq 'update'}" />
+							<params>
+								<param name="jobId">${id}</param>
+								<param name="path">/jobs/update/${id}</param>
+								<param name="tab">#tab_update</param>
+							</params>
+						</datasource>
+					</element>
+					<element>
+						<action eventId="jobEvent" id="showRecordDetails">
+							<condition expression="${not empty recordId}" />
+							<params>
+								<param name="recordId">${recordId}</param>
+							</params>
+						</action>
+					</element>
+				</section>
+			</structure>
+		</page>
+		<page id="records">
+			<config>
+				<title>records</title>
+				<url-schema>
+					<url-params>
+						<url-param name="recordId" />
+					</url-params>
+					<get-params>
+						<get-param name="ap" />
+						<get-param name="job" />
+						<get-param name="sa" />
+						<get-param name="sb" />
+						<get-param name="du" />
+						<get-param name="re" />
+					</get-params>
+				</url-schema>
+			</config>
+			<structure>
+				<section>
+					<element>
+						<datasource id="records">
+							<params>
+								<param name="path">/records</param>
+							</params>
+						</datasource>
+					</element>
+					<element>
+						<action eventId="jobEvent" id="showRecordDetails">
+							<condition expression="${not empty recordId}" />
+							<params>
+								<param name="recordId">${recordId}</param>
 							</params>
 						</action>
 					</element>

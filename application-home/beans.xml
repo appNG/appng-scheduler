@@ -18,10 +18,6 @@
 
 	<context:component-scan base-package="org.appng.application.scheduler" />
 
-	<bean id="schedulingController" class="org.appng.application.scheduler.business.SchedulingController">
-		<property name="scheduler" ref="scheduler" />
-	</bean>
-
 	<bean id="scheduler" class="org.appng.application.scheduler.quartz.SchedulerFactoryBean" lazy-init="false">
 		<constructor-arg value="${quartzDriverDelegate}" />
 		<property name="schedulerName">
@@ -53,6 +49,11 @@
 		</property>
 	</bean>
 
+	<bean id="jdbcTemplate" class="org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate">
+		<constructor-arg ref="dataSource" />
+	</bean>
+
+
 	<bean id="jobs" class="org.appng.application.scheduler.business.SchedulerDataSource">
 		<property name="scheduler" ref="scheduler" />
 	</bean>
@@ -80,10 +81,29 @@
 		</property>
 	</bean>
 
+	<bean id="houseKeepingJob" class="org.appng.application.scheduler.job.JobRecordHouseKeepingJob">
+		<property name="description" value="Job Record House Keeping Job" />
+		<property name="jobDataMap">
+			<map>
+				<entry key="runOnce" value="true" />
+				<entry key="enabled" value="${houseKeepingEnabled}" />
+				<entry key="cronExpression" value="${houseKeepingExpression}" />
+			</map>
+		</property>
+		<property name="jobRecordService" ref="jobRecordService" />
+	</bean>
+
 	<!-- this is needed to support the dictionary view of appng-manager -->
 	<util:list id="messageSources">
 		<value>messages-scheduler</value>
 		<value>messages-core</value>
 	</util:list>
+
+	<bean id="objectMapper" class="com.fasterxml.jackson.databind.ObjectMapper" />
+
+	<bean class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
+		<property name="objectMapper" ref="objectMapper" />
+		<property name="prettyPrint" value="true" />
+	</bean>
 
 </beans>
