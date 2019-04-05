@@ -22,7 +22,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 /**
- * Model class representig a row in the job record table.
+ * Model class representing a row in the job record table.
  * 
  * @author Claus Stümke
  *
