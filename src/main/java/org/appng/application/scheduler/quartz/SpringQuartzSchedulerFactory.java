@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2017 the original author or authors.
+ * Copyright 2011-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -89,7 +89,9 @@ public class SpringQuartzSchedulerFactory extends AdaptableJobFactory {
 				RunJobEvent runJobEvent = new RunJobEvent(eventId, jobKey, site.getName());
 				try {
 					runJobEvent.perform(environment, site);
+					context.setResult(runJobEvent.getJobResult());
 				} catch (Exception e) {
+					context.setResult(runJobEvent.getJobResult());
 					throw new JobExecutionException(e);
 				}
 				sendRunOnceEvent(jobDetail, jobKey, site, runJobEvent);
@@ -121,7 +123,9 @@ public class SpringQuartzSchedulerFactory extends AdaptableJobFactory {
 					public void run() {
 						try {
 							runJobEvent.perform(environment, site);
+							context.setResult(runJobEvent.getJobResult());
 						} catch (Exception e) {
+							context.setResult(runJobEvent.getJobResult());
 							LOGGER.error("Caught Exception on job execution: ", e);
 						}
 						sendRunOnceEvent(jobDetail, jobKey, site, runJobEvent);

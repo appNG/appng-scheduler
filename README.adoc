@@ -12,3 +12,28 @@ image::https://img.shields.io/maven-central/v/org.appng/appng-scheduler.svg?styl
 == Welcome to appNG Scheduler
 
 appNG Scheduler is an appNG privileged application, providing job scheduling services.
+
+=== Scheduler Execution Records
+The scheduler records each execution of a scheduled job and also manual triggered executions. It saves the site, application and job name. It saves the start- and enddate as well as the duration in seconds. A scheduler job can provide some result information and custom data which are stored as well. Additionally the scheduler saves stacktraces if a job is interrupted by an exception.
+
+  
+==== REST API
+The records of job executions are provided by a REST API. This is useful for writing monitoring checks to assure that important jobs has been executed successfully. To enable the REST API, the application property `bearerToken` has to be filled with a non-blank value. This bearer token is also a shared secret to be used as authentification header by the consuming application. 
+
+The API is available at:
+
+<host>/service/<site-name>/appng-scheduler/rest/jobRecords
+
+There are some filter which can be provided as GET parameter
+
+* application: filter for application name
+* job: filter for job name
+* startedAfter: filter for jobs with start time is after given time (format yyyy.MM.dd hh:mm:ss)
+* startedBefore: filter for jobs where start time is before given time (format yyyy.MM.dd hh:mm:ss)
+* result: SUCCEESS or FAIL to filter for successful or failed jobs
+* minDuration: filter for jobs with a duration in seconds which equal or higher than the given value
+
+==== Icinga/Nagios check script
+Job executions can be monitored by icinga or nagios. A check script is available at scripts/icinga. With the range definition it is possible 
+to check each kind of minimum or maximum number of executions for a certain job in a configurable time period. Check the usage of the script 
+with --help 

@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <data xmlns="http://www.appng.org/schema/platform">
     <result>
-        <field type="text" name="name">
+        <field name="name" type="text">
             <value>application_indexJob</value>
         </field>
-        <field type="text" name="cronExpression">
+        <field name="cronExpression" type="text">
             <value>0 0/5 * * * ? 2042</value>
         </field>
-        <field type="longtext" name="description">
+        <field name="description" type="longtext">
             <value></value>
         </field>
     </result>

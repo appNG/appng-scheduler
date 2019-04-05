@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2017 the original author or authors.
+ * Copyright 2011-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,10 +19,12 @@ import org.appng.api.BusinessException;
 import org.appng.api.Environment;
 import org.appng.api.InvalidConfigurationException;
 import org.appng.api.ScheduledJob;
+import org.appng.api.ScheduledJobResult;
 import org.appng.api.messaging.Event;
 import org.appng.api.model.Application;
 import org.appng.api.model.Site;
 import org.appng.application.scheduler.Constants;
+import org.appng.application.scheduler.model.JobResult;
 import org.quartz.JobDetail;
 import org.quartz.JobKey;
 import org.quartz.Scheduler;
@@ -37,11 +39,16 @@ public class RunJobEvent extends Event {
 	private static final String SCHEDULER_APPLICATION = "schedulerApplication";
 	private String id;
 	private JobKey jobKey;
+	private JobResult jobResult;
 
 	public RunJobEvent(String id, JobKey jobKey, String siteName) {
 		super(siteName);
 		this.id = id;
 		this.jobKey = jobKey;
+	}
+
+	public JobResult getJobResult() {
+		return jobResult;
 	}
 
 	public void perform(Environment environment, Site site) throws InvalidConfigurationException, BusinessException {
@@ -62,10 +69,12 @@ public class RunJobEvent extends Event {
 			}
 			job.setJobDataMap(jobDetail.getJobDataMap());
 
+			this.jobResult = new JobResult(new ScheduledJobResult(), appName, site.getName(), jobKey.getName());
 			StopWatch sw = new StopWatch();
 			sw.start();
 			job.execute(site, application);
 			sw.stop();
+			this.jobResult.setScheduledJobResult(job.getResult());
 			Object[] args = new Object[] { jobKey, appName, site.getName(), sw.getTotalTimeMillis() };
 			logger.debug("executing job {} for application {} in site {} took {}ms", args);
 
