@@ -1,3 +1,12 @@
+Release Notes - appNG Scheduler - Version 1.12.0 (2019-04-05)
+-------------------------------------------------------------
+* [SCHED-31] - Release of 1.12.0
+* [SCHED-30] - Bump version to 1.12.0
+* [SCHED-29] - Use appNG 1.18.0
+* [SCHED-28] - Nagios / Icinga check script for job executions
+* [SCHED-27] - Show job executions in Job Detail Page
+* [SCHED-26] - Job Execution Report 
+
 Release Notes - appNG Scheduler - Version 1.11.6 (2018-05-11)
 -------------------------------------------------------------
 * [SCHED-24] - Release version 1.11.6
