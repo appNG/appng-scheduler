@@ -15,9 +15,12 @@
  */
 package org.appng.application.scheduler.business;
 
+import java.text.ParseException;
+import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.FastDateFormat;
 import org.appng.api.DataContainer;
 import org.appng.api.DataProvider;
 import org.appng.api.Environment;
@@ -34,6 +37,7 @@ import org.appng.application.scheduler.model.JobRecord;
 import org.appng.application.scheduler.service.JobRecordService;
 import org.appng.xml.platform.Selection;
 import org.appng.xml.platform.SelectionGroup;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Lists;
@@ -42,19 +46,18 @@ import com.google.common.collect.Lists;
  * A {@link DataProvider} for recorded job executions. It supports some filters.
  * 
  * @author Claus Stümke
- *
  */
 
 @Component
 public class Records implements DataProvider {
 
 	private static final String START_FILTER_DATE_TIME_FORMAT = "yyyy-MM-dd HH:mm";
-	private static final String APPLICATION_FILTER = "ap";
-	private static final String JOB_FILTER = "job";
-	private static final String START_AFTER_FILTER = "sa";
-	private static final String START_BEFORE_FILTER = "sb";
-	private static final String MIN_DURATION_FILTER = "du";
-	private static final String RESULT_FILTER = "re";
+	protected static final String APPLICATION_FILTER = "ap";
+	protected static final String JOB_FILTER = "job";
+	protected static final String START_AFTER_FILTER = "sa";
+	protected static final String START_BEFORE_FILTER = "sb";
+	protected static final String MIN_DURATION_FILTER = "du";
+	protected static final String RESULT_FILTER = "re";
 
 	private JobRecordService jobRecordService;
 
@@ -62,20 +65,18 @@ public class Records implements DataProvider {
 		this.jobRecordService = jobRecordService;
 	}
 
-	@Override
 	public DataContainer getData(Site site, Application application, Environment environment, Options options,
-			Request request, FieldProcessor fieldProcessor) {
-		DataContainer dc = new DataContainer(fieldProcessor);
-		String recordId = options.getOptionValue("id", "value");
+			Request request, FieldProcessor fp) {
+		DataContainer dc = new DataContainer(fp);
+		Integer recordId = options.getInteger("id", "value");
 		String jobId = options.getOptionValue("jobId", "value");
 		if (StringUtils.isNotBlank(jobId)) {
-			List<JobRecord> records = jobRecordService.getRecords(site.getName(), null, jobId, null, null, null, null);
-			dc.setPage(records, fieldProcessor.getPageable());
-		} else if (StringUtils.isNotBlank(recordId)) {
-
-			JobRecord item = jobRecordService.getRecord(site.getName(), recordId);
+			Page<JobRecord> records = jobRecordService.getRecords(site.getName(), null, jobId, null, null, null, null,
+					fp.getPageable());
+			dc.setPage(records);
+		} else if (null != recordId) {
+			JobRecord item = jobRecordService.getRecord(recordId);
 			dc.setItem(item);
-
 		} else {
 			SelectionGroup filter = new SelectionGroup();
 			dc.getSelectionGroups().add(filter);
@@ -83,36 +84,50 @@ public class Records implements DataProvider {
 			String aFilter = request.getParameter(APPLICATION_FILTER);
 			String jFilter = request.getParameter(JOB_FILTER);
 			String result = request.getParameter(RESULT_FILTER);
-			String duration = request.getParameter(MIN_DURATION_FILTER);
+			Integer duration = request.convert(request.getParameter(MIN_DURATION_FILTER), Integer.class);
 			String start = request.getParameter(START_AFTER_FILTER);
 			String end = request.getParameter(START_BEFORE_FILTER);
 
 			addFilter(site, filter, request);
 
-			List<JobRecord> records = jobRecordService.getRecords(site.getName(), aFilter, jFilter, start, end, result,
-					duration);
-			dc.setPage(records, fieldProcessor.getPageable());
+			Date startDate = getDate(start);
+			Date endDate = getDate(end);
+
+			Page<JobRecord> records = jobRecordService.getRecords(site.getName(), aFilter, jFilter, startDate, endDate,
+					result, duration, fp.getPageable());
+			dc.setPage(records);
 		}
 		return dc;
 	}
 
+	public static Date getDate(String value) {
+		if (StringUtils.isNotBlank(value)) {
+			try {
+				return FastDateFormat.getInstance(START_FILTER_DATE_TIME_FORMAT).parse(value);
+			} catch (ParseException e) {
+			}
+		}
+		return null;
+	}
+
 	private void addFilter(Site site, SelectionGroup filter, Request request) {
 		List<String> appNames = jobRecordService.getDistinctElements(site.getName(), "application");
-		appNames.add(0, "");
+		appNames.add(0, StringUtils.EMPTY);
 		Selection appFilter = new SelectionBuilder<String>(APPLICATION_FILTER)
 				.title(MessageConstants.FILTER_RECORD_APPLICATION_NAME).select(request.getParameter(APPLICATION_FILTER))
 				.options(appNames).build();
 		filter.getSelections().add(appFilter);
 
 		List<String> jobNames = jobRecordService.getDistinctElements(site.getName(), "job_name");
-		jobNames.add(0, "");
+		jobNames.add(0, StringUtils.EMPTY);
 		Selection jobFilter = new SelectionBuilder<String>(JOB_FILTER).title(MessageConstants.FILTER_RECORD_JOB_NAME)
 				.select(request.getParameter(JOB_FILTER)).options(jobNames).build();
 		filter.getSelections().add(jobFilter);
 
 		Selection resultFilter = new SelectionBuilder<String>(RESULT_FILTER)
 				.title(MessageConstants.FILTER_RECORD_RESULT).select(request.getParameter(RESULT_FILTER))
-				.options(Lists.newArrayList("", ExecutionResult.SUCCESS.toString(), ExecutionResult.FAIL.toString()))
+				.options(Lists.newArrayList(StringUtils.EMPTY, ExecutionResult.SUCCESS.toString(),
+						ExecutionResult.FAIL.toString()))
 				.build();
 		filter.getSelections().add(resultFilter);
 

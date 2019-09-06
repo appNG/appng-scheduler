@@ -21,12 +21,15 @@ import java.util.Properties;
 import java.util.Set;
 
 import org.appng.api.FieldProcessor;
+import org.appng.api.Platform;
 import org.appng.api.ProcessingException;
 import org.appng.api.model.Application;
 import org.appng.api.support.CallableAction;
 import org.appng.application.scheduler.business.SchedulingController;
 import org.appng.application.scheduler.model.JobForm;
 import org.appng.application.scheduler.model.JobModel;
+import org.appng.core.domain.JobExecutionRecord;
+import org.appng.core.repository.JobExecutionRecordRepository;
 import org.appng.testsupport.TestBase;
 import org.appng.testsupport.validation.WritingXmlValidator;
 import org.appng.xml.platform.Data;
@@ -42,12 +45,18 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-@ContextConfiguration(locations = {
-		"classpath:beans.xml" }, inheritLocations = true, initializers = SchedulingTest.class)
+@ContextConfiguration(locations = { TestBase.TESTCONTEXT_CORE, TestBase.TESTCONTEXT_JPA,
+		"classpath:beans.xml" }, initializers = SchedulingTest.class)
 public class SchedulingTest extends TestBase {
 
 	@Autowired
 	SchedulingController controller;
+
+	public SchedulingTest() {
+		super("appng-scheduler", APPLICATION_HOME);
+		setEntityPackage(JobExecutionRecord.class.getPackage().getName());
+		setRepositoryBase(JobExecutionRecordRepository.class.getPackage().getName());
+	}
 
 	static {
 		WritingXmlValidator.writeXml = false;
@@ -55,13 +64,14 @@ public class SchedulingTest extends TestBase {
 
 	@Override
 	protected java.util.Properties getProperties() {
-		Properties properties = new Properties();
+		Properties properties = super.getProperties();
 		properties.put("indexExpression", "0 0/5 * * * ? 2042");
 		properties.put("houseKeepingExpression", "0 0/5 * * * ? 2042");
 		properties.put("indexEnabled", "false");
 		properties.put("site.name", "localhost");
 		properties.put("validateJobsOnStartup", "false");
 		properties.put("houseKeepingEnabled", "false");
+		properties.put("platform." + Platform.Property.JSP_FILE_TYPE, ".jsp");
 		return properties;
 	}
 

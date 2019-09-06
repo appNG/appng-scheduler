@@ -17,6 +17,10 @@ package org.appng.application.scheduler.model;
 
 import java.util.Date;
 
+import org.appng.api.ScheduledJobResult;
+import org.appng.api.ScheduledJobResult.ExecutionResult;
+import org.appng.core.domain.JobExecutionRecord;
+
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 import lombok.Data;
@@ -25,7 +29,6 @@ import lombok.Data;
  * Model class representing a row in the job record table.
  * 
  * @author Claus Stümke
- *
  */
 @Data
 public class JobRecord extends JobResult {
@@ -43,5 +46,24 @@ public class JobRecord extends JobResult {
 	private Long duration;
 
 	private String stacktraces;
+
+	public static JobRecord fromDomain(JobExecutionRecord r) {
+		JobRecord jobRecord = new JobRecord();
+		jobRecord.setId(r.getId());
+		jobRecord.setApplicationName(r.getApplication());
+		jobRecord.setSiteName(r.getSite());
+		jobRecord.setJobName(r.getJobName());
+		jobRecord.setTriggerName(r.getTriggername());
+		jobRecord.setStart(r.getStartTime());
+		jobRecord.setEnd(r.getEndTime());
+		jobRecord.setRunOnce(r.isRunOnce());
+		jobRecord.setDuration(r.getDuration().longValue());
+		jobRecord.setStacktraces(r.getStacktraces());
+		ScheduledJobResult scheduledJobResult = new ScheduledJobResult();
+		scheduledJobResult.setResult(ExecutionResult.valueOf(r.getResult()));
+		scheduledJobResult.setCustomData(r.getCustomData());
+		jobRecord.setScheduledJobResult(scheduledJobResult);
+		return jobRecord;
+	}
 
 }

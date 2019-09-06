@@ -3,27 +3,32 @@
     <config>
         <title id="records.list">Recorded Job Executions</title>
         <params>
-            <param name="jobId">foo</param>
+            <param name="jobId">thejob</param>
             <param name="path"/>
             <param name="tab"/>
         </params>
         <meta-data bindClass="org.appng.application.scheduler.model.JobRecord">
             <field name="siteName" type="text" binding="siteName">
+                <sort/>
                 <label id="record.site">Site</label>
             </field>
             <field name="applicationName" type="text" binding="applicationName">
+                <sort/>
                 <label id="record.application">Application</label>
             </field>
             <field name="jobName" type="text" binding="jobName">
                 <label id="record.jobName">Job Name</label>
             </field>
-            <field name="duration" type="decimal" binding="duration">
+            <field name="duration" type="int" format="#" binding="duration">
+                <sort/>
                 <label id="record.duration">Duration</label>
             </field>
-            <field name="start" type="date" binding="start">
+            <field name="start" type="date" format="yyyy-MM-dd HH:mm:ss" binding="start">
+                <sort/>
                 <label id="record.start">Start Time</label>
             </field>
-            <field name="end" type="date" binding="end">
+            <field name="end" type="date" format="yyyy-MM-dd HH:mm:ss" binding="end">
+                <sort/>
                 <label id="record.end">End Time</label>
             </field>
             <field name="result" type="image" binding="result">
@@ -43,6 +48,37 @@
         </linkpanel>
     </config>
     <data>
-        <resultset chunk="0" chunkname="records" chunksize="25" nextchunk="0" previouschunk="0" firstchunk="0" lastchunk="-1" hits="0"/>
+        <resultset chunk="0" chunkname="records" chunksize="25" nextchunk="0" previouschunk="0" firstchunk="0" lastchunk="0" hits="1">
+            <result>
+                <field name="siteName" type="text">
+                    <value>localhost</value>
+                </field>
+                <field name="applicationName" type="text">
+                    <value>appng-scheduler</value>
+                </field>
+                <field name="jobName" type="text">
+                    <value>thejob</value>
+                </field>
+                <field name="duration" type="int">
+                    <value>0</value>
+                </field>
+                <field name="start" type="date">
+                    <value>2019-09-06 15:11:14</value>
+                </field>
+                <field name="end" type="date">
+                    <value>2019-09-06 15:11:14</value>
+                </field>
+                <field name="result" type="image">
+                    <value>SUCCESS</value>
+                    <icon type="class">led_green</icon>
+                </field>
+                <linkpanel id="actions" location="inline">
+                    <link id="actions[1]" mode="intern" target="/1" default="true">
+                        <label id="record.details">Show Details</label>
+                        <icon>detail</icon>
+                    </link>
+                </linkpanel>
+            </result>
+        </resultset>
     </data>
 </datasource>

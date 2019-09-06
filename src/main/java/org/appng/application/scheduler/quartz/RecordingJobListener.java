@@ -67,7 +67,7 @@ public class RecordingJobListener implements JobListener {
 			if (result instanceof JobResult) {
 				jobRecordService.recordJob((JobResult) result, context.getFireTime(), new Date(),
 						context.getJobRunTime(), context.getJobDetail().getJobDataMap(), jobException,
-						context.getTrigger().getKey().getName());
+						context.getTrigger().getKey().toString());
 			}
 		}
 	}

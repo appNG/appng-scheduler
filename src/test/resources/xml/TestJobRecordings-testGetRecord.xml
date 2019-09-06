@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<datasource xmlns="http://www.appng.org/schema/platform" id="record">
+    <config>
+        <title id="records.item">records.item</title>
+        <params>
+            <param name="recordId">1</param>
+        </params>
+        <meta-data bindClass="org.appng.application.scheduler.model.JobRecord">
+            <field name="siteName" type="text" readonly="true" binding="siteName">
+                <label id="record.site">Site</label>
+            </field>
+            <field name="applicationName" type="text" readonly="true" binding="applicationName">
+                <label id="record.application">Application</label>
+            </field>
+            <field name="jobName" type="text" readonly="true" binding="jobName">
+                <label id="record.jobName">Job Name</label>
+            </field>
+            <field name="triggerName" type="text" readonly="true" binding="triggerName">
+                <label id="record.triggerName">Trigger Name</label>
+            </field>
+            <field name="duration" type="decimal" format="#.##" readonly="true" binding="duration">
+                <label id="record.duration">Duration</label>
+            </field>
+            <field name="runOnce" type="checkbox" readonly="true" binding="runOnce">
+                <label id="record.runOnce">Run once (per cluster)</label>
+            </field>
+            <field name="start" type="date" format="yyyy-MM-dd HH:mm:ss" readonly="true" binding="start">
+                <label id="record.start">Start Time</label>
+            </field>
+            <field name="end" type="date" format="yyyy-MM-dd HH:mm:ss" readonly="true" binding="end">
+                <label id="record.end">End Time</label>
+            </field>
+            <field name="customData" type="longtext" readonly="true" binding="customData">
+                <label id="record.customData">Custom Data</label>
+            </field>
+            <field name="stacktraces" type="longtext" readonly="true" binding="stacktraces">
+                <label id="record.stacktraces">Stacktrace</label>
+            </field>
+            <field name="result" type="image" readonly="true" binding="result">
+                <label id="record.result">Result</label>
+                <icon condition="${'FAIL' eq current.result}">led_red</icon>
+                <icon condition="${'SUCCESS'eq current.result}">led_green</icon>
+            </field>
+        </meta-data>
+    </config>
+    <data>
+        <result>
+            <field name="siteName" type="text">
+                <value>localhost</value>
+            </field>
+            <field name="applicationName" type="text">
+                <value>appng-scheduler</value>
+            </field>
+            <field name="jobName" type="text">
+                <value>thejob</value>
+            </field>
+            <field name="triggerName" type="text">
+                <value>appng-scheduler.localhost</value>
+            </field>
+            <field name="duration" type="decimal">
+                <value>0</value>
+            </field>
+            <field name="runOnce" type="checkbox">
+                <value>false</value>
+            </field>
+            <field name="start" type="date">
+                <value>2019-09-06 15:11:14</value>
+            </field>
+            <field name="end" type="date">
+                <value>2019-09-06 15:11:14</value>
+            </field>
+            <field name="customData" type="longtext">
+                <value></value>
+            </field>
+            <field name="stacktraces" type="longtext">
+                <value></value>
+            </field>
+            <field name="result" type="image">
+                <value>SUCCESS</value>
+                <icon type="class">led_green</icon>
+            </field>
+        </result>
+    </data>
+</datasource>
