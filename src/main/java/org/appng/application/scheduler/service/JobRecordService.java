@@ -92,8 +92,12 @@ public class JobRecordService {
 		return ExecutionResult.FAIL;
 	}
 
-	public List<String> getDistinctElements(String siteName, String fieldName) {
+	public List<String> getDistinctJobNames(String siteName) {
 		return recordRepository.getDistinctJobNames(siteName);
+	}
+	
+	public List<String> getDistinctApplications(String siteName) {
+		return recordRepository.getDistinctApplications(siteName);
 	}
 
 	public Page<JobRecord> getRecords(String siteName, String applicationFilter, String jobFilter, Date start,

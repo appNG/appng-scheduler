@@ -111,14 +111,14 @@ public class Records implements DataProvider {
 	}
 
 	private void addFilter(Site site, SelectionGroup filter, Request request) {
-		List<String> appNames = jobRecordService.getDistinctElements(site.getName(), "application");
+		List<String> appNames = jobRecordService.getDistinctApplications(site.getName());
 		appNames.add(0, StringUtils.EMPTY);
 		Selection appFilter = new SelectionBuilder<String>(APPLICATION_FILTER)
 				.title(MessageConstants.FILTER_RECORD_APPLICATION_NAME).select(request.getParameter(APPLICATION_FILTER))
 				.options(appNames).build();
 		filter.getSelections().add(appFilter);
 
-		List<String> jobNames = jobRecordService.getDistinctElements(site.getName(), "job_name");
+		List<String> jobNames = jobRecordService.getDistinctJobNames(site.getName());
 		jobNames.add(0, StringUtils.EMPTY);
 		Selection jobFilter = new SelectionBuilder<String>(JOB_FILTER).title(MessageConstants.FILTER_RECORD_JOB_NAME)
 				.select(request.getParameter(JOB_FILTER)).options(jobNames).build();
