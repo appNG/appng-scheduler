@@ -106,8 +106,8 @@ public class JobRecordService {
 		SearchQuery<JobExecutionRecord> query = recordRepository.createSearchQuery();
 		query.equals(FIELD_SITE, siteName);
 		query.equals(FIELD_APPLICATION, applicationFilter);
-		query.equals(FIELD_JOB_NAME, jobFilter);
-		query.equals(FIELD_RESULT, result);
+		query.equals(FIELD_JOB_NAME, StringUtils.trimToNull(jobFilter));
+		query.equals(FIELD_RESULT, StringUtils.trimToNull(result));
 		query.greaterEquals(FIELD_START, start);
 		query.lessEquals(FIELD_START, end);
 		query.greaterEquals(FIELD_DURATION, duration);
