@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p" xmlns:aop="http://www.springframework.org/schema/aop"
-	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:oxm="http://www.springframework.org/schema/oxm" xmlns:util="http://www.springframework.org/schema/util"
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:p="http://www.springframework.org/schema/p" xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:oxm="http://www.springframework.org/schema/oxm"
+	xmlns:util="http://www.springframework.org/schema/util"
 	xsi:schemaLocation="http://www.springframework.org/schema/beans 
 		http://www.springframework.org/schema/beans/spring-beans.xsd
 		http://www.springframework.org/schema/aop 
@@ -14,7 +16,7 @@
 		http://www.springframework.org/schema/util
 		http://www.springframework.org/schema/util/spring-util.xsd">
 
-	<bean id="scheduler" class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+	<bean id="scheduler" class="org.springframework.scheduling.quartz.SchedulerFactoryBean" primary="true">
 		<property name="schedulerName">
 			<value>Scheduler_${site.name}</value>
 		</property>
@@ -33,40 +35,8 @@
 		</property>
 	</bean>
 
-	<bean id="jobs" class="org.appng.application.scheduler.business.SchedulerDataSource">
-		<property name="scheduler" ref="scheduler" />
+	<bean id="jobExecutionRecordRepository" class="org.mockito.Mockito" factory-method="mock">
+		<constructor-arg value="org.appng.core.repository.JobExecutionRecordRepository" />
 	</bean>
-
-	<bean id="updateJob" class="org.appng.application.scheduler.business.UpdateSchedulerAction">
-		<property name="scheduler" ref="scheduler" />
-	</bean>
-
-	<bean id="createJob" class="org.appng.application.scheduler.business.CreateSchedulerAction">
-		<property name="scheduler" ref="scheduler" />
-	</bean>
-
-	<bean id="setJobState" class="org.appng.application.scheduler.business.SetSchedulerStateAction">
-		<property name="scheduler" ref="scheduler" />
-	</bean>
-
-	<bean id="indexJob" class="org.appng.application.scheduler.job.IndexJob">
-		<property name="description" value="Search job" />
-		<property name="jobDataMap">
-			<map>
-				<entry key="enabled" value="${indexEnabled}" />
-				<entry key="cronExpression" value="${indexExpression}" />
-			</map>
-		</property>
-	</bean>
-
-	<bean id="jdbcTemplate" class="org.mockito.Mockito" factory-method="mock" primary="true">
-		<constructor-arg index="0" value="org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate" />
-	</bean>
-	
-	<!-- this is needed to support the dictionary view of appng-manager -->
-	<util:list id="messageSources">
-		<value>messages-scheduler</value>
-		<value>messages-core</value>
-	</util:list>
 
 </beans>

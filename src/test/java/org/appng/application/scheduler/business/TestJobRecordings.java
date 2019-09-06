@@ -43,6 +43,7 @@ import org.quartz.JobExecutionContext;
 import org.quartz.Trigger;
 import org.quartz.TriggerBuilder;
 import org.quartz.impl.JobDetailImpl;
+import org.quartz.impl.jdbcjobstore.HSQLDBDelegate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -50,7 +51,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 @RunWith(SpringJUnit4ClassRunner.class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @ContextConfiguration(locations = { TestBase.TESTCONTEXT_CORE, TestBase.TESTCONTEXT_JPA,
-		"classpath:beans-test.xml" }, initializers = TestJobRecordings.class)
+		"classpath:beans-test-core.xml" }, initializers = TestJobRecordings.class)
 public class TestJobRecordings extends TestBase {
 
 	@Mock
@@ -82,6 +83,7 @@ public class TestJobRecordings extends TestBase {
 		properties.put("site.name", "localhost");
 		properties.put("validateJobsOnStartup", "false");
 		properties.put("houseKeepingEnabled", "false");
+		properties.put("quartzDriverDelegate", HSQLDBDelegate.class.getName());
 		properties.put("platform." + Platform.Property.JSP_FILE_TYPE, ".jsp");
 		return properties;
 	}

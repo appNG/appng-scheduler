@@ -45,8 +45,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-@ContextConfiguration(locations = { TestBase.TESTCONTEXT_CORE, TestBase.TESTCONTEXT_JPA,
-		"classpath:beans.xml" }, initializers = SchedulingTest.class)
+@ContextConfiguration(locations = { "classpath:beans-test.xml" }, initializers = SchedulingTest.class)
 public class SchedulingTest extends TestBase {
 
 	@Autowired
@@ -71,6 +70,7 @@ public class SchedulingTest extends TestBase {
 		properties.put("site.name", "localhost");
 		properties.put("validateJobsOnStartup", "false");
 		properties.put("houseKeepingEnabled", "false");
+		properties.put("quartzDriverDelegate", "org.quartz.impl.jdbcjobstore.HSQLDBDelegate");
 		properties.put("platform." + Platform.Property.JSP_FILE_TYPE, ".jsp");
 		return properties;
 	}
@@ -106,21 +106,21 @@ public class SchedulingTest extends TestBase {
 	@Test
 	public void testSchedule() throws ProcessingException, IOException {
 		CallableAction callableAction = getAction("jobEvent", "schedule").withParam("form_action", "schedule")
-				.withParam("id", "application_indexJob").getCallableAction(null);
+				.withParam("id", "appng-scheduler_indexJob").getCallableAction(null);
 		validate(callableAction.perform().getMessages());
 	}
 
 	@Test
 	public void testStart() throws ProcessingException, IOException, InterruptedException {
 		CallableAction callableAction = getAction("jobEvent", "start").withParam("form_action", "start")
-				.withParam("id", "application_indexJob").getCallableAction(null);
+				.withParam("id", "appng-scheduler_indexJob").getCallableAction(null);
 		validate(callableAction.perform().getMessages());
 	}
 
 	@Test
 	public void testUnschedule() throws ProcessingException, IOException {
 		CallableAction callableAction = getAction("jobEvent", "unschedule").withParam("form_action", "unschedule")
-				.withParam("id", "application_indexJob").getCallableAction(null);
+				.withParam("id", "appng-scheduler_indexJob").getCallableAction(null);
 		validate(callableAction.perform().getMessages());
 	}
 
@@ -136,7 +136,7 @@ public class SchedulingTest extends TestBase {
 
 	@Test
 	public void testShowJob() throws ProcessingException, IOException {
-		DataSourceCall dataSource = getDataSource("job").withParam("id", "application_indexJob");
+		DataSourceCall dataSource = getDataSource("job").withParam("id", "appng-scheduler_indexJob");
 		Data data = dataSource.getCallableDataSource().perform("");
 		validate(data);
 	}
