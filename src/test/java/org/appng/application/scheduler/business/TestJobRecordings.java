@@ -128,8 +128,7 @@ public class TestJobRecordings extends TestBase {
 	public void testGetRecordsForJobId() throws Exception {
 		CallableDataSource datasource = getDataSource("records").withParam("jobId", "thejob").getCallableDataSource();
 		datasource.perform("page");
-		XPathDifferenceHandler diffHandler = getResultsetDiffHandler();
-		validate(datasource.getDatasource(), diffHandler);
+		validate(datasource.getDatasource(), getResultsetDiffHandler());
 	}
 
 	@Test
@@ -142,16 +141,13 @@ public class TestJobRecordings extends TestBase {
 		request.addParameter(Records.RESULT_FILTER, ExecutionResult.SUCCESS.name());
 		CallableDataSource datasource = getDataSource("records").withParam("jobId", "thejob").getCallableDataSource();
 		datasource.perform("page");
-		XPathDifferenceHandler diffHandler = new XPathDifferenceHandler(false);
-		diffHandler.ignoreDifference("/datasource[1]/data[1]/resultset[1]/result[1]/field[5]/value[1]/text()[1]");
-		diffHandler.ignoreDifference("/datasource[1]/data[1]/resultset[1]/result[1]/field[6]/value[1]/text()[1]");
-		validate(datasource.getDatasource(), diffHandler);
+		validate(datasource.getDatasource(), getResultsetDiffHandler());
 	}
 
 	private XPathDifferenceHandler getResultsetDiffHandler() {
 		XPathDifferenceHandler diffHandler = new XPathDifferenceHandler(false);
+		diffHandler.ignoreDifference("/datasource[1]/data[1]/resultset[1]/result[1]/field[4]/value[1]/text()[1]");
 		diffHandler.ignoreDifference("/datasource[1]/data[1]/resultset[1]/result[1]/field[5]/value[1]/text()[1]");
-		diffHandler.ignoreDifference("/datasource[1]/data[1]/resultset[1]/result[1]/field[6]/value[1]/text()[1]");
 		return diffHandler;
 	}
 

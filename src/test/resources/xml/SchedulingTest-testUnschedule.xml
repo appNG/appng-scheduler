@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <messages xmlns="http://www.appng.org/schema/platform" ref="unschedule">
-    <message ref="unschedule" class="OK">Job "appng-scheduler_indexJob" has been successfully unscheduled.</message>
+	<message ref="unschedule" class="OK">Job "appng-scheduler_indexJob" has been successfully unscheduled.</message>
 </messages>

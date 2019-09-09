@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <messages xmlns="http://www.appng.org/schema/platform" ref="update">
-    <message ref="update" class="OK">Job "appng-scheduler_anotherJob" has been updated successfully.</message>
+	<message ref="update" class="OK">Job "appng-scheduler_anotherJob" has been updated successfully.</message>
 </messages>

@@ -7,18 +7,23 @@
 			<title>jobs</title>
 			<meta-data bindClass="org.appng.application.scheduler.model.JobModel">
 				<field name="name" type="text">
+					<sort />
 					<label>name</label>
 				</field>
 				<field name="origin" type="text">
+					<sort />
 					<label>origin</label>
 				</field>
 				<field name="cronExpression" type="text">
+					<sort />
 					<label>cronExpression</label>
 				</field>
 				<field name="nextFireTime" type="date" format="yyyy-MM-dd HH:mm:ss,SSS">
+					<sort />
 					<label>nextFireTime</label>
 				</field>
 				<field name="beanAvailable" type="image">
+					<sort />
 					<label id="status"></label>
 					<icon condition="${!current.beanAvailable}">led_red</icon>
 					<icon condition="${current.beanAvailable}">led_green</icon>
@@ -138,15 +143,12 @@
 				<param name="tab" />
 			</params>
 			<meta-data bindClass="org.appng.application.scheduler.model.JobRecord">
-				<field name="siteName" type="text">
-					<sort name="site" />
-					<label>record.site</label>
-				</field>
 				<field name="applicationName" type="text">
 					<sort name="application" />
 					<label>record.application</label>
 				</field>
 				<field name="jobName" type="text">
+					<sort />
 					<label>record.jobName</label>
 				</field>
 				<field name="duration" type="int">
@@ -162,6 +164,7 @@
 					<label>record.end</label>
 				</field>
 				<field name="result" type="image">
+					<sort />
 					<label id="record.result"></label>
 					<icon condition="${'FAIL' eq current.result}">led_red</icon>
 					<icon condition="${'SUCCESS'eq current.result}">led_green</icon>
@@ -174,7 +177,7 @@
 			<linkpanel id="actions" location="inline">
 				<link mode="intern" target="${path}/${current.id}${tab}" default="true">
 					<label>record.details</label>
-					<icon>detail</icon>
+					<icon>preview</icon>
 				</link>
 			</linkpanel>
 		</config>
