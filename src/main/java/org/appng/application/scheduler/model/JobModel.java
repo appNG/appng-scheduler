@@ -15,11 +15,10 @@
  */
 package org.appng.application.scheduler.model;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.appng.api.ScheduledJob;
@@ -37,6 +36,9 @@ import org.quartz.SchedulerException;
 import org.quartz.Trigger;
 import org.quartz.impl.matchers.GroupMatcher;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 public class JobModel implements Named<String>, Comparable<Named<String>> {
 
 	private String name;
@@ -147,62 +149,60 @@ public class JobModel implements Named<String>, Comparable<Named<String>> {
 	}
 
 	public static List<JobModel> getJobs(Scheduler scheduler, Site site) throws SchedulerException {
-		List<JobModel> list = new ArrayList<JobModel>();
 		Set<JobKey> jobKeys = scheduler.getJobKeys(GroupMatcher.jobGroupEquals(site.getName()));
-		for (JobKey jobKey : jobKeys) {
-			JobModel job = getJob(jobKey.getName(), scheduler, site);
-			list.add(job);
-		}
-		Collections.sort(list);
-		return list;
+		return jobKeys.stream().map(jk -> getJob(jk.getName(), scheduler, site)).filter(jm -> null != jm).sorted()
+				.collect(Collectors.toList());
 	}
 
-	public static JobModel getJob(String jobName, Scheduler scheduler, Site site) throws SchedulerException {
-		if (null != jobName) {
-			return getModel(scheduler, jobName, site);
-		}
-		return null;
+	public static JobModel getJob(String jobName, Scheduler scheduler, Site site) {
+		return null == jobName ? null : getModel(scheduler, jobName, site);
 	}
 
-	private static JobModel getModel(Scheduler scheduler, String jobName, Site site) throws SchedulerException {
+	private static JobModel getModel(Scheduler scheduler, String jobName, Site site) {
 		JobModel jobModel = null;
-		JobDetail jobDetail = scheduler.getJobDetail(new JobKey(jobName, site.getName()));
-		if (null != jobDetail) {
-			JobDataMap jobDataMap = jobDetail.getJobDataMap();
-			String jobClass = jobDataMap.getString(Constants.JOB_SCHEDULED_JOB);
-			String origin = jobDataMap.getString(Constants.JOB_ORIGIN);
-			String beanName = jobDataMap.getString(Constants.JOB_BEAN_NAME);
-			Application application = site.getApplication(origin);
-			jobModel = new JobModel();
-			jobModel.setName(jobName);
-			jobModel.setJobClass(jobClass);
-			jobModel.setOrigin(origin);
-			boolean beanAvailable = null != application && null != application.getBean(beanName, ScheduledJob.class);
-			jobModel.setBeanAvailable(beanAvailable);
-	
-			List<? extends Trigger> triggers = scheduler.getTriggersOfJob(jobDetail.getKey());
-			// job has a Trigger
-			if (triggers.size() > 0) {
-				for (Trigger trigger : triggers) {
-					// It is a cron trigger
-					if (trigger instanceof CronTrigger) {
-						CronTrigger cronTrigger = (CronTrigger) trigger;
-						String cronExpression = cronTrigger.getCronExpression();
-						Date previousFireTime = cronTrigger.getPreviousFireTime();
-						Date nextFireTime = cronTrigger.getNextFireTime();
-						jobModel.setCronExpression(cronExpression);
-						jobModel.setPreviousFireTime(previousFireTime);
-						jobModel.setNextFireTime(nextFireTime);
-	
+		JobKey jobKey = new JobKey(jobName, site.getName());
+		try {
+			JobDetail jobDetail = scheduler.getJobDetail(jobKey);
+			if (null != jobDetail) {
+				JobDataMap jobDataMap = jobDetail.getJobDataMap();
+				String jobClass = jobDataMap.getString(Constants.JOB_SCHEDULED_JOB);
+				String origin = jobDataMap.getString(Constants.JOB_ORIGIN);
+				String beanName = jobDataMap.getString(Constants.JOB_BEAN_NAME);
+				Application application = site.getApplication(origin);
+				jobModel = new JobModel();
+				jobModel.setName(jobName);
+				jobModel.setJobClass(jobClass);
+				jobModel.setOrigin(origin);
+				boolean beanAvailable = null != application
+						&& null != application.getBean(beanName, ScheduledJob.class);
+				jobModel.setBeanAvailable(beanAvailable);
+
+				List<? extends Trigger> triggers = scheduler.getTriggersOfJob(jobDetail.getKey());
+				// job has a Trigger
+				if (triggers.size() > 0) {
+					for (Trigger trigger : triggers) {
+						// It is a cron trigger
+						if (trigger instanceof CronTrigger) {
+							CronTrigger cronTrigger = (CronTrigger) trigger;
+							String cronExpression = cronTrigger.getCronExpression();
+							Date previousFireTime = cronTrigger.getPreviousFireTime();
+							Date nextFireTime = cronTrigger.getNextFireTime();
+							jobModel.setCronExpression(cronExpression);
+							jobModel.setPreviousFireTime(previousFireTime);
+							jobModel.setNextFireTime(nextFireTime);
+
+						}
 					}
+					if (new SchedulerUtils(scheduler, null).isRunning(jobDetail)) {
+						jobModel.setRunning(true);
+					}
+				} else {
+					String cronExpression = (String) jobDataMap.get(Constants.JOB_CRON_EXPRESSION);
+					jobModel.setCronExpression(cronExpression);
 				}
-				if (new SchedulerUtils(scheduler, null).isRunning(jobDetail)) {
-					jobModel.setRunning(true);
-				}
-			} else {
-				String cronExpression = (String) jobDataMap.get(Constants.JOB_CRON_EXPRESSION);
-				jobModel.setCronExpression(cronExpression);
 			}
+		} catch (SchedulerException e) {
+			log.error("error creating model for " + jobKey, e);
 		}
 		return jobModel;
 	}
