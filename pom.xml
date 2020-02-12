@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>appng-scheduler</artifactId>
 	<version>1.13.0-SNAPSHOT</version>
@@ -9,16 +10,16 @@
 	<parent>
 		<groupId>org.appng</groupId>
 		<artifactId>appng-application-parent</artifactId>
-		<version>1.20.0</version>
+		<version>1.20.2</version>
 	</parent>
 
 	<properties>
+		<appNG.version>${project.parent.version}</appNG.version>
 		<projectId>SCHED</projectId>
 		<hsqlPort>9001</hsqlPort>
 		<urlAlias>scheduler</urlAlias>
 		<displayName>Scheduler</displayName>
 		<longDescription><![CDATA[An application for scheduling using Quartz]]></longDescription>
-		<appNGVersion>${project.parent.version}</appNGVersion>
 		<application.homeFolder>application-home</application.homeFolder>
 	</properties>
 
@@ -178,7 +179,7 @@
 			<plugin>
 				<groupId>org.appng</groupId>
 				<artifactId>appng-maven-plugin</artifactId>
-				<version>${appNGVersion}</version>
+				<version>${appNG.version}</version>
 				<executions>
 					<execution>
 						<id>applicationConstants</id>
@@ -208,7 +209,7 @@
 					<dependency>
 						<groupId>org.appng</groupId>
 						<artifactId>appng-xmlapi</artifactId>
-						<version>${appNGVersion}</version>
+						<version>${appNG.version}</version>
 					</dependency>
 					<dependency>
 						<groupId>javax.xml.bind</groupId>
@@ -254,7 +255,7 @@
 				<artifactId>appng-application-bom</artifactId>
 				<type>pom</type>
 				<scope>import</scope>
-				<version>${appNGVersion}</version>
+				<version>${appNG.version}</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>

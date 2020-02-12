@@ -18,6 +18,7 @@ package org.appng.application.scheduler.business;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.appng.api.ApplicationException;
 import org.appng.api.DataContainer;
 import org.appng.api.DataProvider;
@@ -35,20 +36,20 @@ import org.appng.application.scheduler.Constants;
 import org.appng.application.scheduler.SchedulerUtils;
 import org.appng.application.scheduler.model.JobForm;
 import org.appng.application.scheduler.model.JobModel;
-import org.appng.application.scheduler.model.JobXmlModel;
 import org.appng.xml.platform.Label;
 import org.appng.xml.platform.Selection;
 import org.appng.xml.platform.SelectionType;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
 /**
- * 
  * A {@link DataProvider} which returns informations about all implementations of {@link ScheduledJob} that where
  * registered during application startup
  * 
  * @author Matthias Müller
- * 
  */
 public class SchedulerDataSource implements DataProvider {
 
@@ -74,9 +75,8 @@ public class SchedulerDataSource implements DataProvider {
 		String actionId = options.getOptionValue(Constants.OPT_ACTION, Constants.ATTR_ID);
 		String actionForm = request.getParameter(Constants.FORM_ACTION);
 		try {
-			JobXmlModel jobXmlModel = new JobXmlModel();
-			if (null != jobId && !"".equals(jobId) && !ACTION_DELETE.equals(actionForm)) {
-				JobModel job = jobXmlModel.getJob(jobId, scheduler, site);
+			if (StringUtils.isNotBlank(jobId) && !ACTION_DELETE.equals(actionForm)) {
+				JobModel job = JobModel.getJob(jobId, scheduler, site);
 				data.setItem(job);
 			} else {
 				if (ACTION_CREATE.equals(actionId)) {
@@ -110,7 +110,7 @@ public class SchedulerDataSource implements DataProvider {
 					}
 					data.getSelections().add(selection);
 				} else {
-					List<JobModel> jobs = jobXmlModel.getJobs(scheduler, site);
+					List<JobModel> jobs = JobModel.getJobs(scheduler, site);
 					data.setPage(jobs, fp.getPageable());
 				}
 			}
@@ -121,22 +121,11 @@ public class SchedulerDataSource implements DataProvider {
 		return data;
 	}
 
+	@Getter
+	@AllArgsConstructor
 	class NamedJob implements Named<String> {
 		private String name;
 		private String id;
-
-		NamedJob(String name, String id) {
-			this.name = name;
-			this.id = id;
-		}
-
-		public String getName() {
-			return name;
-		}
-
-		public String getId() {
-			return id;
-		}
 
 		public String getDescription() {
 			return null;
