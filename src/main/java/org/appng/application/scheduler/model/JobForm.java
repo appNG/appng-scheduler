@@ -17,6 +17,7 @@ package org.appng.application.scheduler.model;
 
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
 import org.appng.api.Environment;
 import org.appng.api.FieldProcessor;
 import org.appng.api.FormValidator;
@@ -55,7 +56,7 @@ public class JobForm implements FormValidator {
 			Scheduler scheduler = application.getBean(Scheduler.class);
 			Set<JobKey> jobKeys = scheduler.getJobKeys(GroupMatcher.jobGroupEquals(site.getName()));
 
-			if (jobModel.getName() == null || "".equals(jobModel.getName())) {
+			if (StringUtils.isBlank(jobModel.getName())) {
 				String message = request.getMessage(MessageConstants.JOB_NOT_NAME_ERROR);
 				fp.addErrorMessage(fp.getField(JOB_NAME), message);
 			} else {
