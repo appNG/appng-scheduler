@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <messages xmlns="http://www.appng.org/schema/platform" ref="start">
-    <message ref="start" class="OK">Job "application_indexJob" has been successfully started.</message>
+	<message ref="start" class="OK">Job "appng-scheduler_indexJob" has been successfully started.</message>
 </messages>

@@ -17,6 +17,7 @@
 		http://www.springframework.org/schema/util/spring-util.xsd">
 
 	<context:component-scan base-package="org.appng.application.scheduler" />
+	<tx:annotation-driven transaction-manager="coreTxManager" proxy-target-class="true" />
 
 	<bean id="scheduler" class="org.appng.application.scheduler.quartz.SchedulerFactoryBean" lazy-init="false">
 		<constructor-arg value="${quartzDriverDelegate}" />
@@ -48,11 +49,6 @@
 			</props>
 		</property>
 	</bean>
-
-	<bean id="jdbcTemplate" class="org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate">
-		<constructor-arg ref="dataSource" />
-	</bean>
-
 
 	<bean id="jobs" class="org.appng.application.scheduler.business.SchedulerDataSource">
 		<property name="scheduler" ref="scheduler" />

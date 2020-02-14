@@ -27,7 +27,6 @@ import org.appng.api.model.Properties;
 import org.appng.api.model.Site;
 import org.appng.api.support.environment.DefaultEnvironment;
 import org.appng.application.scheduler.Constants;
-import org.appng.core.model.ApplicationContext;
 import org.quartz.InterruptableJob;
 import org.quartz.Job;
 import org.quartz.JobDetail;
@@ -41,11 +40,13 @@ import org.quartz.spi.TriggerFiredBundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.scheduling.quartz.AdaptableJobFactory;
 import org.springframework.web.context.WebApplicationContext;
 
 /**
- * A {@link JobFactory} that creates Quartz {@link Job}s that are build from {@link ScheduledJob}s.
+ * A {@link JobFactory} that creates Quartz {@link Job}s that are build from
+ * {@link ScheduledJob}s.
  * 
  * @author Matthias Müller
  * @author Claus Stümke
@@ -66,8 +67,9 @@ public class SpringQuartzSchedulerFactory extends AdaptableJobFactory {
 		final JobKey jobKey = jobDetail.getKey();
 		LOGGER.debug("creating job instance for job {}", jobKey);
 
-		final Site site = applicationContext.getSite();
-		WebApplicationContext parentContext = (WebApplicationContext) applicationContext.getParent();
+		org.appng.core.model.ApplicationContext appngAppContext = (org.appng.core.model.ApplicationContext) applicationContext;
+		final Site site = appngAppContext.getSite();
+		WebApplicationContext parentContext = (WebApplicationContext) appngAppContext.getParent();
 		ServletContext servletContext = parentContext.getServletContext();
 		final Environment environment = DefaultEnvironment.get(servletContext);
 
@@ -101,11 +103,13 @@ public class SpringQuartzSchedulerFactory extends AdaptableJobFactory {
 	}
 
 	/**
-	 * Returns an {@link InterruptableJob} that is is being interrupted by quartz when shutting down a {@link Scheduler}
-	 * , e.g. on site reload. This is done by using a separate thread, which is interrupted when
-	 * {@link InterruptableJob#interrupt()} is being called. It does not care about open resources, so use
-	 * {@value #JOBDATA_HARD_INTERRUPTABLE}{@code =true} only for {@link ScheduledJob}s that can safely be stopped by
-	 * interrupting its thread.
+	 * Returns an {@link InterruptableJob} that is is being interrupted by quartz
+	 * when shutting down a {@link Scheduler} , e.g. on site reload. This is done by
+	 * using a separate thread, which is interrupted when
+	 * {@link InterruptableJob#interrupt()} is being called. It does not care about
+	 * open resources, so use {@value #JOBDATA_HARD_INTERRUPTABLE}{@code =true} only
+	 * for {@link ScheduledJob}s that can safely be stopped by interrupting its
+	 * thread.
 	 */
 	private Job getInterruptableJob(final JobDetail jobDetail, final JobKey jobKey, final Site site,
 			final Environment environment, final String eventId) {

@@ -30,7 +30,6 @@ import lombok.Data;
  * A {@link ScheduledJob} to remove old job records from the database.
  * 
  * @author Claus Stümke
- *
  */
 @Data
 public class JobRecordHouseKeepingJob implements ScheduledJob {
@@ -44,10 +43,10 @@ public class JobRecordHouseKeepingJob implements ScheduledJob {
 	private String description;
 
 	public void execute(Site site, Application application) throws Exception {
-		String details = jobRecordService.cleanUp(site, application);
+		Integer deleted = jobRecordService.cleanUp(site, application);
 		this.result = new ScheduledJobResult();
 		this.result.setResult(ExecutionResult.SUCCESS);
-		this.result.setCustomData(details);
+		this.result.setCustomData(String.format("%s records have been deleted for site %s", deleted, site.getName()));
 	}
 
 }
