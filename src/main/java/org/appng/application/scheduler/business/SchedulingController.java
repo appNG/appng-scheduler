@@ -90,7 +90,7 @@ public class SchedulingController extends SchedulerAware implements ApplicationC
 							schedulerUtils.saveJob(jobDetail);
 						}
 					} catch (Exception e) {
-						LOGGER.error(String.format("error starting job '{}' of application {} (type is {})",
+						LOGGER.error(String.format("error starting job '%s' of application %s (type is %s)",
 								jobBeanName, application.getName(), scheduledJob.getClass().getName()), e);
 					}
 				}
