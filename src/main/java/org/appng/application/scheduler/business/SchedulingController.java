@@ -25,6 +25,7 @@ import org.appng.api.ScheduledJob;
 import org.appng.api.model.Application;
 import org.appng.api.model.Site;
 import org.appng.application.scheduler.Constants;
+import org.appng.application.scheduler.PropertyConstants;
 import org.appng.application.scheduler.SchedulerUtils;
 import org.appng.application.scheduler.quartz.RecordingJobListener;
 import org.appng.xml.platform.FieldDef;
@@ -56,7 +57,7 @@ public class SchedulingController extends SchedulerAware implements ApplicationC
 	public boolean start(Site site, Application application, Environment env) {
 		try {
 			SchedulerUtils schedulerUtils = new SchedulerUtils(scheduler, getLoggingFieldProcessor());
-			if (application.getProperties().getBoolean("validateJobsOnStartup")) {
+			if (application.getProperties().getBoolean(PropertyConstants.VALIDATE_JOBS_ON_STARTUP)) {
 				validateJobs(site, schedulerUtils);
 			}
 
@@ -76,16 +77,21 @@ public class SchedulingController extends SchedulerAware implements ApplicationC
 
 						boolean enabled = jobDetail.getJobDataMap().getBoolean(Constants.JOB_ENABLED);
 
-						if (isNewJob && enabled) {
+						if (enabled) {
 							String cronExpression = jobDetail.getJobDataMap().getString(Constants.JOB_CRON_EXPRESSION);
 							String description = scheduledJob.getDescription();
-							schedulerUtils.addJob(jobDetail, description, cronExpression);
+							if (isNewJob) {
+								schedulerUtils.addJob(jobDetail, description, cronExpression);
+							} else {
+								schedulerUtils.scheduleJob(jobDetail, cronExpression, jobKey.getName(), description,
+										site.getName());
+							}
 						} else {
-							scheduler.addJob(jobDetail, true);
+							schedulerUtils.saveJob(jobDetail);
 						}
 					} catch (Exception e) {
-						LOGGER.error("error starting job '" + jobBeanName + "' of application " + application.getName()
-								+ " (type is" + scheduledJob.getClass().getName() + ")", e);
+						LOGGER.error(String.format("error starting job '%s' of application %s (type is %s)",
+								jobBeanName, application.getName(), scheduledJob.getClass().getName()), e);
 					}
 				}
 			}
@@ -145,7 +151,8 @@ public class SchedulingController extends SchedulerAware implements ApplicationC
 	}
 
 	/**
-	 * Nothing to do here, since {@link org.quartz.Scheduler#shutdown(boolean)} is invoked by
+	 * Nothing to do here, since {@link org.quartz.Scheduler#shutdown(boolean)} is
+	 * invoked by
 	 * {@link org.springframework.scheduling.quartz.SchedulerFactoryBean#destroy()}
 	 **/
 	public boolean shutdown(Site site, Application application, Environment environment) {
