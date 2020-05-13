@@ -32,6 +32,7 @@ import org.appng.core.domain.JobExecutionRecord;
 import org.appng.core.repository.JobExecutionRecordRepository;
 import org.appng.testsupport.TestBase;
 import org.appng.testsupport.validation.WritingXmlValidator;
+import org.appng.testsupport.validation.XPathDifferenceHandler;
 import org.appng.xml.platform.Data;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
@@ -48,6 +49,10 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 @ContextConfiguration(locations = { "classpath:beans-test.xml" }, initializers = SchedulingTest.class)
 public class SchedulingTest extends TestBase {
 
+	static {
+		WritingXmlValidator.writeXml = false;
+	}
+
 	@Autowired
 	SchedulingController controller;
 
@@ -55,10 +60,6 @@ public class SchedulingTest extends TestBase {
 		super("appng-scheduler", APPLICATION_HOME);
 		setEntityPackage(JobExecutionRecord.class.getPackage().getName());
 		setRepositoryBase(JobExecutionRecordRepository.class.getPackage().getName());
-	}
-
-	static {
-		WritingXmlValidator.writeXml = false;
 	}
 
 	@Override
@@ -145,7 +146,9 @@ public class SchedulingTest extends TestBase {
 	public void testShowJobs() throws ProcessingException, IOException {
 		DataSourceCall dataSource = getDataSource("jobs");
 		Data data = dataSource.getCallableDataSource().perform("");
-		validate(data);
+		XPathDifferenceHandler diffHandler = new XPathDifferenceHandler(false);
+		diffHandler.ignoreDifference("/data[1]/resultset[1]/result[4]/field[5]/value[1]/text()[1]");
+		validate(data, diffHandler);
 	}
 
 	@Before

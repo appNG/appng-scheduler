@@ -73,21 +73,10 @@ public class SchedulingController extends SchedulerAware implements ApplicationC
 						JobKey jobKey = schedulerUtils.getJobKey(site.getName(), a.getName(), jobBeanName);
 						JobDetail jobDetail = schedulerUtils.getJobDetail(jobKey, site, a.getName(), scheduledJob,
 								jobBeanName);
-						boolean isNewJob = !scheduler.checkExists(jobKey);
-
 						boolean enabled = jobDetail.getJobDataMap().getBoolean(Constants.JOB_ENABLED);
-
 						if (enabled) {
-							String cronExpression = jobDetail.getJobDataMap().getString(Constants.JOB_CRON_EXPRESSION);
 							String description = scheduledJob.getDescription();
-							if (isNewJob) {
-								schedulerUtils.addJob(jobDetail, description, cronExpression);
-							} else {
-								schedulerUtils.scheduleJob(jobDetail, cronExpression, jobKey.getName(), description,
-										site.getName());
-							}
-						} else {
-							schedulerUtils.saveJob(jobDetail);
+							schedulerUtils.scheduleJob(jobDetail, jobKey.getName(), description, site.getName());
 						}
 					} catch (Exception e) {
 						LOGGER.error(String.format("error starting job '%s' of application %s (type is %s)",
@@ -151,8 +140,7 @@ public class SchedulingController extends SchedulerAware implements ApplicationC
 	}
 
 	/**
-	 * Nothing to do here, since {@link org.quartz.Scheduler#shutdown(boolean)} is
-	 * invoked by
+	 * Nothing to do here, since {@link org.quartz.Scheduler#shutdown(boolean)} is invoked by
 	 * {@link org.springframework.scheduling.quartz.SchedulerFactoryBean#destroy()}
 	 **/
 	public boolean shutdown(Site site, Application application, Environment environment) {

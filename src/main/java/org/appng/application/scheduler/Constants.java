@@ -36,5 +36,6 @@ public class Constants {
 	public static final String ATTR_ACTION = "action";
 
 	public static final String FORM_ACTION = "form_action";
+	public static final String JOB_FORCE_STATE = "forceState";
 
 }

@@ -17,7 +17,9 @@ package org.appng.application.scheduler.business;
 
 import static org.mockito.Mockito.when;
 
+import java.util.Arrays;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
 
@@ -38,6 +40,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.quartz.Trigger;
@@ -47,6 +50,8 @@ import org.quartz.impl.jdbcjobstore.HSQLDBDelegate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+
+import com.google.common.collect.Sets;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
@@ -62,6 +67,9 @@ public class TestJobRecordings extends TestBase {
 
 	@Autowired
 	JobExecutionRecordRepository recordRepo;
+
+	@Autowired
+	SchedulingController schedulingController;
 
 	static {
 		WritingXmlValidator.writeXml = false;
@@ -86,6 +94,17 @@ public class TestJobRecordings extends TestBase {
 		properties.put("quartzDriverDelegate", HSQLDBDelegate.class.getName());
 		properties.put("platform." + Platform.Property.JSP_FILE_TYPE, ".jsp");
 		return properties;
+	}
+
+	@Test
+	public void testJobDetails() throws Exception {
+		Mockito.when(site.getApplications()).thenReturn(new HashSet<>(Arrays.asList(application)));
+		schedulingController.start(site, application, environment);
+
+		CallableDataSource callableDataSource = getDataSource("job").withParam("id", "appng-scheduler_longRunningJob")
+				.getCallableDataSource();
+		callableDataSource.perform("");
+		validate(callableDataSource.getDatasource());
 	}
 
 	@Test

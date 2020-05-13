@@ -6,27 +6,33 @@
 		<config>
 			<title>jobs</title>
 			<meta-data bindClass="org.appng.application.scheduler.model.JobModel">
-				<field name="name" type="text">
-					<sort />
-					<label>name</label>
-				</field>
+				<field name="name" type="text" hidden="true" />
 				<field name="origin" type="text">
 					<sort />
 					<label>origin</label>
+				</field>
+				<field name="beanName" type="text">
+					<label>name</label>
 				</field>
 				<field name="cronExpression" type="text">
 					<sort />
 					<label>cronExpression</label>
 				</field>
-				<field name="nextFireTime" type="date" format="yyyy-MM-dd HH:mm:ss,SSS">
+				<field name="nextFireTime" type="date" format="yyyy-MM-dd HH:mm:ss">
 					<sort />
 					<label>nextFireTime</label>
 				</field>
-				<field name="beanAvailable" type="image">
+				<field name="previousFireTime" type="date" format="yyyy-MM-dd HH:mm:ss">
+					<sort />
+					<label>previousFireTime</label>
+				</field>
+				<field name="stateName" type="image">
 					<sort />
 					<label id="status"></label>
 					<icon condition="${!current.beanAvailable}">led_red</icon>
-					<icon condition="${current.beanAvailable}">led_green</icon>
+					<icon condition="${current.beanAvailable and not current.running and current.scheduled}">schedule</icon>
+					<icon condition="${current.beanAvailable and not current.running and not current.scheduled}">led_green</icon>
+					<icon condition="${current.running}">running</icon>
 				</field>
 				<field name="actions" type="linkpanel">
 					<label>actions</label>
@@ -39,45 +45,27 @@
 				</link>
 			</linkpanel>
 			<linkpanel id="actions" location="inline">
-				<link mode="intern" target="">
-					<condition expression="${current.running}" />
-					<label>running</label>
-					<icon>running</icon>
-				</link>
-				<link mode="intern" target="">
-					<condition
-						expression="${not current.running and (current.nextFireTime ne null and current.cronExpression ne null)}" />
-					<label>scheduled</label>
-					<icon>scheduled</icon>
-				</link>
-				<link mode="intern" target="">
-					<condition
-						expression="${not current.running and (current.nextFireTime eq null or current.cronExpression eq null)}" />
-					<label></label>
-					<icon>spacer</icon>
-				</link>
-				<link mode="intern" target="/jobs/update/#{name}#tab_update" default="true">
-					<label>update</label>
-					<icon>edit</icon>
-				</link>
-				<link mode="intern" target="/jobs&#63;form_action=schedule&#38;id=#{name}" show-disabled="true">
-					<condition
-						expression="${current.beanAvailable and (current.nextFireTime eq null and current.cronExpression ne null)}" />
+				<link mode="intern" target="/jobs&#63;form_action=schedule&#38;id=#{name}" show-disabled="false" id="schedule">
+					<condition expression="${current.beanAvailable and current.scheduled and empty current.nextFireTime}" />
 					<label>schedule</label>
 					<icon>schedule</icon>
 				</link>
-				<link mode="intern" target="/jobs&#63;form_action=unschedule&#38;id=#{name}" show-disabled="true">
-					<condition
-						expression="${current.beanAvailable and (current.nextFireTime ne null or current.cronExpression eq null)}" />
+				<link mode="intern" target="/jobs&#63;form_action=unschedule&#38;id=#{name}" show-disabled="false"
+					id="unschedule">
+					<condition expression="${current.beanAvailable and current.scheduled and not empty current.nextFireTime}" />
 					<label>unschedule</label>
 					<icon>unschedule</icon>
 				</link>
-				<link mode="intern" target="/jobs&#63;form_action=start&#38;id=#{name}" show-disabled="true">
+				<link mode="intern" target="/jobs/update/#{name}#tab_update" default="true" id="update">
+					<label>update</label>
+					<icon>edit</icon>
+				</link>
+				<link mode="intern" target="/jobs&#63;form_action=start&#38;id=#{name}" show-disabled="true" id="start">
 					<condition expression="${not current.running and current.beanAvailable}" />
 					<label>start</label>
 					<icon>start</icon>
 				</link>
-				<link mode="intern" target="/jobs&#63;form_action=delete&#38;id=#{name}" show-disabled="true">
+				<link mode="intern" target="/jobs&#63;form_action=delete&#38;id=#{name}" show-disabled="true" id="delete">
 					<condition expression="${not current.running}" />
 					<label>delete</label>
 					<icon>delete</icon>
@@ -103,6 +91,9 @@
 				</field>
 				<field name="description" type="longtext">
 					<label>description</label>
+				</field>
+				<field name="jobData" type="longtext" readonly="true">
+					<label id="jobdata" />
 				</field>
 			</meta-data>
 		</config>

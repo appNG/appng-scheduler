@@ -50,10 +50,6 @@
 		</property>
 	</bean>
 
-	<bean id="jobs" class="org.appng.application.scheduler.business.SchedulerDataSource">
-		<property name="scheduler" ref="scheduler" />
-	</bean>
-
 	<bean id="updateJob" class="org.appng.application.scheduler.business.UpdateSchedulerAction">
 		<property name="scheduler" ref="scheduler" />
 	</bean>

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<datasource xmlns="http://www.appng.org/schema/platform" id="job">
+	<config>
+		<title id="jobs">Jobs</title>
+		<params>
+			<param name="id">appng-scheduler_longRunningJob</param>
+		</params>
+		<meta-data bindClass="org.appng.application.scheduler.model.JobModel">
+			<field name="name" type="text" readonly="true" binding="name">
+				<label id="name">Name</label>
+			</field>
+			<field name="cronExpression" type="text" binding="cronExpression">
+				<label id="cronExpression">Cron-Expression</label>
+			</field>
+			<field name="description" type="longtext" binding="description">
+				<label id="description">Description</label>
+			</field>
+			<field name="jobData" type="longtext" readonly="true" binding="jobData">
+				<label id="jobdata">jobdata</label>
+			</field>
+		</meta-data>
+	</config>
+	<data>
+		<result>
+			<field name="name" type="text">
+				<value>appng-scheduler_longRunningJob</value>
+			</field>
+			<field name="cronExpression" type="text">
+				<value>0 0/10 * 1/1 * ? *</value>
+			</field>
+			<field name="description" type="longtext">
+				<value></value>
+			</field>
+			<field name="jobData" type="longtext">
+				<value>{
+					"SCHEDULED_JOB" : "org.appng.application.scheduler.job.LongRunningJob",
+					"cronExpression" : "0 0/10 * 1/1 * ? *",
+					"enabled" : true,
+					"forceState" : "true",
+					"jobBeanName" : "longRunningJob",
+					"origin" : "appng-scheduler",
+					"siteName"
+					: "localhost"
+					}
+				</value>
+			</field>
+		</result>
+	</data>
+</datasource>

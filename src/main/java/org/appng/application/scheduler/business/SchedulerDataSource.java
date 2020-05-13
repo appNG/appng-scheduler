@@ -41,9 +41,12 @@ import org.appng.xml.platform.Selection;
 import org.appng.xml.platform.SelectionType;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
+import org.springframework.context.MessageSource;
+import org.springframework.stereotype.Component;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
 /**
  * A {@link DataProvider} which returns informations about all implementations of {@link ScheduledJob} that where
@@ -51,23 +54,18 @@ import lombok.Getter;
  * 
  * @author Matthias Müller
  */
+@Component("jobs")
+@RequiredArgsConstructor
 public class SchedulerDataSource implements DataProvider {
 
 	private static final String ACTION_CREATE = "create";
 	private static final String ACTION_DELETE = "delete";
 	private static final String AVAILABLE_JOB = "availableJob";
 
-	private Scheduler scheduler;
+	private final Scheduler scheduler;
+	private final MessageSource messageSource;
 
-	public Scheduler getScheduler() {
-		return scheduler;
-	}
-
-	public void setScheduler(Scheduler scheduler) {
-		this.scheduler = scheduler;
-	}
-
-	public DataContainer getData(Site site, Application application, Environment environment, Options options,
+	public DataContainer getData(Site site, Application application, Environment env, Options options,
 			Request request, FieldProcessor fp) {
 		DataContainer data = new DataContainer(fp);
 
@@ -76,14 +74,14 @@ public class SchedulerDataSource implements DataProvider {
 		String actionForm = request.getParameter(Constants.FORM_ACTION);
 		try {
 			if (StringUtils.isNotBlank(jobId) && !ACTION_DELETE.equals(actionForm)) {
-				JobModel job = JobModel.getJob(jobId, scheduler, site);
+				JobModel job = JobModel.getJob(scheduler, messageSource, env.getLocale(), jobId, site);
 				data.setItem(job);
 			} else {
 				if (ACTION_CREATE.equals(actionId)) {
 					JobModel jobModel = new JobModel();
-					jobModel.setName("");
-					jobModel.setDescription("");
-					jobModel.setCronExpression("");
+					jobModel.setName(StringUtils.EMPTY);
+					jobModel.setDescription(StringUtils.EMPTY);
+					jobModel.setCronExpression(StringUtils.EMPTY);
 					JobForm jobForm = new JobForm(jobModel);
 					data.setItem(jobForm);
 
@@ -110,7 +108,7 @@ public class SchedulerDataSource implements DataProvider {
 					}
 					data.getSelections().add(selection);
 				} else {
-					List<JobModel> jobs = JobModel.getJobs(scheduler, site);
+					List<JobModel> jobs = JobModel.getJobs(scheduler, site, messageSource, env.getLocale());
 					data.setPage(jobs, fp.getPageable());
 				}
 			}

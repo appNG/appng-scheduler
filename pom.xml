@@ -186,6 +186,7 @@
 						<goals>
 							<goal>generateApplicationConstants</goal>
 						</goals>
+						<phase>generate-sources</phase>
 						<configuration>
 							<filePath>${application.homeFolder}/application.xml</filePath>
 							<targetClass>org.appng.application.scheduler.PropertyConstants</targetClass>

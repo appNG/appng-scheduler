@@ -1,6 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://www.springframework.org/schema/beans	http://www.springframework.org/schema/beans/spring-beans.xsd">
+	xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+	xsi:schemaLocation="http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc.xsd
+		http://www.springframework.org/schema/beans	http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+	<jdbc:initialize-database enabled="true" data-source="datasource">
+		<jdbc:script location="${script:classpath:/org/quartz/impl/jdbcjobstore/tables_hsqldb.sql}" />
+	</jdbc:initialize-database>
 
 	<bean id="dataSource" parent="datasource" primary="true" />
 
