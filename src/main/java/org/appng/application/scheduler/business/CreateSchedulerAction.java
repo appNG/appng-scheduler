@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2018 the original author or authors.
+ * Copyright 2011-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,6 @@ import org.slf4j.LoggerFactory;
  * time (cron-syntax).
  * 
  * @author Matthias Müller
- * 
  */
 public class CreateSchedulerAction extends SchedulerAware implements ActionProvider<JobForm> {
 
@@ -76,7 +75,8 @@ public class CreateSchedulerAction extends SchedulerAware implements ActionProvi
 				jobDetail.getJobDataMap().put(Constants.JOB_LOCALE, "en");
 			}
 
-			schedulerUtils.addJob(jobDetail, jobModel.getDescription(), jobModel.getCronExpression());
+			schedulerUtils.addCronTrigger(jobDetail, jobModel.getCronExpression(), jobKey.getName(), "",
+					jobKey.getGroup());
 			message = request.getMessage(MessageConstants.JOB_CREATED, jobKey.getName());
 		} catch (Exception e) {
 			log.error("SchedulerException while creating scheduler", e);

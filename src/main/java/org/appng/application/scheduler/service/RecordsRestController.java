@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2018 the original author or authors.
+ * Copyright 2011-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.appng.api.model.Application;
 import org.appng.api.model.Site;
 import org.appng.application.scheduler.PropertyConstants;
+import org.appng.application.scheduler.business.Records;
 import org.appng.application.scheduler.model.JobRecord;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -54,16 +56,16 @@ public class RecordsRestController {
 			@RequestParam(required = false, name = "startedAfter") String startedAfter,
 			@RequestParam(required = false, name = "startedBefore") String startedBefore,
 			@RequestParam(required = false, name = "result") String result,
-			@RequestParam(required = false, name = "minDuration") String duration,
+			@RequestParam(required = false, name = "minDuration") Integer duration,
 			@RequestHeader(name = HttpHeaders.AUTHORIZATION, required = false) List<String> auths,
 			Application application, Site site) {
 		if (!verifyToken(application, auths)) {
 			return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
 		}
 
-		List<JobRecord> records = jobRecordService.getRecords(site.getName(), applicationName, jobName, startedAfter,
-				startedBefore, result, duration);
-		return new ResponseEntity<>(records, HttpStatus.OK);
+		Page<JobRecord> records = jobRecordService.getRecords(site.getName(), applicationName, jobName, Records.getDate(startedAfter),
+				 Records.getDate(startedBefore), result, duration, null);
+		return new ResponseEntity<>(records.getContent(), HttpStatus.OK);
 
 	}
 
