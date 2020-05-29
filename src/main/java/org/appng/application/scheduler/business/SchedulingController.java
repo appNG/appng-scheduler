@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2018 the original author or authors.
+ * Copyright 2011-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import org.appng.api.ScheduledJob;
 import org.appng.api.model.Application;
 import org.appng.api.model.Site;
 import org.appng.application.scheduler.Constants;
+import org.appng.application.scheduler.PropertyConstants;
 import org.appng.application.scheduler.SchedulerUtils;
 import org.appng.application.scheduler.quartz.RecordingJobListener;
 import org.appng.xml.platform.FieldDef;
@@ -56,7 +57,7 @@ public class SchedulingController extends SchedulerAware implements ApplicationC
 	public boolean start(Site site, Application application, Environment env) {
 		try {
 			SchedulerUtils schedulerUtils = new SchedulerUtils(scheduler, getLoggingFieldProcessor());
-			if (application.getProperties().getBoolean("validateJobsOnStartup")) {
+			if (application.getProperties().getBoolean(PropertyConstants.VALIDATE_JOBS_ON_STARTUP)) {
 				validateJobs(site, schedulerUtils);
 			}
 
@@ -72,20 +73,14 @@ public class SchedulingController extends SchedulerAware implements ApplicationC
 						JobKey jobKey = schedulerUtils.getJobKey(site.getName(), a.getName(), jobBeanName);
 						JobDetail jobDetail = schedulerUtils.getJobDetail(jobKey, site, a.getName(), scheduledJob,
 								jobBeanName);
-						boolean isNewJob = !scheduler.checkExists(jobKey);
-
 						boolean enabled = jobDetail.getJobDataMap().getBoolean(Constants.JOB_ENABLED);
-
-						if (isNewJob && enabled) {
-							String cronExpression = jobDetail.getJobDataMap().getString(Constants.JOB_CRON_EXPRESSION);
+						if (enabled) {
 							String description = scheduledJob.getDescription();
-							schedulerUtils.addJob(jobDetail, description, cronExpression);
-						} else {
-							scheduler.addJob(jobDetail, true);
+							schedulerUtils.scheduleJob(jobDetail, jobKey.getName(), description, site.getName());
 						}
 					} catch (Exception e) {
-						LOGGER.error("error starting job '" + jobBeanName + "' of application " + application.getName()
-								+ " (type is" + scheduledJob.getClass().getName() + ")", e);
+						LOGGER.error(String.format("error starting job '%s' of application %s (type is %s)",
+								jobBeanName, application.getName(), scheduledJob.getClass().getName()), e);
 					}
 				}
 			}

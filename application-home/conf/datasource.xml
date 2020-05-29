@@ -1,25 +1,41 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<datasources xmlns="http://www.appng.org/schema/platform" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.appng.org/schema/platform http://www.appng.org/schema/platform/appng-platform.xsd ">
+<datasources xmlns="http://www.appng.org/schema/platform"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.appng.org/schema/platform http://www.appng.org/schema/platform/appng-platform.xsd ">
 	<datasource id="jobs">
 		<config>
 			<title>jobs</title>
 			<meta-data bindClass="org.appng.application.scheduler.model.JobModel">
-				<field name="name" type="text">
-					<label>name</label>
-				</field>
+				<field name="name" type="text" hidden="true" />
 				<field name="origin" type="text">
+					<sort />
 					<label>origin</label>
 				</field>
+				<field name="beanName" type="text">
+					<label>name</label>
+				</field>
 				<field name="cronExpression" type="text">
+					<sort />
 					<label>cronExpression</label>
 				</field>
-				<field name="nextFireTime" type="date" format="yyyy-MM-dd HH:mm:ss,SSS">
+				<field name="nextFireTime" type="date" format="yyyy-MM-dd HH:mm:ss">
+					<sort />
 					<label>nextFireTime</label>
 				</field>
-				<field name="beanAvailable" type="image">
+				<field name="previousFireTime" type="date" format="yyyy-MM-dd HH:mm:ss">
+					<sort />
+					<label>previousFireTime</label>
+				</field>
+				<field name="stateName" type="image">
+					<sort />
 					<label id="status"></label>
 					<icon condition="${!current.beanAvailable}">led_red</icon>
-					<icon condition="${current.beanAvailable}">led_green</icon>
+					<icon condition="${current.beanAvailable and not current.running and current.scheduled}">led_green</icon>
+					<icon condition="${current.beanAvailable and not current.running and not current.scheduled}">led_orange</icon>
+					<icon condition="${current.running}">running</icon>
+				</field>
+				<field name="schedule" type="linkpanel">
+					<label />
 				</field>
 				<field name="actions" type="linkpanel">
 					<label>actions</label>
@@ -32,45 +48,33 @@
 				</link>
 			</linkpanel>
 			<linkpanel id="actions" location="inline">
-				<link mode="intern" target="">
-					<condition expression="${current.running}" />
-					<label>running</label>
-					<icon>running</icon>
-				</link>
-				<link mode="intern" target="">
-					<condition expression="${not current.running and (current.nextFireTime ne null and current.cronExpression ne null)}" />
-					<label>scheduled</label>
-					<icon>scheduled</icon>
-				</link>
-				<link mode="intern" target="">
-					<condition expression="${not current.running and (current.nextFireTime eq null or current.cronExpression eq null)}" />
-					<label></label>
-					<icon>spacer</icon>
-				</link>
-				<link mode="intern" target="/jobs/update/#{name}#tab_update" default="true">
+				<link mode="intern" target="/jobs/update/#{name}#tab_update" default="true" id="update">
 					<label>update</label>
 					<icon>edit</icon>
 				</link>
-				<link mode="intern" target="/jobs&#63;form_action=schedule&#38;id=#{name}" show-disabled="true">
-					<condition expression="${current.beanAvailable and (current.nextFireTime eq null and current.cronExpression ne null)}" />
-					<label>schedule</label>
-					<icon>schedule</icon>
-				</link>
-				<link mode="intern" target="/jobs&#63;form_action=unschedule&#38;id=#{name}" show-disabled="true">
-					<condition expression="${current.beanAvailable and (current.nextFireTime ne null or current.cronExpression eq null)}" />
-					<label>unschedule</label>
-					<icon>unschedule</icon>
-				</link>
-				<link mode="intern" target="/jobs&#63;form_action=start&#38;id=#{name}" show-disabled="true">
+				<link mode="intern" target="/jobs&#63;form_action=start&#38;id=#{name}" show-disabled="true" id="start">
 					<condition expression="${not current.running and current.beanAvailable}" />
 					<label>start</label>
 					<icon>start</icon>
 				</link>
-				<link mode="intern" target="/jobs&#63;form_action=delete&#38;id=#{name}" show-disabled="true">
+				<link mode="intern" target="/jobs&#63;form_action=delete&#38;id=#{name}" show-disabled="true" id="delete">
 					<condition expression="${not current.running}" />
 					<label>delete</label>
 					<icon>delete</icon>
 					<confirmation id="confirm.delete.job" params="#{name}" />
+				</link>
+			</linkpanel>
+			<linkpanel id="schedule" location="inline">
+				<link mode="intern" target="/jobs&#63;form_action=schedule&#38;id=#{name}" show-disabled="false" id="schedule">
+					<condition expression="${current.beanAvailable and current.scheduled and empty current.nextFireTime}" />
+					<label>schedule</label>
+					<icon>schedule</icon>
+				</link>
+				<link mode="intern" target="/jobs&#63;form_action=unschedule&#38;id=#{name}" show-disabled="false"
+					id="unschedule">
+					<condition expression="${current.beanAvailable and current.scheduled and not empty current.nextFireTime}" />
+					<label>unschedule</label>
+					<icon>unschedule</icon>
 				</link>
 			</linkpanel>
 		</config>
@@ -92,6 +96,9 @@
 				</field>
 				<field name="description" type="longtext">
 					<label>description</label>
+				</field>
+				<field name="jobData" type="longtext" readonly="true" format="preformatted">
+					<label id="jobdata" />
 				</field>
 			</meta-data>
 		</config>
@@ -132,25 +139,28 @@
 				<param name="tab" />
 			</params>
 			<meta-data bindClass="org.appng.application.scheduler.model.JobRecord">
-				<field name="siteName" type="text">
-					<label>record.site</label>
-				</field>
 				<field name="applicationName" type="text">
+					<sort name="application" />
 					<label>record.application</label>
 				</field>
 				<field name="jobName" type="text">
+					<sort />
 					<label>record.jobName</label>
 				</field>
-				<field name="duration" type="decimal">
+				<field name="duration" type="int">
+					<sort />
 					<label>record.duration</label>
 				</field>
 				<field name="start" type="date">
+					<sort prio="0" order="desc" name="startTime" />
 					<label>record.start</label>
 				</field>
 				<field name="end" type="date">
+					<sort name="endTime" />
 					<label>record.end</label>
 				</field>
 				<field name="result" type="image">
+					<sort />
 					<label id="record.result"></label>
 					<icon condition="${'FAIL' eq current.result}">led_red</icon>
 					<icon condition="${'SUCCESS'eq current.result}">led_green</icon>
@@ -163,7 +173,7 @@
 			<linkpanel id="actions" location="inline">
 				<link mode="intern" target="${path}/${current.id}${tab}" default="true">
 					<label>record.details</label>
-					<icon>detail</icon>
+					<icon>preview</icon>
 				</link>
 			</linkpanel>
 		</config>
@@ -171,7 +181,6 @@
 			<option name="jobId" value="${jobId}" />
 		</bean>
 	</datasource>
-
 
 	<datasource id="record">
 		<config>
@@ -213,7 +222,7 @@
 				<field name="result" type="image" readonly="true">
 					<label id="record.result"></label>
 					<icon condition="${'FAIL' eq current.result}">led_red</icon>
-					<icon condition="${'SUCCESS'eq current.result}">led_green</icon>
+					<icon condition="${'SUCCESS' eq current.result}">led_green</icon>
 				</field>
 			</meta-data>
 		</config>

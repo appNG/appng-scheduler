@@ -15,38 +15,36 @@
  */
 package org.appng.application.scheduler.job;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.appng.api.ScheduledJob;
-import org.appng.api.ScheduledJobResult;
-import org.appng.api.ScheduledJobResult.ExecutionResult;
 import org.appng.api.model.Application;
 import org.appng.api.model.Site;
-import org.appng.application.scheduler.service.JobRecordService;
+import org.springframework.stereotype.Component;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
-/**
- * A {@link ScheduledJob} to remove old job records from the database.
- * 
- * @author Claus Stümke
- */
-@Data
-public class JobRecordHouseKeepingJob implements ScheduledJob {
+@Getter
+@Setter
+@Component
+public class LongRunningJob implements ScheduledJob {
 
-	private JobRecordService jobRecordService;
-
-	private ScheduledJobResult result;
-
-	private Map<String, Object> jobDataMap;
-
+	private Map<String, Object> jobDataMap = new HashMap<>();
 	private String description;
 
-	public void execute(Site site, Application application) throws Exception {
-		Integer deleted = jobRecordService.cleanUp(site, application);
-		this.result = new ScheduledJobResult();
-		this.result.setResult(ExecutionResult.SUCCESS);
-		this.result.setCustomData(String.format("%s records have been deleted for site %s", deleted, site.getName()));
+	public LongRunningJob() {
+		getJobDataMap().put("cronExpression", "0 0/10 * 1/1 * ? *");
+		getJobDataMap().put("enabled", "true");
+		getJobDataMap().put("forceState", "true");
 	}
 
+	public void execute(Site site, Application application) throws Exception {
+		int waited = 0;
+		while (waited < 60) {
+			Thread.sleep(1000);
+			waited += 1;
+		}
+	}
 }

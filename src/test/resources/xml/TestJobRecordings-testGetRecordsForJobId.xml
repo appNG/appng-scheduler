@@ -1,48 +1,80 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <datasource xmlns="http://www.appng.org/schema/platform" id="records">
-    <config>
-        <title id="records.list">Recorded Job Executions</title>
-        <params>
-            <param name="jobId">foo</param>
-            <param name="path"/>
-            <param name="tab"/>
-        </params>
-        <meta-data bindClass="org.appng.application.scheduler.model.JobRecord">
-            <field name="siteName" type="text" binding="siteName">
-                <label id="record.site">Site</label>
-            </field>
-            <field name="applicationName" type="text" binding="applicationName">
-                <label id="record.application">Application</label>
-            </field>
-            <field name="jobName" type="text" binding="jobName">
-                <label id="record.jobName">Job Name</label>
-            </field>
-            <field name="duration" type="decimal" binding="duration">
-                <label id="record.duration">Duration</label>
-            </field>
-            <field name="start" type="date" binding="start">
-                <label id="record.start">Start Time</label>
-            </field>
-            <field name="end" type="date" binding="end">
-                <label id="record.end">End Time</label>
-            </field>
-            <field name="result" type="image" binding="result">
-                <label id="record.result">Result</label>
-                <icon condition="${'FAIL' eq current.result}">led_red</icon>
-                <icon condition="${'SUCCESS'eq current.result}">led_green</icon>
-            </field>
-            <field name="actions" type="linkpanel" binding="actions">
-                <label id="actions">Actions</label>
-            </field>
-        </meta-data>
-        <linkpanel id="actions" location="inline">
-            <link id="actions[1]" mode="intern" target="/${current.id}" default="true">
-                <label id="record.details">Show Details</label>
-                <icon>detail</icon>
-            </link>
-        </linkpanel>
-    </config>
-    <data>
-        <resultset chunk="0" chunkname="records" chunksize="25" nextchunk="0" previouschunk="0" firstchunk="0" lastchunk="-1" hits="0"/>
-    </data>
+	<config>
+		<title id="records.list">Recorded Job Executions</title>
+		<params>
+			<param name="jobId">thejob</param>
+			<param name="path" />
+			<param name="tab" />
+		</params>
+		<meta-data bindClass="org.appng.application.scheduler.model.JobRecord">
+			<field name="applicationName" type="text" binding="applicationName">
+				<sort />
+				<label id="record.application">Application</label>
+			</field>
+			<field name="jobName" type="text" binding="jobName">
+				<sort />
+				<label id="record.jobName">Job Name</label>
+			</field>
+			<field name="duration" type="int" format="#" binding="duration">
+				<sort />
+				<label id="record.duration">Duration (sec)</label>
+			</field>
+			<field name="start" type="date" format="yyyy-MM-dd HH:mm:ss" binding="start">
+				<sort />
+				<label id="record.start">Start Time</label>
+			</field>
+			<field name="end" type="date" format="yyyy-MM-dd HH:mm:ss" binding="end">
+				<sort />
+				<label id="record.end">End Time</label>
+			</field>
+			<field name="result" type="image" binding="result">
+				<sort />
+				<label id="record.result">Result</label>
+				<icon condition="${'FAIL' eq current.result}">led_red</icon>
+				<icon condition="${'SUCCESS'eq current.result}">led_green</icon>
+			</field>
+			<field name="actions" type="linkpanel" binding="actions">
+				<label id="actions">Actions</label>
+			</field>
+		</meta-data>
+		<linkpanel id="actions" location="inline">
+			<link id="actions[1]" mode="intern" target="/${current.id}" default="true">
+				<label id="record.details">Show Details</label>
+				<icon>preview</icon>
+			</link>
+		</linkpanel>
+	</config>
+	<data>
+		<resultset chunk="0" chunkname="records" chunksize="25" nextchunk="0" previouschunk="0" firstchunk="0"
+			lastchunk="0" hits="1">
+			<result>
+				<field name="applicationName" type="text">
+					<value>appng-scheduler</value>
+				</field>
+				<field name="jobName" type="text">
+					<value>thejob</value>
+				</field>
+				<field name="duration" type="int">
+					<value>0</value>
+				</field>
+				<field name="start" type="date">
+					<value>2019-09-09 12:22:12</value>
+				</field>
+				<field name="end" type="date">
+					<value>2019-09-09 12:22:12</value>
+				</field>
+				<field name="result" type="image">
+					<value>SUCCESS</value>
+					<icon type="class">led_green</icon>
+				</field>
+				<linkpanel id="actions" location="inline">
+					<link id="actions[1]" mode="intern" target="/1" default="true">
+						<label id="record.details">Show Details</label>
+						<icon>preview</icon>
+					</link>
+				</linkpanel>
+			</result>
+		</resultset>
+	</data>
 </datasource>

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2018 the original author or authors.
+ * Copyright 2011-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,8 +61,7 @@ public class SetSchedulerStateAction extends SchedulerAware implements ActionPro
 				if (null == jobDetail) {
 					fp.addErrorMessage(request.getMessage(MessageConstants.JOB_NOT_EXISTS_ERROR, id));
 				} else {
-					String cronExpression = (String) jobDetail.getJobDataMap().get(Constants.JOB_CRON_EXPRESSION);
-					schedulerUtils.scheduleJob(jobDetail, cronExpression, id, "", siteName);
+					schedulerUtils.scheduleJob(jobDetail, id, "", siteName);
 				}
 			} else if (ACTION_UNSCHEDULE.equals(action)) {
 				schedulerUtils.deleteTrigger(jobDetail, id);

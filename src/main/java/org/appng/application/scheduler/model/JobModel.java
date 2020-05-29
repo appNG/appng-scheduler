@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2018 the original author or authors.
+ * Copyright 2011-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,45 @@
 package org.appng.application.scheduler.model;
 
 import java.util.Date;
+import java.util.List;
+import java.util.Locale;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
+import org.appng.api.ScheduledJob;
+import org.appng.api.model.Application;
 import org.appng.api.model.Named;
+import org.appng.api.model.Site;
+import org.appng.application.scheduler.Constants;
+import org.appng.application.scheduler.MessageConstants;
+import org.appng.application.scheduler.SchedulerUtils;
+import org.quartz.CronTrigger;
+import org.quartz.JobDataMap;
+import org.quartz.JobDetail;
+import org.quartz.JobKey;
+import org.quartz.Scheduler;
+import org.quartz.SchedulerException;
+import org.quartz.Trigger;
+import org.quartz.impl.matchers.GroupMatcher;
+import org.springframework.context.MessageSource;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
+
+import lombok.Getter;
+import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
+
+@Getter
+@Setter
+@Slf4j
 public class JobModel implements Named<String>, Comparable<Named<String>> {
 
 	private String name;
+	private String beanName;
 	private String availableJob;
 	private String description;
 	private String origin;
@@ -32,6 +64,10 @@ public class JobModel implements Named<String>, Comparable<Named<String>> {
 	private Date nextFireTime;
 	private Date previousFireTime;
 	private boolean beanAvailable;
+	private String stateName;
+	private String jobData;
+
+	private static final ObjectWriter JSON_WRITER = new ObjectMapper().writerWithDefaultPrettyPrinter();
 
 	public String getAvailableJob() {
 		if (StringUtils.isBlank(availableJob)) {
@@ -41,92 +77,83 @@ public class JobModel implements Named<String>, Comparable<Named<String>> {
 		}
 	}
 
-	public void setAvailableJob(String availableJob) {
-		this.availableJob = availableJob;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public String getDescription() {
-		return description;
-	}
-
-	public void setDescription(String description) {
-		this.description = description;
-	}
-
-	public String getOrigin() {
-		return origin;
-	}
-
-	public void setOrigin(String origin) {
-		this.origin = origin;
-	}
-
-	public String getJobClass() {
-		return jobClass;
-	}
-
-	public void setJobClass(String jobClass) {
-		this.jobClass = jobClass;
-	}
-
-	public boolean isRunning() {
-		return running;
-	}
-
-	public void setRunning(boolean running) {
-		this.running = running;
-	}
-
-	public String getCronExpression() {
-		return cronExpression;
-	}
-
-	public void setCronExpression(String cronExpression) {
-		this.cronExpression = cronExpression;
-	}
-
-	public Date getNextFireTime() {
-		return nextFireTime;
-	}
-
-	public void setNextFireTime(Date nextFireTime) {
-		this.nextFireTime = nextFireTime;
-	}
-
-	public Date getPreviousFireTime() {
-		return previousFireTime;
-	}
-
-	public void setPreviousFireTime(Date previousFireTime) {
-		this.previousFireTime = previousFireTime;
-	}
-
-	public boolean isBeanAvailable() {
-		return beanAvailable;
-	}
-
-	public void setBeanAvailable(boolean beanAvailable) {
-		this.beanAvailable = beanAvailable;
+	public boolean isScheduled() {
+		return cronExpression != null;
 	}
 
 	public String getId() {
 		return getName();
 	}
 
-	public Date getVersion() {
-		return null;
-	}
-
 	public int compareTo(Named<String> other) {
 		return getName().compareTo(other.getName());
+	}
+
+	public static List<JobModel> getJobs(Scheduler scheduler, Site site, MessageSource messageSource, Locale locale)
+			throws SchedulerException {
+		Set<JobKey> jobKeys = scheduler.getJobKeys(GroupMatcher.jobGroupEquals(site.getName()));
+		return jobKeys.stream().map(jk -> getJob(scheduler, messageSource, locale, jk.getName(), site))
+				.filter(jm -> null != jm).sorted().collect(Collectors.toList());
+	}
+
+	public static JobModel getJob(Scheduler scheduler, MessageSource messageSource, Locale locale, String jobName,
+			Site site) {
+		JobModel jobModel = null;
+		JobKey jobKey = new JobKey(jobName, site.getName());
+		try {
+			JobDetail jobDetail = scheduler.getJobDetail(jobKey);
+			if (null != jobDetail) {
+				JobDataMap jobDataMap = jobDetail.getJobDataMap();
+				String jobClass = jobDataMap.getString(Constants.JOB_SCHEDULED_JOB);
+				String origin = jobDataMap.getString(Constants.JOB_ORIGIN);
+				String beanName = jobDataMap.getString(Constants.JOB_BEAN_NAME);
+				Application application = site.getApplication(origin);
+				jobModel = new JobModel();
+				jobModel.setName(jobName);
+				jobModel.setBeanName(beanName);
+				jobModel.setJobClass(jobClass);
+				jobModel.setOrigin(origin);
+				String jobDataJson = JSON_WRITER.writeValueAsString(new TreeMap<>(jobDataMap));
+				jobModel.setJobData(jobDataJson);
+				boolean beanAvailable = null != application
+						&& null != application.getBean(beanName, ScheduledJob.class);
+				jobModel.setBeanAvailable(beanAvailable);
+
+				String stateKey = beanAvailable ? MessageConstants.JOB_STATE_AVAILABLE
+						: MessageConstants.JOB_STATE_ERROR;
+
+				List<? extends Trigger> triggers = scheduler.getTriggersOfJob(jobDetail.getKey());
+
+				if (triggers.size() > 0) {
+					for (Trigger trigger : triggers) {
+						if (trigger instanceof CronTrigger) {
+							CronTrigger cronTrigger = (CronTrigger) trigger;
+							String cronExpression = cronTrigger.getCronExpression();
+							Date previousFireTime = cronTrigger.getPreviousFireTime();
+							Date nextFireTime = cronTrigger.getNextFireTime();
+							jobModel.setCronExpression(cronExpression);
+							jobModel.setPreviousFireTime(previousFireTime);
+							jobModel.setNextFireTime(nextFireTime);
+							stateKey = MessageConstants.JOB_STATE_SCHEDULED;
+						} else {
+							jobModel.setPreviousFireTime(trigger.getStartTime());
+						}
+					}
+					if (new SchedulerUtils(scheduler, null).isRunning(jobDetail)) {
+						jobModel.setRunning(true);
+						stateKey = MessageConstants.JOB_STATE_RUNNING;
+					}
+				} else {
+					String cronExpression = jobDataMap.getString(Constants.JOB_CRON_EXPRESSION);
+					jobModel.setCronExpression(cronExpression);
+				}
+				String stateName = messageSource.getMessage(stateKey, new Object[0], locale);
+				jobModel.setStateName(stateName);
+			}
+		} catch (SchedulerException | JsonProcessingException e) {
+			log.error("error creating model for " + jobKey, e);
+		}
+		return jobModel;
 	}
 
 }
