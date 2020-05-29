@@ -39,7 +39,7 @@
 			<field name="result" type="image" readonly="true" binding="result">
 				<label id="record.result">Result</label>
 				<icon condition="${'FAIL' eq current.result}">led_red</icon>
-				<icon condition="${'SUCCESS'eq current.result}">led_green</icon>
+				<icon condition="${'SUCCESS' eq current.result}">led_green</icon>
 			</field>
 		</meta-data>
 	</config>
@@ -64,10 +64,10 @@
 				<value>false</value>
 			</field>
 			<field name="start" type="date">
-				<value>2019-09-09 12:22:12</value>
+				<value>2020-05-29 08:47:29</value>
 			</field>
 			<field name="end" type="date">
-				<value>2019-09-09 12:22:12</value>
+				<value>2020-05-29 08:47:29</value>
 			</field>
 			<field name="customData" type="longtext">
 				<value></value>

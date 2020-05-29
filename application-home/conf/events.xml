@@ -19,7 +19,7 @@
 
 		<action id="update">
 			<config>
-				<title>update</title>
+				<title params="#{name}">update</title>
 				<params>
 					<param name="form_action" />
 					<param name="id" />

@@ -15,8 +15,8 @@
 			<field name="description" type="longtext" binding="description">
 				<label id="description">Description</label>
 			</field>
-			<field name="jobData" type="longtext" readonly="true" binding="jobData">
-				<label id="jobdata">jobdata</label>
+			<field name="jobData" type="longtext" format="preformatted" readonly="true" binding="jobData">
+				<label id="jobdata">Job Data</label>
 			</field>
 		</meta-data>
 	</config>
@@ -39,10 +39,8 @@
 					"forceState" : "true",
 					"jobBeanName" : "longRunningJob",
 					"origin" : "appng-scheduler",
-					"siteName"
-					: "localhost"
-					}
-				</value>
+					"siteName" : "localhost"
+					}</value>
 			</field>
 		</result>
 	</data>
