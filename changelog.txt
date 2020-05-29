@@ -1,3 +1,15 @@
+Release Notes - appNG Scheduler - Version 1.13.0 (2020-05-29)
+-------------------------------------------------------------
+* [SCHED-41] - Release of 1.13.0
+* [SCHED-40] - Move Job Executions to separate tab
+* [SCHED-39] - Add a job's last execution time in job overview
+* [SCHED-38] - In job-overview, the action panel contains non-clickable status icons
+* [SCHED-37] - Show a job's JobDataMap when editing the job
+* [SCHED-36] - JobData Map is not being updated
+* [SCHED-34] - Update License Headers to 2020
+* [SCHED-33] - Jobs that got deactivated due to failed application start must be rescheduled
+* [SCHED-32] - Use @Entity JobExecutionRecord
+
 Release Notes - appNG Scheduler - Version 1.12.0 (2019-04-05)
 -------------------------------------------------------------
 * [SCHED-31] - Release of 1.12.0
