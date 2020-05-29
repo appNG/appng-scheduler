@@ -34,12 +34,14 @@
 			<field name="jobData" type="longtext">
 				<value>{
 					"SCHEDULED_JOB" : "org.appng.application.scheduler.job.LongRunningJob",
-					"cronExpression" : "0 0/10 * 1/1 * ? *",
+					"cronExpression" : "0 0/10 * 1/1 * ?
+					*",
 					"enabled" : true,
 					"forceState" : "true",
 					"jobBeanName" : "longRunningJob",
 					"origin" : "appng-scheduler",
-					"siteName" : "localhost"
+					"siteName"
+					: "localhost"
 					}</value>
 			</field>
 		</result>

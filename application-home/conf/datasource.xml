@@ -30,9 +30,12 @@
 					<sort />
 					<label id="status"></label>
 					<icon condition="${!current.beanAvailable}">led_red</icon>
-					<icon condition="${current.beanAvailable and not current.running and current.scheduled}">schedule</icon>
-					<icon condition="${current.beanAvailable and not current.running and not current.scheduled}">led_green</icon>
+					<icon condition="${current.beanAvailable and not current.running and current.scheduled}">led_green</icon>
+					<icon condition="${current.beanAvailable and not current.running and not current.scheduled}">led_orange</icon>
 					<icon condition="${current.running}">running</icon>
+				</field>
+				<field name="schedule" type="linkpanel">
+					<label />
 				</field>
 				<field name="actions" type="linkpanel">
 					<label>actions</label>
@@ -45,17 +48,6 @@
 				</link>
 			</linkpanel>
 			<linkpanel id="actions" location="inline">
-				<link mode="intern" target="/jobs&#63;form_action=schedule&#38;id=#{name}" show-disabled="false" id="schedule">
-					<condition expression="${current.beanAvailable and current.scheduled and empty current.nextFireTime}" />
-					<label>schedule</label>
-					<icon>schedule</icon>
-				</link>
-				<link mode="intern" target="/jobs&#63;form_action=unschedule&#38;id=#{name}" show-disabled="false"
-					id="unschedule">
-					<condition expression="${current.beanAvailable and current.scheduled and not empty current.nextFireTime}" />
-					<label>unschedule</label>
-					<icon>unschedule</icon>
-				</link>
 				<link mode="intern" target="/jobs/update/#{name}#tab_update" default="true" id="update">
 					<label>update</label>
 					<icon>edit</icon>
@@ -70,6 +62,19 @@
 					<label>delete</label>
 					<icon>delete</icon>
 					<confirmation id="confirm.delete.job" params="#{name}" />
+				</link>
+			</linkpanel>
+			<linkpanel id="schedule" location="inline">
+				<link mode="intern" target="/jobs&#63;form_action=schedule&#38;id=#{name}" show-disabled="false" id="schedule">
+					<condition expression="${current.beanAvailable and current.scheduled and empty current.nextFireTime}" />
+					<label>schedule</label>
+					<icon>schedule</icon>
+				</link>
+				<link mode="intern" target="/jobs&#63;form_action=unschedule&#38;id=#{name}" show-disabled="false"
+					id="unschedule">
+					<condition expression="${current.beanAvailable and current.scheduled and not empty current.nextFireTime}" />
+					<label>unschedule</label>
+					<icon>unschedule</icon>
 				</link>
 			</linkpanel>
 		</config>
@@ -92,7 +97,7 @@
 				<field name="description" type="longtext">
 					<label>description</label>
 				</field>
-				<field name="jobData" type="longtext" readonly="true">
+				<field name="jobData" type="longtext" readonly="true" format="preformatted">
 					<label id="jobdata" />
 				</field>
 			</meta-data>
@@ -217,7 +222,7 @@
 				<field name="result" type="image" readonly="true">
 					<label id="record.result"></label>
 					<icon condition="${'FAIL' eq current.result}">led_red</icon>
-					<icon condition="${'SUCCESS'eq current.result}">led_green</icon>
+					<icon condition="${'SUCCESS' eq current.result}">led_green</icon>
 				</field>
 			</meta-data>
 		</config>

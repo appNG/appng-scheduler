@@ -19,7 +19,7 @@
 
 		<action id="update">
 			<config>
-				<title params="#{name}">update</title>
+				<title params="#{name}">job.update</title>
 				<params>
 					<param name="form_action" />
 					<param name="id" />

@@ -67,6 +67,8 @@ public class JobModel implements Named<String>, Comparable<Named<String>> {
 	private String stateName;
 	private String jobData;
 
+	private static final ObjectWriter JSON_WRITER = new ObjectMapper().writerWithDefaultPrettyPrinter();
+
 	public String getAvailableJob() {
 		if (StringUtils.isBlank(availableJob)) {
 			return name;
@@ -81,10 +83,6 @@ public class JobModel implements Named<String>, Comparable<Named<String>> {
 
 	public String getId() {
 		return getName();
-	}
-
-	public Date getVersion() {
-		return null;
 	}
 
 	public int compareTo(Named<String> other) {
@@ -115,17 +113,14 @@ public class JobModel implements Named<String>, Comparable<Named<String>> {
 				jobModel.setBeanName(beanName);
 				jobModel.setJobClass(jobClass);
 				jobModel.setOrigin(origin);
-				ObjectWriter writer = new ObjectMapper().writerWithDefaultPrettyPrinter();
-				String jobDataJson = writer.writeValueAsString(new TreeMap<>(jobDataMap));
+				String jobDataJson = JSON_WRITER.writeValueAsString(new TreeMap<>(jobDataMap));
 				jobModel.setJobData(jobDataJson);
 				boolean beanAvailable = null != application
 						&& null != application.getBean(beanName, ScheduledJob.class);
 				jobModel.setBeanAvailable(beanAvailable);
 
-				String stateKey = MessageConstants.JOB_STATE_OK;
-				if (!beanAvailable) {
-					stateKey = MessageConstants.JOB_STATE_ERROR;
-				}
+				String stateKey = beanAvailable ? MessageConstants.JOB_STATE_AVAILABLE
+						: MessageConstants.JOB_STATE_ERROR;
 
 				List<? extends Trigger> triggers = scheduler.getTriggersOfJob(jobDetail.getKey());
 

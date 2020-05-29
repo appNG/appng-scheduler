@@ -23,13 +23,15 @@
 			</field>
 			<field name="stateName" type="image">
 				<value>Scheduled</value>
-				<icon type="class">schedule</icon>
+				<icon type="class">led_green</icon>
 			</field>
-			<linkpanel id="actions" location="inline">
+			<linkpanel id="schedule" location="inline">
 				<link id="unschedule" mode="intern" target="/jobs?form_action=unschedule&amp;id=appng-scheduler_anotherJob">
 					<label id="unschedule">Deactivate</label>
 					<icon>unschedule</icon>
 				</link>
+			</linkpanel>
+			<linkpanel id="actions" location="inline">
 				<link id="update" mode="intern" target="/jobs/update/appng-scheduler_anotherJob#tab_update" default="true">
 					<label id="update">Update</label>
 					<icon>edit</icon>
@@ -66,14 +68,16 @@
 				<value></value>
 			</field>
 			<field name="stateName" type="image">
-				<value>OK</value>
-				<icon type="class">schedule</icon>
+				<value>Available</value>
+				<icon type="class">led_green</icon>
 			</field>
-			<linkpanel id="actions" location="inline">
+			<linkpanel id="schedule" location="inline">
 				<link id="schedule" mode="intern" target="/jobs?form_action=schedule&amp;id=appng-scheduler_houseKeepingJob">
 					<label id="schedule">Activate</label>
 					<icon>schedule</icon>
 				</link>
+			</linkpanel>
+			<linkpanel id="actions" location="inline">
 				<link id="update" mode="intern" target="/jobs/update/appng-scheduler_houseKeepingJob#tab_update" default="true">
 					<label id="update">Update</label>
 					<icon>edit</icon>
@@ -111,13 +115,15 @@
 			</field>
 			<field name="stateName" type="image">
 				<value>Scheduled</value>
-				<icon type="class">schedule</icon>
+				<icon type="class">led_green</icon>
 			</field>
-			<linkpanel id="actions" location="inline">
+			<linkpanel id="schedule" location="inline">
 				<link id="unschedule" mode="intern" target="/jobs?form_action=unschedule&amp;id=appng-scheduler_indexJob">
 					<label id="unschedule">Deactivate</label>
 					<icon>unschedule</icon>
 				</link>
+			</linkpanel>
+			<linkpanel id="actions" location="inline">
 				<link id="update" mode="intern" target="/jobs/update/appng-scheduler_indexJob#tab_update" default="true">
 					<label id="update">Update</label>
 					<icon>edit</icon>
@@ -148,20 +154,22 @@
 				<value>0 0/10 * 1/1 * ? *</value>
 			</field>
 			<field name="nextFireTime" type="date">
-				<value>2020-05-13 12:40:00</value>
+				<value>2020-05-29 09:50:00</value>
 			</field>
 			<field name="previousFireTime" type="date">
 				<value></value>
 			</field>
 			<field name="stateName" type="image">
 				<value>Scheduled</value>
-				<icon type="class">schedule</icon>
+				<icon type="class">led_green</icon>
 			</field>
-			<linkpanel id="actions" location="inline">
+			<linkpanel id="schedule" location="inline">
 				<link id="unschedule" mode="intern" target="/jobs?form_action=unschedule&amp;id=appng-scheduler_longRunningJob">
 					<label id="unschedule">Deactivate</label>
 					<icon>unschedule</icon>
 				</link>
+			</linkpanel>
+			<linkpanel id="actions" location="inline">
 				<link id="update" mode="intern" target="/jobs/update/appng-scheduler_longRunningJob#tab_update" default="true">
 					<label id="update">Update</label>
 					<icon>edit</icon>
