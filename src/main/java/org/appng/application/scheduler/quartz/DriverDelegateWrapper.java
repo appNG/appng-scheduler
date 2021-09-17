@@ -44,7 +44,6 @@ import org.slf4j.Logger;
  * <a href="https://github.com/quartz-scheduler/quartz/issues/184">Quartz issue #184</a>.
  * 
  * @author Matthias Müller
- *
  */
 public class DriverDelegateWrapper implements DriverDelegate {
 

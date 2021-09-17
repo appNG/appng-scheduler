@@ -46,7 +46,6 @@ import org.springframework.stereotype.Component;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 
 /**
  * A {@link DataProvider} which returns informations about all implementations of {@link ScheduledJob} that where
@@ -55,18 +54,21 @@ import lombok.RequiredArgsConstructor;
  * @author Matthias Müller
  */
 @Component("jobs")
-@RequiredArgsConstructor
-public class SchedulerDataSource implements DataProvider {
+public class SchedulerDataSource extends SchedulerAware implements DataProvider {
 
 	private static final String ACTION_CREATE = "create";
 	private static final String ACTION_DELETE = "delete";
 	private static final String AVAILABLE_JOB = "availableJob";
 
-	private final Scheduler scheduler;
 	private final MessageSource messageSource;
 
-	public DataContainer getData(Site site, Application application, Environment env, Options options,
-			Request request, FieldProcessor fp) {
+	public SchedulerDataSource(Scheduler scheduler, MessageSource messageSource) {
+		super(scheduler);
+		this.messageSource = messageSource;
+	}
+
+	public DataContainer getData(Site site, Application application, Environment env, Options options, Request request,
+			FieldProcessor fp) {
 		DataContainer data = new DataContainer(fp);
 
 		String jobId = options.getOptionValue(Constants.OPT_JOB, Constants.ATTR_ID);

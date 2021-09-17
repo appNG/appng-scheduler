@@ -45,12 +45,10 @@ import org.springframework.scheduling.quartz.AdaptableJobFactory;
 import org.springframework.web.context.WebApplicationContext;
 
 /**
- * A {@link JobFactory} that creates Quartz {@link Job}s that are build from
- * {@link ScheduledJob}s.
+ * A {@link JobFactory} that creates Quartz {@link Job}s that are build from {@link ScheduledJob}s.
  * 
  * @author Matthias Müller
  * @author Claus Stümke
- *
  */
 public class SpringQuartzSchedulerFactory extends AdaptableJobFactory {
 
@@ -103,13 +101,11 @@ public class SpringQuartzSchedulerFactory extends AdaptableJobFactory {
 	}
 
 	/**
-	 * Returns an {@link InterruptableJob} that is is being interrupted by quartz
-	 * when shutting down a {@link Scheduler} , e.g. on site reload. This is done by
-	 * using a separate thread, which is interrupted when
-	 * {@link InterruptableJob#interrupt()} is being called. It does not care about
-	 * open resources, so use {@value #JOBDATA_HARD_INTERRUPTABLE}{@code =true} only
-	 * for {@link ScheduledJob}s that can safely be stopped by interrupting its
-	 * thread.
+	 * Returns an {@link InterruptableJob} that is is being interrupted by quartz when shutting down a {@link Scheduler}
+	 * , e.g. on site reload. This is done by using a separate thread, which is interrupted when
+	 * {@link InterruptableJob#interrupt()} is being called. It does not care about open resources, so use
+	 * {@value #JOBDATA_HARD_INTERRUPTABLE}{@code =true} only for {@link ScheduledJob}s that can safely be stopped by
+	 * interrupting its thread.
 	 */
 	private Job getInterruptableJob(final JobDetail jobDetail, final JobKey jobKey, final Site site,
 			final Environment environment, final String eventId) {

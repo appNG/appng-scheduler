@@ -16,16 +16,14 @@
 package org.appng.application.scheduler.business;
 
 import org.quartz.Scheduler;
+import org.springframework.transaction.annotation.Transactional;
 
+@Transactional
 abstract class SchedulerAware {
 
 	protected Scheduler scheduler;
 
-	public Scheduler getScheduler() {
-		return scheduler;
-	}
-
-	public void setScheduler(Scheduler scheduler) {
+	public SchedulerAware(Scheduler scheduler) {
 		this.scheduler = scheduler;
 	}
 

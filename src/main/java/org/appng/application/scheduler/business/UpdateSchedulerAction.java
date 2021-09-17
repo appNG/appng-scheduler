@@ -29,19 +29,25 @@ import org.appng.application.scheduler.SchedulerUtils;
 import org.appng.application.scheduler.model.JobModel;
 import org.quartz.JobDetail;
 import org.quartz.JobKey;
+import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * An {@link ActionProvider} to update the parameters of a {@link ScheduledJob} , such as name, description and
  * execution time (cron-syntax).
  * 
  * @author Matthias Müller
- * 
  */
+@Slf4j
+@Component("updateJob")
 public class UpdateSchedulerAction extends SchedulerAware implements ActionProvider<JobModel> {
-	private static Logger log = LoggerFactory.getLogger(UpdateSchedulerAction.class);
+
+	public UpdateSchedulerAction(Scheduler scheduler) {
+		super(scheduler);
+	}
 
 	public void perform(Site site, Application application, Environment environment, Options options, Request request,
 			JobModel valueHolder, FieldProcessor fp) {

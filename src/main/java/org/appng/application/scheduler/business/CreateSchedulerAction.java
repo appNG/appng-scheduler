@@ -34,8 +34,10 @@ import org.appng.application.scheduler.model.JobForm;
 import org.appng.application.scheduler.model.JobModel;
 import org.quartz.JobDetail;
 import org.quartz.JobKey;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.quartz.Scheduler;
+import org.springframework.stereotype.Component;
+
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * A {@link ActionProvider} to update the parameters of a {@link ScheduledJob}, such as name, description and execution
@@ -43,9 +45,13 @@ import org.slf4j.LoggerFactory;
  * 
  * @author Matthias Müller
  */
+@Slf4j
+@Component("createJob")
 public class CreateSchedulerAction extends SchedulerAware implements ActionProvider<JobForm> {
 
-	private static final Logger log = LoggerFactory.getLogger(CreateSchedulerAction.class);
+	public CreateSchedulerAction(Scheduler scheduler) {
+		super(scheduler);
+	}
 
 	public void perform(Site site, Application application, Environment environment, Options options, Request request,
 			JobForm valueHolder, FieldProcessor fp) {
