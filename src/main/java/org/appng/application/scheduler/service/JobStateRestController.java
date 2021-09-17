@@ -28,7 +28,6 @@ import org.appng.application.scheduler.Constants;
 import org.appng.core.domain.JobExecutionRecord;
 import org.appng.scheduler.openapi.model.JobRecord;
 import org.appng.scheduler.openapi.model.JobState;
-import org.appng.scheduler.openapi.model.JobState.StateEnum;
 import org.appng.scheduler.openapi.model.JobState.TimeunitEnum;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
@@ -126,7 +125,7 @@ public class JobStateRestController {
 			JobKey jobKey = new JobKey(jobName, site.getName());
 			JobDetail jobDetail = scheduler.getJobDetail(jobKey);
 			if (null == jobDetail) {
-				jobState.setState(StateEnum.UNDEFINED);
+				jobState.setState(JobState.StateEnum.UNDEFINED);
 			} else {
 				JobDataMap jobDataMap = jobDetail.getJobDataMap();
 				boolean hasWarnTreshold = jobDataMap.containsKey(Constants.THRESHOLD_WARN);
@@ -138,7 +137,8 @@ public class JobStateRestController {
 					jobState.setThresholdError(jobDataMap.getInt(Constants.THRESHOLD_ERROR));
 				}
 				if (jobDataMap.containsKey(Constants.THRESHOLD_TIMEUNIT)) {
-					jobState.setTimeunit(TimeunitEnum.valueOf(jobDataMap.getString(Constants.THRESHOLD_TIMEUNIT).toUpperCase()));
+					jobState.setTimeunit(
+							TimeunitEnum.valueOf(jobDataMap.getString(Constants.THRESHOLD_TIMEUNIT).toUpperCase()));
 				}
 
 				Date now = new Date();
@@ -155,11 +155,11 @@ public class JobStateRestController {
 				}
 
 				if (hasErrorTreshold && records.getTotalElements() < jobState.getThresholdError()) {
-					jobState.setState(StateEnum.ERROR);
+					jobState.setState(JobState.StateEnum.ERROR);
 				} else if (hasWarnTreshold && records.getTotalElements() < jobState.getThresholdWarn()) {
-					jobState.setState(StateEnum.WARN);
+					jobState.setState(JobState.StateEnum.WARN);
 				} else {
-					jobState.setState(StateEnum.OK);
+					jobState.setState(JobState.StateEnum.OK);
 				}
 			}
 		} catch (SchedulerException e) {
@@ -178,8 +178,7 @@ public class JobStateRestController {
 		jobRecord.setStacktrace(r.getStacktraces());
 		ExecutionResult execResult = ExecutionResult.valueOf(r.getResult());
 		jobRecord.setState(
-				ExecutionResult.SUCCESS.equals(execResult) ? org.appng.scheduler.openapi.model.JobRecord.StateEnum.OK
-						: org.appng.scheduler.openapi.model.JobRecord.StateEnum.ERROR);
+				ExecutionResult.SUCCESS.equals(execResult) ? JobRecord.StateEnum.OK : JobRecord.StateEnum.ERROR);
 		return jobRecord;
 	}
 

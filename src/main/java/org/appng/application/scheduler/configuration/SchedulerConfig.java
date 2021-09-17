@@ -15,6 +15,7 @@ import org.appng.application.scheduler.job.JobRecordHouseKeepingJob;
 import org.appng.application.scheduler.quartz.DriverDelegateWrapper;
 import org.appng.application.scheduler.quartz.SpringQuartzSchedulerFactory;
 import org.appng.application.scheduler.service.JobRecordService;
+import org.appng.scheduler.openapi.model.JobState.TimeunitEnum;
 import org.quartz.impl.StdSchedulerFactory;
 import org.quartz.impl.jdbcjobstore.HSQLDBDelegate;
 import org.quartz.impl.jdbcjobstore.MSSQLDelegate;
@@ -124,6 +125,8 @@ public class SchedulerConfig {
 		indexJob.getJobDataMap().put(Constants.JOB_ENABLED, indexEnabled);
 		indexJob.getJobDataMap().put(Constants.JOB_CRON_EXPRESSION, indexExpression);
 		indexJob.getJobDataMap().put(Platform.Property.JSP_FILE_TYPE, jspFileType);
+		indexJob.getJobDataMap().put(Constants.THRESHOLD_TIMEUNIT, TimeunitEnum.DAY.name());
+		indexJob.getJobDataMap().put(Constants.THRESHOLD_ERROR, 1);
 		return indexJob;
 	}
 
