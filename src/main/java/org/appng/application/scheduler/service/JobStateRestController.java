@@ -24,6 +24,7 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.appng.api.ScheduledJobResult.ExecutionResult;
 import org.appng.api.model.Application;
 import org.appng.api.model.Site;
+import org.appng.application.scheduler.Constants;
 import org.appng.core.domain.JobExecutionRecord;
 import org.appng.scheduler.openapi.model.JobRecord;
 import org.appng.scheduler.openapi.model.JobState;
@@ -59,9 +60,6 @@ import lombok.extern.slf4j.Slf4j;
 @RestController
 public class JobStateRestController {
 
-	public static final String THRESHOLD_TIMEUNIT = "thresholdTimeunit";
-	public static final String THRESHOLD_ERROR = "thresholdError";
-	public static final String THRESHOLD_WARN = "thresholdWarn";
 	private JobRecordService jobRecordService;
 	private Scheduler scheduler;
 	@Value("${bearerToken}")
@@ -72,10 +70,10 @@ public class JobStateRestController {
 		this.scheduler = scheduler;
 	}
 
-	@RequestMapping(value = "/jobRecords", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	@RequestMapping(value = "/jobRecords/{application}/{job}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 	public ResponseEntity<List<JobRecord>> getJobRecords(
-			@RequestParam(required = false, name = "application") String applicationName,
-			@RequestParam(required = false, name = "job") String jobName,
+			@PathVariable(required = true, name = "application") String applicationName,
+			@PathVariable(required = true, name = "job") String jobName,
 			@RequestParam(required = false, name = "startedAfter") String startedAfter,
 			@RequestParam(required = false, name = "startedBefore") String startedBefore,
 			@RequestParam(required = false, name = "result") String result,
@@ -131,16 +129,16 @@ public class JobStateRestController {
 				jobState.setState(StateEnum.UNDEFINED);
 			} else {
 				JobDataMap jobDataMap = jobDetail.getJobDataMap();
-				boolean hasWarnTreshold = jobDataMap.containsKey(THRESHOLD_WARN);
+				boolean hasWarnTreshold = jobDataMap.containsKey(Constants.THRESHOLD_WARN);
 				if (hasWarnTreshold) {
-					jobState.setThresholdWarn(jobDataMap.getInt(THRESHOLD_WARN));
+					jobState.setThresholdWarn(jobDataMap.getInt(Constants.THRESHOLD_WARN));
 				}
-				boolean hasErrorTreshold = jobDataMap.containsKey(THRESHOLD_ERROR);
+				boolean hasErrorTreshold = jobDataMap.containsKey(Constants.THRESHOLD_ERROR);
 				if (hasErrorTreshold) {
-					jobState.setThresholdError(jobDataMap.getInt(THRESHOLD_ERROR));
+					jobState.setThresholdError(jobDataMap.getInt(Constants.THRESHOLD_ERROR));
 				}
-				if (jobDataMap.containsKey(THRESHOLD_TIMEUNIT)) {
-					jobState.setTimeunit(TimeunitEnum.valueOf(jobDataMap.getString(THRESHOLD_TIMEUNIT).toUpperCase()));
+				if (jobDataMap.containsKey(Constants.THRESHOLD_TIMEUNIT)) {
+					jobState.setTimeunit(TimeunitEnum.valueOf(jobDataMap.getString(Constants.THRESHOLD_TIMEUNIT).toUpperCase()));
 				}
 
 				Date now = new Date();
@@ -160,6 +158,8 @@ public class JobStateRestController {
 					jobState.setState(StateEnum.ERROR);
 				} else if (hasWarnTreshold && records.getTotalElements() < jobState.getThresholdWarn()) {
 					jobState.setState(StateEnum.WARN);
+				} else {
+					jobState.setState(StateEnum.OK);
 				}
 			}
 		} catch (SchedulerException e) {
