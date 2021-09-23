@@ -15,14 +15,14 @@
  */
 package org.appng.application.scheduler.service;
 
-import java.time.ZoneOffset;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.appng.api.ScheduledJobResult.ExecutionResult;
-import org.appng.api.model.Application;
 import org.appng.api.model.Site;
 import org.appng.application.scheduler.Constants;
 import org.appng.core.domain.JobExecutionRecord;
@@ -69,28 +69,6 @@ public class JobStateRestController {
 		this.scheduler = scheduler;
 	}
 
-	@RequestMapping(value = "/jobRecords/{application}/{job}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public ResponseEntity<List<JobRecord>> getJobRecords(
-			@PathVariable(required = true, name = "application") String applicationName,
-			@PathVariable(required = true, name = "job") String jobName,
-			@RequestParam(required = false, name = "startedAfter") String startedAfter,
-			@RequestParam(required = false, name = "startedBefore") String startedBefore,
-			@RequestParam(required = false, name = "result") String result,
-			@RequestParam(required = false, name = "minDuration") Integer duration,
-			@RequestHeader(name = HttpHeaders.AUTHORIZATION, required = false) List<String> auths,
-			Application application, Site site) {
-		if (!isValidBearer(auths)) {
-			return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
-		}
-
-		// TODO
-
-//		Page<JobExecutionRecord> records = jobRecordService.getJobRecords(site.getName(), application,
-//				jobName, startedAfter, now, null, null, new PageRequest(0, 10));
-//		return new ResponseEntity<>(records.map(r->toRecord(r)).getContent(), HttpStatus.OK);
-		return null;
-	}
-
 	@RequestMapping(value = "/jobState/{application}/{job}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 	public ResponseEntity<JobState> getJobState(
 			@PathVariable(required = true, name = "application") String applicationName,
@@ -104,29 +82,24 @@ public class JobStateRestController {
 
 		JobState jobState = getJobState(applicationName, jobName, site, pageSize, withRecords);
 		if (null != jobState) {
-			if (null == jobState.getStartedAfter()) {
-				return ResponseEntity.notFound().build();
-			}
-			if (!withRecords) {
-				jobState.setRecords(null);
-			}
 			return ResponseEntity.ok(jobState);
 		}
-		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+		return ResponseEntity.notFound().build();
 	}
 
 	private JobState getJobState(String application, String job, Site site, Integer pageSize, boolean withRecords) {
-		JobState jobState = new JobState();
-		jobState.setSite(site.getName());
-		jobState.setApplication(application);
-		String jobName = job.startsWith(application) ? job : application + "_" + job;
-		jobState.setJob(jobName);
+		JobState jobState = null;
 		try {
+			String jobName = job.startsWith(application) ? job : application + "_" + job;
 			JobKey jobKey = new JobKey(jobName, site.getName());
 			JobDetail jobDetail = scheduler.getJobDetail(jobKey);
-			if (null == jobDetail) {
-				jobState.setState(JobState.StateEnum.UNDEFINED);
-			} else {
+			if (null != jobDetail) {
+
+				jobState = new JobState();
+				jobState.setSite(site.getName());
+				jobState.setApplication(application);
+				jobState.setJob(jobName);
+
 				JobDataMap jobDataMap = jobDetail.getJobDataMap();
 				boolean hasWarnTreshold = jobDataMap.containsKey(Constants.THRESHOLD_WARN);
 				if (hasWarnTreshold) {
@@ -142,25 +115,34 @@ public class JobStateRestController {
 				}
 
 				Date now = new Date();
-				Date startedAfter = getStartDate(jobState.getTimeunit(), now);
+				TimeunitEnum timeunit = jobState.getTimeunit();
+				boolean hasTimeUnit = null != timeunit;
+				Date startedAfter = hasTimeUnit ? getStartDate(timeunit, now) : null;
 
 				Page<JobExecutionRecord> records = jobRecordService.getJobRecords(site.getName(), application,
 						jobKey.getName(), startedAfter, now, null, null, new PageRequest(0, pageSize));
 
-				jobState.setStartedAfter(startedAfter.toInstant().atOffset(ZoneOffset.UTC));
+				if (hasTimeUnit) {
+					jobState.setStartedAfter(toLocalTime(startedAfter));
+				}
 				jobState.setTotalRecords((int) records.getTotalElements());
 
 				if (withRecords) {
 					jobState.setRecords(records.map(r -> toRecord(r)).getContent());
 				}
 
-				if (hasErrorTreshold && records.getTotalElements() < jobState.getThresholdError()) {
-					jobState.setState(JobState.StateEnum.ERROR);
-				} else if (hasWarnTreshold && records.getTotalElements() < jobState.getThresholdWarn()) {
-					jobState.setState(JobState.StateEnum.WARN);
+				if (hasTimeUnit) {
+					if (hasErrorTreshold && records.getTotalElements() < jobState.getThresholdError()) {
+						jobState.setState(JobState.StateEnum.ERROR);
+					} else if (hasWarnTreshold && records.getTotalElements() < jobState.getThresholdWarn()) {
+						jobState.setState(JobState.StateEnum.WARN);
+					} else {
+						jobState.setState(JobState.StateEnum.OK);
+					}
 				} else {
-					jobState.setState(JobState.StateEnum.OK);
+					jobState.setState(JobState.StateEnum.UNDEFINED);
 				}
+
 			}
 		} catch (SchedulerException e) {
 			log.error("error while retrieving job", e);
@@ -171,8 +153,8 @@ public class JobStateRestController {
 	private JobRecord toRecord(JobExecutionRecord r) {
 		JobRecord jobRecord = new JobRecord();
 		jobRecord.setId(r.getId());
-		jobRecord.setStart(r.getStartTime().toInstant().atOffset(ZoneOffset.UTC));
-		jobRecord.setEnd(r.getEndTime().toInstant().atOffset(ZoneOffset.UTC));
+		jobRecord.setStart(toLocalTime(r.getStartTime()));
+		jobRecord.setEnd(toLocalTime(r.getEndTime()));
 		jobRecord.setRunOnce(r.isRunOnce());
 		jobRecord.setDuration(r.getDuration().intValue());
 		jobRecord.setStacktrace(r.getStacktraces());
@@ -180,6 +162,10 @@ public class JobStateRestController {
 		jobRecord.setState(
 				ExecutionResult.SUCCESS.equals(execResult) ? JobRecord.StateEnum.OK : JobRecord.StateEnum.ERROR);
 		return jobRecord;
+	}
+
+	private LocalDateTime toLocalTime(Date date) {
+		return date.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
 	}
 
 	public Date getStartDate(TimeunitEnum timeunit, Date now) {

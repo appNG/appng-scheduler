@@ -6,7 +6,7 @@ info:
   contact:
     name: appNG developer team
     email: matthias.mueller@appng.org
-    url: http://appng.org
+    url: https://github.com/appNG/appng-scheduler
   license:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0

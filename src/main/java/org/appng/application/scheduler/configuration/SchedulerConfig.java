@@ -1,7 +1,9 @@
 package org.appng.application.scheduler.configuration;
 
+import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Properties;
 
@@ -31,10 +33,10 @@ import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 
-import lombok.extern.slf4j.Slf4j;
-
-@Slf4j
 @Configuration
 public class SchedulerConfig {
 
@@ -52,7 +54,7 @@ public class SchedulerConfig {
 	@Bean
 	public SchedulerFactoryBean scheduler(JobFactory jobFactory,
 			@Value("${quartzDriverDelegate}") String quartzDriverDelegate, @Value("${site.name}") String siteName,
-			DataSourceTransactionManager quartzTransactionManager, Properties quartzProperties) {
+			DataSourceTransactionManager quartzTransactionManager, Properties quartzProperties) throws SQLException {
 		DataSource dataSource = quartzTransactionManager.getDataSource();
 		SchedulerFactoryBean scheduler = new SchedulerFactoryBean();
 
@@ -66,7 +68,8 @@ public class SchedulerConfig {
 		String driverDelegate = StdJDBCDelegate.class.getName();
 		String lockSql = null;
 		if (!quartzProperties.contains(SELECT_WITH_LOCK_SQL)) {
-			try (Connection connection = dataSource.getConnection()) {
+			try (
+					Connection connection = dataSource.getConnection()) {
 				String databaseProductName = connection.getMetaData().getDatabaseProductName().toLowerCase();
 				if (databaseProductName.contains("mysql") || databaseProductName.contains("mariadb")) {
 					lockSql = MYSQL_LOCK_SQL;
@@ -76,10 +79,12 @@ public class SchedulerConfig {
 				} else if (databaseProductName.contains("postgres")) {
 					driverDelegate = PostgreSQLDelegate.class.getName();
 				} else if (databaseProductName.contains("hsql")) {
+					// http://www.hsqldb.org/doc/2.0/guide/sessions-chapt.html#snc_tx_mvcc
+					try (CallableStatement stmt = connection.prepareCall("SET DATABASE TRANSACTION CONTROL MVCC")) {
+						stmt.execute();
+					}
 					driverDelegate = HSQLDBDelegate.class.getName();
 				}
-			} catch (SQLException e) {
-				log.warn("error retrieving metadata from database", e);
 			}
 		}
 		if (null != lockSql) {
@@ -144,7 +149,13 @@ public class SchedulerConfig {
 
 	@Bean
 	public ObjectMapper objectMapper() {
-		return new ObjectMapper();
+		ObjectMapper objectMapper = new ObjectMapper();
+		objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
+		JavaTimeModule javaTimeModule = new JavaTimeModule();
+		DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+		javaTimeModule.addSerializer(new LocalDateTimeSerializer(dtf));
+		objectMapper.registerModule(javaTimeModule);
+		return objectMapper;
 	}
 
 	@Bean

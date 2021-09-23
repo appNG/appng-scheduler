@@ -21,12 +21,11 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Properties;
 
-import org.appng.api.Platform;
 import org.appng.api.ScheduledJobResult;
 import org.appng.api.ScheduledJobResult.ExecutionResult;
 import org.appng.api.support.CallableDataSource;
+import org.appng.application.scheduler.SchedulingProperties;
 import org.appng.application.scheduler.model.JobResult;
 import org.appng.application.scheduler.quartz.RecordingJobListener;
 import org.appng.core.domain.JobExecutionRecord;
@@ -46,7 +45,6 @@ import org.quartz.JobExecutionContext;
 import org.quartz.Trigger;
 import org.quartz.TriggerBuilder;
 import org.quartz.impl.JobDetailImpl;
-import org.quartz.impl.jdbcjobstore.HSQLDBDelegate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -82,16 +80,7 @@ public class TestJobRecordings extends TestBase {
 
 	@Override
 	protected java.util.Properties getProperties() {
-		Properties properties = super.getProperties();
-		properties.put("indexExpression", "0 0/5 * * * ? 2042");
-		properties.put("houseKeepingExpression", "0 0/5 * * * ? 2042");
-		properties.put("indexEnabled", "false");
-		properties.put("site.name", "localhost");
-		properties.put("validateJobsOnStartup", "false");
-		properties.put("houseKeepingEnabled", "false");
-		properties.put("quartzDriverDelegate", HSQLDBDelegate.class.getName());
-		properties.put("platform." + Platform.Property.JSP_FILE_TYPE, ".jsp");
-		return properties;
+		return SchedulingProperties.getProperties();
 	}
 
 	@Test
