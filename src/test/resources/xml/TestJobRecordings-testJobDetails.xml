@@ -32,17 +32,19 @@
 				<value></value>
 			</field>
 			<field name="jobData" type="longtext">
-				<value>{
-					"SCHEDULED_JOB" : "org.appng.application.scheduler.job.LongRunningJob",
-					"cronExpression" : "0 0/10 * 1/1 * ?
-					*",
-					"enabled" : true,
-					"forceState" : "true",
-					"jobBeanName" : "longRunningJob",
-					"origin" : "appng-scheduler",
-					"siteName"
-					: "localhost"
-					}</value>
+				<value>
+<![CDATA[{
+  "SCHEDULED_JOB" : "org.appng.application.scheduler.job.LongRunningJob",
+  "cronExpression" : "0 0/10 * 1/1 * ? *",
+  "enabled" : true,
+  "forceState" : true,
+  "jobBeanName" : "longRunningJob",
+  "origin" : "appng-scheduler",
+  "siteName" : "localhost",
+  "thresholdError" : 5,
+  "thresholdTimeunit" : "DAY"
+}]]>
+				</value>
 			</field>
 		</result>
 	</data>
