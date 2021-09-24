@@ -15,7 +15,7 @@
  */
 package org.appng.application.scheduler.service;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
@@ -164,8 +164,8 @@ public class JobStateRestController {
 		return jobRecord;
 	}
 
-	private LocalDateTime toLocalTime(Date date) {
-		return date.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+	private OffsetDateTime toLocalTime(Date date) {
+		return date.toInstant().atZone(ZoneId.systemDefault()).toOffsetDateTime();
 	}
 
 	public Date getStartDate(TimeunitEnum timeunit, Date now) {

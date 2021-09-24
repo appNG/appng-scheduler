@@ -21,7 +21,6 @@
 		<displayName>Scheduler</displayName>
 		<longDescription><![CDATA[An application for scheduling using Quartz]]></longDescription>
 		<application.homeFolder>application-home</application.homeFolder>
-		<jackson.version>2.10.0.pr1</jackson.version>
 	</properties>
 
 	<scm>
@@ -264,11 +263,6 @@
 		<dependency>
 			<groupId>org.appng</groupId>
 			<artifactId>appng-core</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.fasterxml.jackson.datatype</groupId>
-			<artifactId>jackson-datatype-jsr310</artifactId>
-			<version>${jackson.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.appng</groupId>

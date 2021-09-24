@@ -1,8 +1,10 @@
 package org.appng.application.scheduler.configuration;
 
+import java.io.IOException;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Properties;
@@ -32,10 +34,12 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 
 @Configuration
 public class SchedulerConfig {
@@ -149,13 +153,16 @@ public class SchedulerConfig {
 
 	@Bean
 	public ObjectMapper objectMapper() {
-		ObjectMapper objectMapper = new ObjectMapper();
-		objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
-		JavaTimeModule javaTimeModule = new JavaTimeModule();
-		DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-		javaTimeModule.addSerializer(new LocalDateTimeSerializer(dtf));
-		objectMapper.registerModule(javaTimeModule);
-		return objectMapper;
+		return new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT)
+				.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS).registerModule(
+						new SimpleModule().addSerializer(OffsetDateTime.class, new JsonSerializer<OffsetDateTime>() {
+							public void serialize(OffsetDateTime value, JsonGenerator jsonGenerator,
+									SerializerProvider provider) throws IOException {
+								if (value != null) {
+									jsonGenerator.writeString(DateTimeFormatter.ISO_DATE_TIME.format(value));
+								}
+							}
+						}));
 	}
 
 	@Bean

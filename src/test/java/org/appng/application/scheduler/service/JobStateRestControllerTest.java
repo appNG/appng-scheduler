@@ -80,7 +80,7 @@ public class JobStateRestControllerTest extends TestBase {
 		String controlFile = "json/RecordsRestControllerTest-" + jobName + ".json";
 		WritingJsonValidator.writeJson = true;
 		String json = result.getResponse().getContentAsString()
-				.replaceFirst("\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}", "2021-09-21 14:49:34");
+				.replaceFirst("\\d{4}.*:\\d{2}", "2021-09-23T09:01:15.476+02:00");
 		WritingJsonValidator.validate(json, controlFile);
 	}
 }
