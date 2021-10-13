@@ -27,6 +27,7 @@ import org.quartz.impl.jdbcjobstore.PostgreSQLDelegate;
 import org.quartz.impl.jdbcjobstore.StdJDBCDelegate;
 import org.quartz.simpl.HostnameInstanceIdGenerator;
 import org.quartz.spi.JobFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -58,7 +59,7 @@ public class SchedulerConfig {
 	private static final String MYSQL_LOCK_SQL = "SELECT * FROM {0}LOCKS WHERE SCHED_NAME = {1} AND LOCK_NAME = ? LOCK IN SHARE MODE;";
 
 	@Bean
-	public DataSourceTransactionManager quartzTransactionManager(DataSource dataSource) {
+	public DataSourceTransactionManager quartzTransactionManager(@Qualifier("dataSource") DataSource dataSource) {
 		return new DataSourceTransactionManager(dataSource);
 	}
 
