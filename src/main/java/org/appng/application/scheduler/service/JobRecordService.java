@@ -47,7 +47,7 @@ import org.springframework.transaction.annotation.Transactional;
  * @author Claus Stümke
  */
 @Component
-@Transactional
+@Transactional(transactionManager = "coreTxManager")
 public class JobRecordService {
 
 	private static final String FIELD_RESULT = "result";
