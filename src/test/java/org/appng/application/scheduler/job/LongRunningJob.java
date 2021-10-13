@@ -21,6 +21,8 @@ import java.util.Map;
 import org.appng.api.ScheduledJob;
 import org.appng.api.model.Application;
 import org.appng.api.model.Site;
+import org.appng.application.scheduler.Constants;
+import org.appng.scheduler.openapi.model.JobState;
 import org.springframework.stereotype.Component;
 
 import lombok.Getter;
@@ -35,9 +37,11 @@ public class LongRunningJob implements ScheduledJob {
 	private String description;
 
 	public LongRunningJob() {
-		getJobDataMap().put("cronExpression", "0 0/10 * 1/1 * ? *");
-		getJobDataMap().put("enabled", "true");
-		getJobDataMap().put("forceState", "true");
+		getJobDataMap().put(Constants.JOB_CRON_EXPRESSION, "0 0/10 * 1/1 * ? *");
+		getJobDataMap().put(Constants.JOB_ENABLED, true);
+		getJobDataMap().put(Constants.JOB_FORCE_STATE, true);
+		getJobDataMap().put(Constants.THRESHOLD_ERROR, 5);
+		getJobDataMap().put(Constants.THRESHOLD_TIMEUNIT, JobState.TimeunitEnum.DAY.name());
 	}
 
 	public void execute(Site site, Application application) throws Exception {

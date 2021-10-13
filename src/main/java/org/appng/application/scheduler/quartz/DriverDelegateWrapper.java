@@ -44,7 +44,6 @@ import org.slf4j.Logger;
  * <a href="https://github.com/quartz-scheduler/quartz/issues/184">Quartz issue #184</a>.
  * 
  * @author Matthias Müller
- *
  */
 public class DriverDelegateWrapper implements DriverDelegate {
 
@@ -330,6 +329,7 @@ public class DriverDelegateWrapper implements DriverDelegate {
 		return delegate.selectCalendars(conn);
 	}
 
+	@SuppressWarnings("deprecation")
 	public long selectNextFireTime(Connection conn) throws SQLException {
 		return delegate.selectNextFireTime(conn);
 	}
@@ -338,6 +338,7 @@ public class DriverDelegateWrapper implements DriverDelegate {
 		return delegate.selectTriggerForFireTime(conn, fireTime);
 	}
 
+	@SuppressWarnings("deprecation")
 	public List<TriggerKey> selectTriggerToAcquire(Connection conn, long noLaterThan, long noEarlierThan)
 			throws SQLException {
 		return delegate.selectTriggerToAcquire(conn, noLaterThan, noEarlierThan);

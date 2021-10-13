@@ -21,12 +21,13 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Properties;
 
-import org.appng.api.Platform;
 import org.appng.api.ScheduledJobResult;
 import org.appng.api.ScheduledJobResult.ExecutionResult;
+import org.appng.api.model.Application;
+import org.appng.api.model.Site;
 import org.appng.api.support.CallableDataSource;
+import org.appng.application.scheduler.SchedulingProperties;
 import org.appng.application.scheduler.model.JobResult;
 import org.appng.application.scheduler.quartz.RecordingJobListener;
 import org.appng.core.domain.JobExecutionRecord;
@@ -37,37 +38,27 @@ import org.appng.testsupport.validation.XPathDifferenceHandler;
 import org.junit.Assert;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
+import org.quartz.JobListener;
 import org.quartz.Trigger;
 import org.quartz.TriggerBuilder;
 import org.quartz.impl.JobDetailImpl;
-import org.quartz.impl.jdbcjobstore.HSQLDBDelegate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-@RunWith(SpringJUnit4ClassRunner.class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @ContextConfiguration(locations = { TestBase.TESTCONTEXT_CORE, TestBase.TESTCONTEXT_JPA,
 		"classpath:beans-test-core.xml" }, initializers = TestJobRecordings.class)
 public class TestJobRecordings extends TestBase {
 
-	@Mock
-	JobExecutionContext jobContext;
-
-	@Autowired
-	RecordingJobListener listener;
-
-	@Autowired
-	JobExecutionRecordRepository recordRepo;
-
-	@Autowired
-	SchedulingController schedulingController;
+	private @Mock JobExecutionContext jobContext;
+	private @Autowired RecordingJobListener listener;
+	private @Autowired JobExecutionRecordRepository recordRepo;
+	private @Autowired SchedulingController schedulingController;
 
 	static {
 		WritingXmlValidator.writeXml = false;
@@ -82,16 +73,7 @@ public class TestJobRecordings extends TestBase {
 
 	@Override
 	protected java.util.Properties getProperties() {
-		Properties properties = super.getProperties();
-		properties.put("indexExpression", "0 0/5 * * * ? 2042");
-		properties.put("houseKeepingExpression", "0 0/5 * * * ? 2042");
-		properties.put("indexEnabled", "false");
-		properties.put("site.name", "localhost");
-		properties.put("validateJobsOnStartup", "false");
-		properties.put("houseKeepingEnabled", "false");
-		properties.put("quartzDriverDelegate", HSQLDBDelegate.class.getName());
-		properties.put("platform." + Platform.Property.JSP_FILE_TYPE, ".jsp");
-		return properties;
+		return SchedulingProperties.getProperties();
 	}
 
 	@Test
@@ -109,7 +91,20 @@ public class TestJobRecordings extends TestBase {
 	public void testAddRecord() {
 		ScheduledJobResult result = new ScheduledJobResult();
 		result.setResult(ExecutionResult.SUCCESS);
-		JobResult jobResult = new JobResult(result, application.getName(), site.getName(), "thejob");
+		JobResult jobResult = createJobResult(listener, result, jobContext, site, application, "thejob");
+
+		List<JobExecutionRecord> saved = recordRepo.findBySiteAndJobName(site.getName(), jobResult.getJobName());
+		Assert.assertEquals(1, saved.size());
+		Assert.assertEquals(jobResult.getSiteName(), saved.get(0).getSite());
+		Assert.assertEquals(jobResult.getApplicationName(), saved.get(0).getApplication());
+		Assert.assertEquals(jobResult.getJobName(), saved.get(0).getJobName());
+		Assert.assertEquals(jobContext.getTrigger().getKey().toString(), saved.get(0).getTriggername());
+		Assert.assertEquals(result.getResult().name(), saved.get(0).getResult());
+	}
+
+	public static JobResult createJobResult(JobListener listener, ScheduledJobResult result,
+			JobExecutionContext jobContext, Site site, Application application, String jobName) {
+		JobResult jobResult = new JobResult(result, application.getName(), site.getName(), jobName);
 		when(jobContext.getResult()).thenReturn(jobResult);
 		when(jobContext.getFireTime()).thenReturn(new Date());
 		Trigger trigger = TriggerBuilder.newTrigger().withIdentity(site.getName(), application.getName())
@@ -121,14 +116,7 @@ public class TestJobRecordings extends TestBase {
 		when(jobContext.getJobDetail()).thenReturn(value);
 
 		listener.jobWasExecuted(jobContext, null);
-
-		List<JobExecutionRecord> saved = recordRepo.findBySiteAndJobName(site.getName(), jobResult.getJobName());
-		Assert.assertEquals(1, saved.size());
-		Assert.assertEquals(jobResult.getSiteName(), saved.get(0).getSite());
-		Assert.assertEquals(jobResult.getApplicationName(), saved.get(0).getApplication());
-		Assert.assertEquals(jobResult.getJobName(), saved.get(0).getJobName());
-		Assert.assertEquals(trigger.getKey().toString(), saved.get(0).getTriggername());
-		Assert.assertEquals(result.getResult().name(), saved.get(0).getResult());
+		return jobResult;
 	}
 
 	@Test

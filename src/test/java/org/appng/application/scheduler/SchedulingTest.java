@@ -17,14 +17,13 @@ package org.appng.application.scheduler;
 
 import java.io.IOException;
 import java.util.HashSet;
-import java.util.Properties;
 import java.util.Set;
 
 import org.appng.api.FieldProcessor;
-import org.appng.api.Platform;
 import org.appng.api.ProcessingException;
 import org.appng.api.model.Application;
 import org.appng.api.support.CallableAction;
+import org.appng.api.support.CallableDataSource;
 import org.appng.application.scheduler.business.SchedulingController;
 import org.appng.application.scheduler.model.JobForm;
 import org.appng.application.scheduler.model.JobModel;
@@ -37,14 +36,11 @@ import org.appng.xml.platform.Data;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-@RunWith(SpringJUnit4ClassRunner.class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @ContextConfiguration(locations = { "classpath:beans-test.xml" }, initializers = SchedulingTest.class)
 public class SchedulingTest extends TestBase {
@@ -64,16 +60,7 @@ public class SchedulingTest extends TestBase {
 
 	@Override
 	protected java.util.Properties getProperties() {
-		Properties properties = super.getProperties();
-		properties.put("indexExpression", "0 0/5 * * * ? 2042");
-		properties.put("houseKeepingExpression", "0 0/5 * * * ? 2042");
-		properties.put("indexEnabled", "false");
-		properties.put("site.name", "localhost");
-		properties.put("validateJobsOnStartup", "false");
-		properties.put("houseKeepingEnabled", "false");
-		properties.put("quartzDriverDelegate", "org.quartz.impl.jdbcjobstore.HSQLDBDelegate");
-		properties.put("platform." + Platform.Property.JSP_FILE_TYPE, ".jsp");
-		return properties;
+		return SchedulingProperties.getProperties();
 	}
 
 	@Test
@@ -138,8 +125,9 @@ public class SchedulingTest extends TestBase {
 	@Test
 	public void testShowJob() throws ProcessingException, IOException {
 		DataSourceCall dataSource = getDataSource("job").withParam("id", "appng-scheduler_indexJob");
-		Data data = dataSource.getCallableDataSource().perform("");
-		validate(data);
+		CallableDataSource singleJob = dataSource.getCallableDataSource();
+		singleJob.perform("");
+		validate(singleJob.getDatasource());
 	}
 
 	@Test

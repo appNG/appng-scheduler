@@ -1,0 +1,120 @@
+openapi: 3.0.1
+info:
+  version: 1.0.0
+  title: appNG Scheduler REST API
+  description: The REST API for appNG Scheduler
+  contact:
+    name: appNG developer team
+    email: matthias.mueller@appng.org
+    url: https://github.com/appNG/appng-scheduler
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0
+security:
+  - bearerAuth: []
+paths:
+  "/jobState/{application}/{job}":
+    get:
+      tags:
+        - Scheduler
+      operationId: getJobState
+      parameters:
+        - in: path 
+          name: application
+          description: the site to call
+          required: true
+          schema:
+            type: string
+        - in: path 
+          name: job
+          description: the application to call
+          required: true
+          schema:
+            type: string
+        - in: query 
+          name: pageSize
+          description: site of the page
+          required: false
+          schema:
+            type: integer
+        - in: query 
+          name: records
+          description: the ID of the page
+          required: true
+          schema:
+            type: boolean  
+      responses:
+        "200":
+          description: datasource response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/jobState" 
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+  schemas:
+    jobState:
+      type: object    
+      properties:
+        site:
+          type: string
+          description: name of the site
+        application:
+          type: string
+          description: name of the application
+        job:
+          type: string
+          description: name of the job
+        thresholdWarn:
+          type: integer
+          description: the waring treshold
+        thresholdError:
+          type: integer
+          description: the error treshold
+        totalRecords:
+          type: integer
+          description: total number of records
+        state:
+            type: string
+            enum: [OK, WARN, ERROR, UNDEFINED]
+        timeunit:
+            type: string
+            enum: [MINUTE, HOUR, DAY, WEEK, MONTH, YEAR]
+        startedAfter:
+          type: string
+          format: date-time
+          description: the date after that the records started
+        records:
+          type: array
+          items:
+            $ref: "#/components/schemas/jobRecord"
+    jobRecord:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: the ID
+        start:
+          type: string
+          format: date-time
+          description: start date
+        end:
+          type: string
+          format: date-time
+          description: end date
+        duration:
+          type: integer
+          description: duration in milliseconds
+        runOnce:
+          type: boolean
+          description: run once flag
+        stacktrace:
+          type: string
+          description: the stacktrace
+        state:
+            type: string
+            enum: [OK, ERROR]
+      

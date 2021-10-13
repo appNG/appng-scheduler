@@ -30,7 +30,6 @@ import org.quartz.JobKey;
  * <a href="https://github.com/quartz-scheduler/quartz/issues/184">Quartz issue #184</a>.
  * 
  * @author Matthias Müller
- *
  */
 public class SchedulerJobDetail implements JobDetail {
 

@@ -28,23 +28,29 @@ import org.appng.application.scheduler.MessageConstants;
 import org.appng.application.scheduler.SchedulerUtils;
 import org.quartz.JobDetail;
 import org.quartz.JobKey;
+import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * An {@link ActionProvider} to enable/disable a {@link ScheduledJob}.
  * 
  * @author Matthias Müller
- * 
  */
+@Slf4j
+@Component("setJobState")
 public class SetSchedulerStateAction extends SchedulerAware implements ActionProvider<Void> {
+
+	public SetSchedulerStateAction(Scheduler scheduler) {
+		super(scheduler);
+	}
 
 	private static final String ACTION_DELETE = "delete";
 	private static final String ACTION_START = "start";
 	private static final String ACTION_UNSCHEDULE = "unschedule";
 	private static final String ACTION_SCHEDULE = "schedule";
-	private static Logger log = LoggerFactory.getLogger(SetSchedulerStateAction.class);
 
 	public void perform(Site site, Application application, Environment environment, Options options, Request request,
 			Void valueHolder, FieldProcessor fp) {

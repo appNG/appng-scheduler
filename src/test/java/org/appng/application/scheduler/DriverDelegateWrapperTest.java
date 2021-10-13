@@ -46,7 +46,6 @@ import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
  * Test for {@link DriverDelegateWrapper}
  * 
  * @author Matthias Müller
- *
  */
 public class DriverDelegateWrapperTest {
 

@@ -1,0 +1,12 @@
+{
+  "site" : "localhost",
+  "application" : "appng-scheduler",
+  "job" : "appng-scheduler_longRunningJob",
+  "thresholdWarn" : null,
+  "thresholdError" : 5,
+  "totalRecords" : 2,
+  "state" : "ERROR",
+  "timeunit" : "DAY",
+  "startedAfter" : "2021-09-23T09:01:15.476+02:00",
+  "records" : null
+}

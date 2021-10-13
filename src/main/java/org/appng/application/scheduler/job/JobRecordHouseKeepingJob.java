@@ -34,7 +34,7 @@ import lombok.Data;
 @Data
 public class JobRecordHouseKeepingJob implements ScheduledJob {
 
-	private JobRecordService jobRecordService;
+	private final JobRecordService jobRecordService;
 
 	private ScheduledJobResult result;
 

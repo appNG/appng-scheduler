@@ -37,21 +37,20 @@ import org.quartz.JobDetail;
 import org.quartz.JobKey;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Component
 public class SchedulingController extends SchedulerAware implements ApplicationController {
-
-	private static final Logger LOGGER = LoggerFactory.getLogger(SchedulingController.class);
 
 	private RecordingJobListener recordingJobListener;
 
 	public SchedulingController(RecordingJobListener recordingJobListener, Scheduler scheduler) {
+		super(scheduler);
 		this.recordingJobListener = recordingJobListener;
-		this.scheduler = scheduler;
 	}
 
 	public boolean start(Site site, Application application, Environment env) {
@@ -66,7 +65,7 @@ public class SchedulingController extends SchedulerAware implements ApplicationC
 				for (String jobBeanName : jobBeanNames) {
 					ScheduledJob scheduledJob = (ScheduledJob) a.getBean(jobBeanName);
 					if (null == scheduledJob) {
-						LOGGER.warn("error retrieving {} from {}", jobBeanName, a.getName());
+						log.warn("error retrieving {} from {}", jobBeanName, a.getName());
 						continue;
 					}
 					try {
@@ -79,15 +78,15 @@ public class SchedulingController extends SchedulerAware implements ApplicationC
 							schedulerUtils.scheduleJob(jobDetail, jobKey.getName(), description, site.getName());
 						}
 					} catch (Exception e) {
-						LOGGER.error(String.format("error starting job '%s' of application %s (type is %s)",
-								jobBeanName, application.getName(), scheduledJob.getClass().getName()), e);
+						log.error(String.format("error starting job '%s' of application %s (type is %s)", jobBeanName,
+								application.getName(), scheduledJob.getClass().getName()), e);
 					}
 				}
 			}
 			scheduler.getListenerManager().addJobListener(recordingJobListener);
 			scheduler.start();
 		} catch (SchedulerException e) {
-			LOGGER.error("error while starting scheduler", e);
+			log.error("error while starting scheduler", e);
 			return false;
 		}
 		return true;
@@ -108,10 +107,10 @@ public class SchedulingController extends SchedulerAware implements ApplicationC
 				}
 				Application app = site.getApplication(appName);
 				if (null == app) {
-					LOGGER.warn("application '{}' of site '{}' not found for job '{}'", appName, site.getName(),
+					log.warn("application '{}' of site '{}' not found for job '{}'", appName, site.getName(),
 							jobKey.getName());
 				} else if (null == app.getBean(beanName, ScheduledJob.class)) {
-					LOGGER.error("bean named '{}' not found in application '{}' of site '{}' for job '{}'", beanName,
+					log.error("bean named '{}' not found in application '{}' of site '{}' for job '{}'", beanName,
 							appName, site.getName(), jobKey.getName());
 				} else {
 					jobOK = true;
@@ -121,7 +120,7 @@ public class SchedulingController extends SchedulerAware implements ApplicationC
 				}
 			}
 		} catch (SchedulerException e) {
-			LOGGER.error("error while retrieving jobs for site " + site.getName(), e);
+			log.error("error while retrieving jobs for site " + site.getName(), e);
 		}
 	}
 
@@ -132,7 +131,7 @@ public class SchedulingController extends SchedulerAware implements ApplicationC
 			scheduler.getContext().clear();
 			return true;
 		} catch (SchedulerException e) {
-			LOGGER.error("error while removing scheduler from site " + site.getName(), e);
+			log.error("error while removing scheduler from site " + site.getName(), e);
 		} finally {
 			scheduler = null;
 		}
@@ -155,7 +154,7 @@ public class SchedulingController extends SchedulerAware implements ApplicationC
 			}
 
 			public void addOkMessage(String message) {
-				LOGGER.info(message);
+				log.info(message);
 			}
 
 			public void addNoticeMessage(FieldDef field, String message) {
@@ -163,7 +162,7 @@ public class SchedulingController extends SchedulerAware implements ApplicationC
 			}
 
 			public void addNoticeMessage(String message) {
-				LOGGER.debug(message);
+				log.debug(message);
 			}
 
 			public void addInvalidMessage(FieldDef field, String message) {
@@ -171,7 +170,7 @@ public class SchedulingController extends SchedulerAware implements ApplicationC
 			}
 
 			public void addInvalidMessage(String message) {
-				LOGGER.warn(message);
+				log.warn(message);
 			}
 
 			public void addErrorMessage(FieldDef field, String message) {
@@ -179,7 +178,7 @@ public class SchedulingController extends SchedulerAware implements ApplicationC
 			}
 
 			public void addErrorMessage(String message) {
-				LOGGER.error(message);
+				log.error(message);
 			}
 
 			public List<FieldDef> getFields() {

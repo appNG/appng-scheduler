@@ -2,7 +2,7 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>appng-scheduler</artifactId>
-	<version>1.13.0</version>
+	<version>1.14.0</version>
 	<name>Scheduler</name>
 	<description>Scheduling using Quartz Scheduler</description>
 	<url>https://www.appng.org</url>
@@ -10,7 +10,7 @@
 	<parent>
 		<groupId>org.appng</groupId>
 		<artifactId>appng-application-parent</artifactId>
-		<version>1.20.2</version>
+		<version>1.23.0</version>
 	</parent>
 
 	<properties>
@@ -118,12 +118,43 @@
 		</testResources>
 		<plugins>
 			<plugin>
+				<groupId>org.openapitools</groupId>
+				<artifactId>openapi-generator-maven-plugin</artifactId>
+				<version>5.1.1</version>
+				<executions>
+					<execution>
+						<id>rest-api</id>
+						<goals>
+							<goal>generate</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<inputSpec>${basedir}/src/main/resources/scheduler-api.yaml</inputSpec>
+					<!--templateDirectory>${project.basedir}/openapi/templates</templateDirectory -->
+					<generatorName>java</generatorName>
+					<generateApis>true</generateApis>
+					<generateModels>true</generateModels>
+					<generateSupportingFiles>true</generateSupportingFiles>
+					<configOptions>
+						<useAbstractionForFiles>true</useAbstractionForFiles>
+						<apiPackage>org.appng.scheduler.openapi</apiPackage>
+						<invokerPackage>org.appng.scheduler.openapi.invoke</invokerPackage>
+						<modelPackage>org.appng.scheduler.openapi.model</modelPackage>
+						<library>resttemplate</library>
+						<java8>true</java8>
+						<dateLibrary>java8</dateLibrary>
+					</configOptions>
+				</configuration>
+			</plugin>
+			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>build-helper-maven-plugin</artifactId>
 				<version>3.0.0</version>
 				<configuration>
 					<sources>
 						<source>target/generated-sources/constants</source>
+						<source>target/generated-sources/openapi/src/main/java</source>
 					</sources>
 				</configuration>
 				<executions>
@@ -150,6 +181,7 @@
 				<configuration>
 					<additionalparam>-Xdoclint:all,-Xdoclint:-html</additionalparam>
 					<sourcepath>src/main/java:target/generated-sources/constants</sourcepath>
+					<sourcepath>target/generated-sources/openapi/src/main/java</sourcepath>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -240,12 +272,16 @@
 		<dependency>
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
-			<version>5.1.44</version>
+			<version>8.0.26</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>io.swagger</groupId>
+			<artifactId>swagger-annotations</artifactId>
 		</dependency>
 	</dependencies>
 

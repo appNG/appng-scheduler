@@ -1,6 +1,6 @@
 image::https://www.aiticon.com/assets/images/appng_logo_760px.jpg[]
-:snapshot: 1.11.4-SNAPSHOT
-:stable: 1.11.3
+:snapshot: 1.14.0-SNAPSHOT
+:stable: 1.13.0
 :current: {snapshot}
 
 [caption="Apache License 2.0",link=LICENSE]

@@ -31,7 +31,6 @@ import org.springframework.stereotype.Component;
  * about the job in a database. Such as start- and endtime, runtime and result.
  * 
  * @author Claus Stümke
- *
  */
 @Component
 public class RecordingJobListener implements JobListener {
