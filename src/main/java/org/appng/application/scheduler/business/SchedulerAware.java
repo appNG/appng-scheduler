@@ -18,7 +18,7 @@ package org.appng.application.scheduler.business;
 import org.quartz.Scheduler;
 import org.springframework.transaction.annotation.Transactional;
 
-@Transactional
+@Transactional(transactionManager = "quartzTransactionManager")
 abstract class SchedulerAware {
 
 	protected Scheduler scheduler;
