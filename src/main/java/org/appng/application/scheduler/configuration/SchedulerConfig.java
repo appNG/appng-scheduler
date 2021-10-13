@@ -36,6 +36,7 @@ import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
+import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.SerializerProvider;
@@ -44,9 +45,15 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 @Configuration
 public class SchedulerConfig {
 
-	private static final String DRIVER_DELEGATE_CLASS = "org.quartz.jobStore.driverDelegateClass";
-	private static final String DRIVER_DELEGATE_INIT_STRING = "org.quartz.jobStore.driverDelegateInitString";
-	private static final String SELECT_WITH_LOCK_SQL = "org.quartz.jobStore.selectWithLockSQL";
+	private static final String SCHEDULER_PREFIX = "Scheduler_";
+
+	private static final String JOBSTORE_PREFIX = "org.quartz.jobStore.";
+	private static final String CLUSTER_CHECKIN_INTERVAL = JOBSTORE_PREFIX + "clusterCheckinInterval";
+	private static final String DRIVER_DELEGATE_CLASS = JOBSTORE_PREFIX + "driverDelegateClass";
+	private static final String DRIVER_DELEGATE_INIT_STRING = JOBSTORE_PREFIX + "driverDelegateInitString";
+	private static final String IS_CLUSTERED = JOBSTORE_PREFIX + "isClustered";
+	private static final String SELECT_WITH_LOCK_SQL = JOBSTORE_PREFIX + "selectWithLockSQL";
+
 	private static final String MSSQL_LOCK_SQL = "SELECT * FROM {0}LOCKS WITH (UPDLOCK,ROWLOCK) WHERE SCHED_NAME = {1} AND LOCK_NAME = ?";
 	private static final String MYSQL_LOCK_SQL = "SELECT * FROM {0}LOCKS WHERE SCHED_NAME = {1} AND LOCK_NAME = ? LOCK IN SHARE MODE;";
 
@@ -62,7 +69,7 @@ public class SchedulerConfig {
 		DataSource dataSource = quartzTransactionManager.getDataSource();
 		SchedulerFactoryBean scheduler = new SchedulerFactoryBean();
 
-		scheduler.setSchedulerName("Scheduler_" + siteName);
+		scheduler.setSchedulerName(SCHEDULER_PREFIX + siteName);
 		scheduler.setAutoStartup(false);
 		scheduler.setOverwriteExistingJobs(true);
 		scheduler.setDataSource(dataSource);
@@ -72,8 +79,7 @@ public class SchedulerConfig {
 		String driverDelegate = StdJDBCDelegate.class.getName();
 		String lockSql = null;
 		if (!quartzProperties.contains(SELECT_WITH_LOCK_SQL)) {
-			try (
-					Connection connection = dataSource.getConnection()) {
+			try (Connection connection = dataSource.getConnection()) {
 				String databaseProductName = connection.getMetaData().getDatabaseProductName().toLowerCase();
 				if (databaseProductName.contains("mysql") || databaseProductName.contains("mariadb")) {
 					lockSql = MYSQL_LOCK_SQL;
@@ -110,8 +116,8 @@ public class SchedulerConfig {
 			@Value("${platform.messagingEnabled:false}") boolean clustered,
 			@Value("${quartzClusterCheckinInterval:20000}") String clusterCheckinInterval) {
 		Properties props = new Properties();
-		props.put(StdSchedulerFactory.PROP_SCHED_INSTANCE_NAME, "Scheduler_" + siteName);
-		props.put(StdSchedulerFactory.PROP_SCHED_THREAD_NAME, "Scheduler_" + siteName);
+		props.put(StdSchedulerFactory.PROP_SCHED_INSTANCE_NAME, SCHEDULER_PREFIX + siteName);
+		props.put(StdSchedulerFactory.PROP_SCHED_THREAD_NAME, SCHEDULER_PREFIX + siteName);
 		props.put(StdSchedulerFactory.PROP_SCHED_INSTANCE_ID, "AUTO");
 		props.put(StdSchedulerFactory.PROP_SCHED_INTERRUPT_JOBS_ON_SHUTDOWN, true);
 		props.put(StdSchedulerFactory.PROP_SCHED_INSTANCE_ID_GENERATOR_CLASS,
@@ -119,8 +125,8 @@ public class SchedulerConfig {
 
 		props.put("org.quartz.threadPool.threadCount", "3");
 		props.put("org.quartz.scheduler.skipUpdateCheck", true);
-		props.put("org.quartz.jobStore.isClustered", clustered);
-		props.put("org.quartz.jobStore.clusterCheckinInterval", clusterCheckinInterval);
+		props.put(IS_CLUSTERED, clustered);
+		props.put(CLUSTER_CHECKIN_INTERVAL, clusterCheckinInterval);
 		props.put(DRIVER_DELEGATE_CLASS, DriverDelegateWrapper.class.getName());
 		return props;
 	}
@@ -153,16 +159,17 @@ public class SchedulerConfig {
 
 	@Bean
 	public ObjectMapper objectMapper() {
+		Module dateModule = new SimpleModule().addSerializer(OffsetDateTime.class,
+				new JsonSerializer<OffsetDateTime>() {
+					public void serialize(OffsetDateTime value, JsonGenerator jsonGenerator,
+							SerializerProvider provider) throws IOException {
+						if (value != null) {
+							jsonGenerator.writeString(DateTimeFormatter.ISO_DATE_TIME.format(value));
+						}
+					}
+				});
 		return new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT)
-				.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS).registerModule(
-						new SimpleModule().addSerializer(OffsetDateTime.class, new JsonSerializer<OffsetDateTime>() {
-							public void serialize(OffsetDateTime value, JsonGenerator jsonGenerator,
-									SerializerProvider provider) throws IOException {
-								if (value != null) {
-									jsonGenerator.writeString(DateTimeFormatter.ISO_DATE_TIME.format(value));
-								}
-							}
-						}));
+				.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS).registerModule(dateModule);
 	}
 
 	@Bean

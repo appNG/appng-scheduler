@@ -329,6 +329,7 @@ public class DriverDelegateWrapper implements DriverDelegate {
 		return delegate.selectCalendars(conn);
 	}
 
+	@SuppressWarnings("deprecation")
 	public long selectNextFireTime(Connection conn) throws SQLException {
 		return delegate.selectNextFireTime(conn);
 	}
@@ -337,6 +338,7 @@ public class DriverDelegateWrapper implements DriverDelegate {
 		return delegate.selectTriggerForFireTime(conn, fireTime);
 	}
 
+	@SuppressWarnings("deprecation")
 	public List<TriggerKey> selectTriggerToAcquire(Connection conn, long noLaterThan, long noEarlierThan)
 			throws SQLException {
 		return delegate.selectTriggerToAcquire(conn, noLaterThan, noEarlierThan);

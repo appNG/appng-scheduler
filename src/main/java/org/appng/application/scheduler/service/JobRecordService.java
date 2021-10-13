@@ -15,7 +15,6 @@
  */
 package org.appng.application.scheduler.service;
 
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -35,7 +34,6 @@ import org.appng.persistence.repository.SearchQuery;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionException;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -51,8 +49,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Component
 @Transactional
 public class JobRecordService {
-
-	static boolean testMode = false;
 
 	private static final String FIELD_RESULT = "result";
 	private static final String FIELD_DURATION = "duration";
@@ -114,10 +110,6 @@ public class JobRecordService {
 
 	public Page<JobExecutionRecord> getJobRecords(String siteName, String applicationFilter, String jobFilter,
 			Date start, Date end, String result, Integer duration, Pageable pageable) {
-		if (testMode) {
-			return new PageImpl<>(Arrays.asList(), pageable, 1);
-		}
-
 		SearchQuery<JobExecutionRecord> query = recordRepository.createSearchQuery();
 		query.equals(FIELD_SITE, siteName);
 		query.equals(FIELD_APPLICATION, applicationFilter);
