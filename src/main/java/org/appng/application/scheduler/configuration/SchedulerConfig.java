@@ -43,6 +43,9 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Configuration
 public class SchedulerConfig {
 
@@ -101,9 +104,13 @@ public class SchedulerConfig {
 		if (null != lockSql) {
 			quartzProperties.put(SELECT_WITH_LOCK_SQL, lockSql);
 		}
-		scheduler.setQuartzProperties(quartzProperties);
-
 		quartzProperties.put(DRIVER_DELEGATE_INIT_STRING, "delegate=" + driverDelegate);
+
+		if (log.isDebugEnabled()) {
+			log.debug("Quartz properties: {}", quartzProperties);
+		}
+
+		scheduler.setQuartzProperties(quartzProperties);
 		return scheduler;
 	}
 
