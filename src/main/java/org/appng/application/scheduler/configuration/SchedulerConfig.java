@@ -127,13 +127,13 @@ public class SchedulerConfig {
 		props.put(StdSchedulerFactory.PROP_SCHED_INSTANCE_NAME, SCHEDULER_PREFIX + siteName);
 		props.put(StdSchedulerFactory.PROP_SCHED_THREAD_NAME, SCHEDULER_PREFIX + siteName);
 		props.put(StdSchedulerFactory.PROP_SCHED_INSTANCE_ID, "AUTO");
-		props.put(StdSchedulerFactory.PROP_SCHED_INTERRUPT_JOBS_ON_SHUTDOWN, true);
+		props.put(StdSchedulerFactory.PROP_SCHED_INTERRUPT_JOBS_ON_SHUTDOWN, "true");
 		props.put(StdSchedulerFactory.PROP_SCHED_INSTANCE_ID_GENERATOR_CLASS,
 				HostnameInstanceIdGenerator.class.getName());
 
 		props.put("org.quartz.threadPool.threadCount", "3");
-		props.put("org.quartz.scheduler.skipUpdateCheck", true);
-		props.put(IS_CLUSTERED, clustered);
+		props.put("org.quartz.scheduler.skipUpdateCheck", "true");
+		props.put(IS_CLUSTERED, String.valueOf(clustered));
 		props.put(CLUSTER_CHECKIN_INTERVAL, clusterCheckinInterval);
 		props.put(DRIVER_DELEGATE_CLASS, DriverDelegateWrapper.class.getName());
 		return props;
