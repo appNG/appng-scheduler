@@ -67,8 +67,7 @@ public class SchedulerConfig {
 	}
 
 	@Bean
-	public SchedulerFactoryBean scheduler(JobFactory jobFactory,
-			@Value("${quartzDriverDelegate}") String quartzDriverDelegate, @Value("${site.name}") String siteName,
+	public SchedulerFactoryBean scheduler(JobFactory jobFactory, @Value("${site.name}") String siteName,
 			DataSourceTransactionManager quartzTransactionManager, Properties quartzProperties) throws SQLException {
 		DataSource dataSource = quartzTransactionManager.getDataSource();
 		SchedulerFactoryBean scheduler = new SchedulerFactoryBean();
