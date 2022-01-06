@@ -47,7 +47,7 @@ import org.quartz.JobKey;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.impl.matchers.GroupMatcher;
-import org.springframework.beans.factory.annotation.Lookup;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -74,6 +74,7 @@ public class JobStateRestController implements JobStateApi {
 	private JobRecordService jobRecordService;
 	private Scheduler scheduler;
 	private Site site;
+	private @Autowired HttpServletRequest request;
 	private @Value("${bearerToken}") String bearerToken;
 	private @Value("${skipAuth:false}") boolean skipAuth;
 	private @Value("${platform.schedulerStateWhitelist:127.0.0.1}") String schedulerStateWhitelist;
@@ -105,9 +106,8 @@ public class JobStateRestController implements JobStateApi {
 		}
 	}
 
-	@Lookup
 	public HttpServletRequest getRequest() {
-		return null;
+		return request;
 	}
 
 	@Override
