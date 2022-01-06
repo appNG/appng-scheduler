@@ -32,6 +32,7 @@ import org.apache.commons.collections4.EnumerationUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.appng.api.ScheduledJobResult.ExecutionResult;
+import org.appng.api.SiteProperties;
 import org.appng.api.model.Site;
 import org.appng.application.scheduler.Constants;
 import org.appng.core.controller.HttpHeaders;
@@ -77,6 +78,7 @@ public class JobStateRestController implements JobStateApi {
 	private @Autowired HttpServletRequest request;
 	private @Value("${bearerToken}") String bearerToken;
 	private @Value("${skipAuth:false}") boolean skipAuth;
+	private @Value("${site." + SiteProperties.SERVICE_PATH + "}") String servicePath;
 	private @Value("${platform.schedulerStateWhitelist:127.0.0.1}") String schedulerStateWhitelist;
 
 	public JobStateRestController(JobRecordService jobRecordService, Scheduler scheduler, Site site) {
@@ -129,8 +131,8 @@ public class JobStateRestController implements JobStateApi {
 				String[] splittedName = name.split("_");
 				job.setApplication(splittedName[0]);
 				job.setJob(name.split("_")[1]);
-				String detail = getRequest().getRequestURL().toString().replace("/list",
-						String.format("/%s/%s", job.getApplication(), job.getJob()));
+				String detail = String.format("%s%s/%s/appng-scheduler/rest/jobState/%s/%s", site.getDomain(),
+						servicePath, site.getName(), job.getApplication(), job.getJob());
 				job.setSelf(detail);
 				job.setJobData(jobDataMap.getWrappedMap());
 				jobList.add(job);

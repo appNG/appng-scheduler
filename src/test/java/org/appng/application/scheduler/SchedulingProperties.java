@@ -18,6 +18,7 @@ package org.appng.application.scheduler;
 import java.util.Properties;
 
 import org.appng.api.Platform;
+import org.appng.api.SiteProperties;
 import org.quartz.impl.jdbcjobstore.HSQLDBDelegate;
 
 public class SchedulingProperties {
@@ -36,6 +37,7 @@ public class SchedulingProperties {
 		properties.put("skipAuth", "true");
 		properties.put("quartzDriverDelegate", HSQLDBDelegate.class.getName());
 		properties.put("platform." + Platform.Property.JSP_FILE_TYPE, ".jsp");
+		properties.put("site." + SiteProperties.SERVICE_PATH, "/service");
 		return properties;
 	}
 

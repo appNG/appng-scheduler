@@ -1,7 +1,21 @@
 {
   "jobs" : [ {
-    "_self" : "http://localhost",
-    "site" : "localhost",
+    "_self" : "https://appng.org/service/appng/appng-scheduler/rest/jobState/appng-scheduler/houseKeepingJob",
+    "site" : "appng",
+    "application" : "appng-scheduler",
+    "job" : "houseKeepingJob",
+    "jobData" : {
+      "SCHEDULED_JOB" : "org.appng.application.scheduler.job.JobRecordHouseKeepingJob",
+      "jobBeanName" : "houseKeepingJob",
+      "cronExpression" : "0 0/5 * * * ? 2042",
+      "origin" : "appng-scheduler",
+      "siteName" : "appng",
+      "runOnce" : true,
+      "enabled" : false
+    }
+  }, {
+    "_self" : "https://appng.org/service/appng/appng-scheduler/rest/jobState/appng-scheduler/longRunningJob",
+    "site" : "appng",
     "application" : "appng-scheduler",
     "job" : "longRunningJob",
     "jobData" : {
@@ -11,13 +25,13 @@
       "thresholdTimeunit" : "DAY",
       "origin" : "appng-scheduler",
       "thresholdError" : 5,
-      "siteName" : "localhost",
+      "siteName" : "appng",
       "forceState" : true,
       "enabled" : true
     }
   }, {
-    "_self" : "http://localhost",
-    "site" : "localhost",
+    "_self" : "https://appng.org/service/appng/appng-scheduler/rest/jobState/appng-scheduler/indexJob",
+    "site" : "appng",
     "application" : "appng-scheduler",
     "job" : "indexJob",
     "jobData" : {
@@ -27,23 +41,9 @@
       "thresholdTimeunit" : "DAY",
       "origin" : "appng-scheduler",
       "thresholdError" : 1,
-      "siteName" : "localhost",
+      "siteName" : "appng",
       "enabled" : false,
       "jspFileType" : ".jsp"
-    }
-  }, {
-    "_self" : "http://localhost",
-    "site" : "localhost",
-    "application" : "appng-scheduler",
-    "job" : "houseKeepingJob",
-    "jobData" : {
-      "SCHEDULED_JOB" : "org.appng.application.scheduler.job.JobRecordHouseKeepingJob",
-      "jobBeanName" : "houseKeepingJob",
-      "cronExpression" : "0 0/5 * * * ? 2042",
-      "origin" : "appng-scheduler",
-      "siteName" : "localhost",
-      "runOnce" : true,
-      "enabled" : false
     }
   } ]
 }

@@ -1,5 +1,5 @@
 {
-  "site" : "localhost",
+  "site" : "appng",
   "application" : "appng-scheduler",
   "job" : "appng-scheduler_longRunningJob",
   "totalRecords" : 3,
@@ -12,7 +12,7 @@
     "thresholdTimeunit" : "DAY",
     "origin" : "appng-scheduler",
     "thresholdError" : 5,
-    "siteName" : "localhost",
+    "siteName" : "appng",
     "forceState" : true,
     "enabled" : true
   },

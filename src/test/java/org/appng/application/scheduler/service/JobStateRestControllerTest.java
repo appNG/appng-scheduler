@@ -25,6 +25,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.quartz.JobExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -70,14 +71,24 @@ public class JobStateRestControllerTest extends TestBase {
 	}
 
 	@Override
+	protected void mockSite(GenericApplicationContext applicationContext) {
+		super.mockSite(applicationContext);
+		Mockito.when(site.getDomain()).thenReturn("https://appng.org");
+		Mockito.when(site.getName()).thenReturn("appng");
+	}
+
+	@Override
 	protected Properties getProperties() {
 		return SchedulingProperties.getProperties();
 	}
 
+	
+
 	@Test
 	public void testJobs() throws Exception {
-		MockHttpServletRequestBuilder builder = get("/jobState/list").header(HttpHeaders.AUTHORIZATION, "Bearer TheBearer")
-				.contentType(MediaType.APPLICATION_JSON).characterEncoding("utf-8");
+		MockHttpServletRequestBuilder builder = get("/jobState/list")
+				.header(HttpHeaders.AUTHORIZATION, "Bearer TheBearer").contentType(MediaType.APPLICATION_JSON)
+				.characterEncoding("utf-8");
 		ResultActions response = mvc.perform(builder);
 		MvcResult result = response.andExpect(status().is(HttpStatus.OK.value())).andReturn();
 		String controlFile = "json/RecordsRestControllerTest-testJobs.json";
