@@ -1,0 +1,49 @@
+{
+  "jobs" : [ {
+    "_self" : "http://localhost",
+    "site" : "localhost",
+    "application" : "appng-scheduler",
+    "job" : "longRunningJob",
+    "jobData" : {
+      "SCHEDULED_JOB" : "org.appng.application.scheduler.job.LongRunningJob",
+      "jobBeanName" : "longRunningJob",
+      "cronExpression" : "0 0/10 * 1/1 * ? *",
+      "thresholdTimeunit" : "DAY",
+      "origin" : "appng-scheduler",
+      "thresholdError" : 5,
+      "siteName" : "localhost",
+      "forceState" : true,
+      "enabled" : true
+    }
+  }, {
+    "_self" : "http://localhost",
+    "site" : "localhost",
+    "application" : "appng-scheduler",
+    "job" : "indexJob",
+    "jobData" : {
+      "SCHEDULED_JOB" : "org.appng.application.scheduler.job.IndexJob",
+      "jobBeanName" : "indexJob",
+      "cronExpression" : "0 0/5 * * * ? 2042",
+      "thresholdTimeunit" : "DAY",
+      "origin" : "appng-scheduler",
+      "thresholdError" : 1,
+      "siteName" : "localhost",
+      "enabled" : false,
+      "jspFileType" : ".jsp"
+    }
+  }, {
+    "_self" : "http://localhost",
+    "site" : "localhost",
+    "application" : "appng-scheduler",
+    "job" : "houseKeepingJob",
+    "jobData" : {
+      "SCHEDULED_JOB" : "org.appng.application.scheduler.job.JobRecordHouseKeepingJob",
+      "jobBeanName" : "houseKeepingJob",
+      "cronExpression" : "0 0/5 * * * ? 2042",
+      "origin" : "appng-scheduler",
+      "siteName" : "localhost",
+      "runOnce" : true,
+      "enabled" : false
+    }
+  } ]
+}

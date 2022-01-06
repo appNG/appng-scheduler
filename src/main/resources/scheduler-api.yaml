@@ -1,6 +1,6 @@
 openapi: 3.0.1
 info:
-  version: 1.0.0
+  version: 1.1.0
   title: appNG Scheduler REST API
   description: The REST API for appNG Scheduler
   contact:
@@ -10,52 +10,94 @@ info:
   license:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0
-security:
-  - bearerAuth: []
 paths:
   "/jobState/{application}/{job}":
     get:
       tags:
-        - Scheduler
+        - JobState
       operationId: getJobState
       parameters:
         - in: path 
           name: application
-          description: the site to call
-          required: true
+          description: name of the application
+          required: true  
           schema:
             type: string
         - in: path 
           name: job
-          description: the application to call
-          required: true
+          description: name of the job
+          required: true         
           schema:
             type: string
         - in: query 
           name: pageSize
-          description: site of the page
+          description: size of the page
           required: false
           schema:
             type: integer
+            default: 10
         - in: query 
           name: records
-          description: the ID of the page
-          required: true
+          description: show records?
+          required: false
           schema:
-            type: boolean  
+            type: boolean
+            default: false  
       responses:
         "200":
-          description: datasource response
+          description: the job's state
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/jobState" 
+  "/jobState/list":
+    get:
+      tags:
+        - JobState
+      operationId: getJobs      
+      responses:
+        "200":
+          description: a list of jobs
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/jobs"
+security:
+  - bearerAuth: []
 components:
   securitySchemes:
     bearerAuth:
       type: http
       scheme: bearer
+      name: Authorization
+      bearerFormat: uuid
   schemas:
+    job:
+      type: object    
+      properties:
+        _self:
+          type: string
+          description: path to details  
+        site: 
+          type: string
+          description: name of the site
+        application:
+          type: string
+          description: name of the application
+        job:
+          type: string
+          description: name of the job
+        jobData:
+          type: object
+          additionalProperties:
+            type: object
+    jobs:
+      type: object 
+      properties:
+        jobs:
+          type: array
+          items:
+            $ref: "#/components/schemas/job"
     jobState:
       type: object    
       properties:
@@ -68,25 +110,20 @@ components:
         job:
           type: string
           description: name of the job
-        thresholdWarn:
-          type: integer
-          description: the waring treshold
-        thresholdError:
-          type: integer
-          description: the error treshold
         totalRecords:
           type: integer
           description: total number of records
         state:
             type: string
             enum: [OK, WARN, ERROR, UNDEFINED]
-        timeunit:
-            type: string
-            enum: [MINUTE, HOUR, DAY, WEEK, MONTH, YEAR]
         startedAfter:
           type: string
           format: date-time
           description: the date after that the records started
+        jobData:
+          type: object
+          additionalProperties:
+            type: object
         records:
           type: array
           items:
@@ -117,4 +154,4 @@ components:
         state:
             type: string
             enum: [OK, ERROR]
-      
+  

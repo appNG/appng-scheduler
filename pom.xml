@@ -120,7 +120,7 @@
 			<plugin>
 				<groupId>org.openapitools</groupId>
 				<artifactId>openapi-generator-maven-plugin</artifactId>
-				<version>5.1.1</version>
+				<version>5.3.0</version>
 				<executions>
 					<execution>
 						<id>rest-api</id>
@@ -131,18 +131,22 @@
 				</executions>
 				<configuration>
 					<inputSpec>${basedir}/src/main/resources/scheduler-api.yaml</inputSpec>
-					<!--templateDirectory>${project.basedir}/openapi/templates</templateDirectory -->
+					<!-- templateDirectory>${project.basedir}/openapi</templateDirectory-->
 					<generatorName>java</generatorName>
-					<generateApis>true</generateApis>
-					<generateModels>true</generateModels>
+					<library>spring-mvc</library>
+					<generatorName>spring</generatorName>
 					<generateSupportingFiles>true</generateSupportingFiles>
+					<generateModels>true</generateModels>
+					<generateApis>true</generateApis>
+					<!-- https://github.com/OpenAPITools/openapi-generator/blob/v5.3.1/docs/generators/spring.md -->
 					<configOptions>
-						<useAbstractionForFiles>true</useAbstractionForFiles>
+						<interfaceOnly>true</interfaceOnly>
 						<apiPackage>org.appng.scheduler.openapi</apiPackage>
 						<invokerPackage>org.appng.scheduler.openapi.invoke</invokerPackage>
 						<modelPackage>org.appng.scheduler.openapi.model</modelPackage>
-						<library>resttemplate</library>
+						<useTags>true</useTags>
 						<java8>true</java8>
+						<skipDefaultInterface>true</skipDefaultInterface>
 						<dateLibrary>java8</dateLibrary>
 					</configOptions>
 				</configuration>
@@ -282,6 +286,11 @@
 		<dependency>
 			<groupId>io.swagger</groupId>
 			<artifactId>swagger-annotations</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.openapitools</groupId>
+			<artifactId>jackson-databind-nullable</artifactId>
+			<version>0.2.2</version>
 		</dependency>
 	</dependencies>
 

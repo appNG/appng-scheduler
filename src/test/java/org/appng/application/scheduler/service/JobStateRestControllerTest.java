@@ -33,6 +33,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
@@ -44,6 +45,7 @@ public class JobStateRestControllerTest extends TestBase {
 	private @Autowired RecordingJobListener listener;
 	private @Autowired SchedulingController schedulerController;
 	private @Autowired MappingJackson2HttpMessageConverter mappingJackson2HttpMessageConverter;
+	private MockMvc mvc;
 
 	public JobStateRestControllerTest() {
 		super("appng-scheduler", APPLICATION_HOME);
@@ -53,6 +55,9 @@ public class JobStateRestControllerTest extends TestBase {
 
 	@Before
 	public void startController() {
+		mvc = MockMvcBuilders.standaloneSetup(context.getBean(JobStateRestController.class))
+				.setCustomArgumentResolvers(getHandlerMethodArgumentResolver())
+				.setMessageConverters(mappingJackson2HttpMessageConverter).build();
 		Mockito.when(site.getApplications()).thenReturn(new HashSet<>(Arrays.asList(application)));
 		Mockito.when(site.getApplication("appng-scheduler")).thenReturn(application);
 		schedulerController.start(site, application, environment);
@@ -70,6 +75,20 @@ public class JobStateRestControllerTest extends TestBase {
 	}
 
 	@Test
+	public void testJobs() throws Exception {
+		MockHttpServletRequestBuilder builder = get("/jobState/list").header(HttpHeaders.AUTHORIZATION, "Bearer TheBearer")
+				.contentType(MediaType.APPLICATION_JSON).characterEncoding("utf-8");
+		ResultActions response = mvc.perform(builder);
+		MvcResult result = response.andExpect(status().is(HttpStatus.OK.value())).andReturn();
+		String controlFile = "json/RecordsRestControllerTest-testJobs.json";
+		String responseJson = result.getResponse().getContentAsString();
+		System.err.println(responseJson);
+
+		String json = responseJson.replaceFirst("\\d{4}.*:\\d{2}", "2021-09-23T09:01:15.476+02:00");
+		WritingJsonValidator.validate(json, controlFile);
+	}
+
+	@Test
 	public void testIndexJob() throws Exception {
 		runTest("indexJob");
 	}
@@ -80,10 +99,6 @@ public class JobStateRestControllerTest extends TestBase {
 	}
 
 	protected void runTest(String jobName) throws Exception {
-		MockMvc mvc = MockMvcBuilders.standaloneSetup(context.getBean(JobStateRestController.class))
-				.setCustomArgumentResolvers(getHandlerMethodArgumentResolver())
-				.setMessageConverters(mappingJackson2HttpMessageConverter).build();
-
 		ResultActions response = mvc.perform(
 				get("/jobState/appng-scheduler/" + jobName).header(HttpHeaders.AUTHORIZATION, "Bearer TheBearer")
 						.contentType(MediaType.APPLICATION_JSON).characterEncoding("utf-8"));

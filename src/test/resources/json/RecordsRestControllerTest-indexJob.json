@@ -2,11 +2,19 @@
   "site" : "localhost",
   "application" : "appng-scheduler",
   "job" : "appng-scheduler_indexJob",
-  "thresholdWarn" : null,
-  "thresholdError" : 1,
   "totalRecords" : 1,
   "state" : "OK",
-  "timeunit" : "DAY",
   "startedAfter" : "2021-09-23T09:01:15.476+02:00",
+  "jobData" : {
+    "SCHEDULED_JOB" : "org.appng.application.scheduler.job.IndexJob",
+    "jobBeanName" : "indexJob",
+    "cronExpression" : "0 0/5 * * * ? 2042",
+    "thresholdTimeunit" : "DAY",
+    "origin" : "appng-scheduler",
+    "thresholdError" : 1,
+    "siteName" : "localhost",
+    "enabled" : false,
+    "jspFileType" : ".jsp"
+  },
   "records" : null
 }
