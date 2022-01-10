@@ -4,6 +4,7 @@
     "site" : "appng",
     "application" : "appng-scheduler",
     "job" : "houseKeepingJob",
+    "thresholdsPresent" : false,
     "jobData" : {
       "SCHEDULED_JOB" : "org.appng.application.scheduler.job.JobRecordHouseKeepingJob",
       "jobBeanName" : "houseKeepingJob",
@@ -18,6 +19,7 @@
     "site" : "appng",
     "application" : "appng-scheduler",
     "job" : "longRunningJob",
+    "thresholdsPresent" : true,
     "jobData" : {
       "SCHEDULED_JOB" : "org.appng.application.scheduler.job.LongRunningJob",
       "jobBeanName" : "longRunningJob",
@@ -34,6 +36,7 @@
     "site" : "appng",
     "application" : "appng-scheduler",
     "job" : "indexJob",
+    "thresholdsPresent" : true,
     "jobData" : {
       "SCHEDULED_JOB" : "org.appng.application.scheduler.job.IndexJob",
       "jobBeanName" : "indexJob",

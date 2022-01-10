@@ -87,6 +87,9 @@ components:
         job:
           type: string
           description: name of the job
+        thresholdsPresent:
+          type: boolean
+          description: are there any treshOlds defined for thos job?
         jobData:
           type: object
           additionalProperties:

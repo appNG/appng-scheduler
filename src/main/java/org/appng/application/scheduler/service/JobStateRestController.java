@@ -135,6 +135,10 @@ public class JobStateRestController implements JobStateApi {
 						servicePath, site.getName(), job.getApplication(), job.getJob());
 				job.setSelf(detail);
 				job.setJobData(jobDataMap.getWrappedMap());
+				boolean thresholdsPresent = jobDataMap.containsKey(Constants.THRESHOLD_TIMEUNIT)
+						&& (jobDataMap.containsKey(Constants.THRESHOLD_WARN)
+								|| jobDataMap.containsKey(Constants.THRESHOLD_ERROR));
+				job.setThresholdsPresent(thresholdsPresent);
 				jobList.add(job);
 			}
 		} catch (SchedulerException e) {
