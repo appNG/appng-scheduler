@@ -38,8 +38,8 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-@ContextConfiguration(locations = { TestBase.TESTCONTEXT_CORE, TestBase.TESTCONTEXT_JPA,
-		"classpath:beans-test-core.xml" }, initializers = JobStateRestControllerTest.class)
+@ContextConfiguration(inheritLocations = false, locations = { TestBase.BEANS_PATH, TestBase.TESTCONTEXT_CORE,
+		TestBase.TESTCONTEXT_JPA, "classpath:beans-test-core.xml" }, initializers = JobStateRestControllerTest.class)
 public class JobStateRestControllerTest extends TestBase {
 
 	private @Mock JobExecutionContext jobContext;
@@ -82,10 +82,9 @@ public class JobStateRestControllerTest extends TestBase {
 		return SchedulingProperties.getProperties();
 	}
 
-	
-
 	@Test
 	public void testJobs() throws Exception {
+		Mockito.when(site.isActive()).thenReturn(true);
 		MockHttpServletRequestBuilder builder = get("/jobState/list")
 				.header(HttpHeaders.AUTHORIZATION, "Bearer TheBearer").contentType(MediaType.APPLICATION_JSON)
 				.characterEncoding("utf-8");

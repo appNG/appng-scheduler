@@ -15,6 +15,5 @@
     "siteName" : "appng",
     "forceState" : true,
     "enabled" : true
-  },
-  "records" : null
+  }
 }

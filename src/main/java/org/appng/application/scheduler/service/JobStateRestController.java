@@ -32,6 +32,8 @@ import org.apache.commons.collections4.EnumerationUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.appng.api.ScheduledJobResult.ExecutionResult;
+import org.appng.api.Environment;
+import org.appng.api.RequestUtil;
 import org.appng.api.SiteProperties;
 import org.appng.api.model.Site;
 import org.appng.application.scheduler.Constants;
@@ -75,16 +77,18 @@ public class JobStateRestController implements JobStateApi {
 	private JobRecordService jobRecordService;
 	private Scheduler scheduler;
 	private Site site;
+	private Environment env;
 	private @Autowired HttpServletRequest request;
 	private @Value("${bearerToken}") String bearerToken;
 	private @Value("${skipAuth:false}") boolean skipAuth;
 	private @Value("${site." + SiteProperties.SERVICE_PATH + "}") String servicePath;
 	private @Value("${platform.schedulerStateWhitelist:127.0.0.1}") String schedulerStateWhitelist;
 
-	public JobStateRestController(JobRecordService jobRecordService, Scheduler scheduler, Site site) {
+	public JobStateRestController(JobRecordService jobRecordService, Scheduler scheduler, Site site, Environment env) {
 		this.jobRecordService = jobRecordService;
 		this.scheduler = scheduler;
 		this.site = site;
+		this.env = env;
 	}
 
 	public enum TimeUnit {
@@ -118,31 +122,37 @@ public class JobStateRestController implements JobStateApi {
 			return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
 		}
 		List<Job> jobList = Lists.newArrayList();
-		try {
-			Set<JobKey> jobKeys = scheduler.getJobKeys(GroupMatcher.jobGroupEquals(site.getName()));
-			for (JobKey jobKey : jobKeys) {
+		Set<String> siteNames = RequestUtil.getSiteNames(env);
+		for (String siteName : siteNames) {
+			Site site = RequestUtil.getSiteByName(env, siteName);
+			if (site.isActive()) {
+				try {
+					Set<JobKey> jobKeys = scheduler.getJobKeys(GroupMatcher.jobGroupEquals(site.getName()));
+					for (JobKey jobKey : jobKeys) {
 
-				JobDetail jobDetail = scheduler.getJobDetail(jobKey);
-				JobDataMap jobDataMap = jobDetail.getJobDataMap();
+						JobDetail jobDetail = scheduler.getJobDetail(jobKey);
+						JobDataMap jobDataMap = jobDetail.getJobDataMap();
 
-				Job job = new Job();
-				job.setSite(site.getName());
-				String name = jobKey.getName();
-				String[] splittedName = name.split("_");
-				job.setApplication(splittedName[0]);
-				job.setJob(name.split("_")[1]);
-				String detail = String.format("%s%s/%s/appng-scheduler/rest/jobState/%s/%s", site.getDomain(),
-						servicePath, site.getName(), job.getApplication(), job.getJob());
-				job.setSelf(detail);
-				job.setJobData(jobDataMap.getWrappedMap());
-				boolean thresholdsPresent = jobDataMap.containsKey(Constants.THRESHOLD_TIMEUNIT)
-						&& (jobDataMap.containsKey(Constants.THRESHOLD_WARN)
-								|| jobDataMap.containsKey(Constants.THRESHOLD_ERROR));
-				job.setThresholdsPresent(thresholdsPresent);
-				jobList.add(job);
+						Job job = new Job();
+						job.setSite(site.getName());
+						String name = jobKey.getName();
+						String[] splittedName = name.split("_");
+						job.setApplication(splittedName[0]);
+						job.setJob(name.split("_")[1]);
+						String detail = String.format("%s%s/%s/appng-scheduler/rest/jobState/%s/%s", site.getDomain(),
+								servicePath, site.getName(), job.getApplication(), job.getJob());
+						job.setSelf(detail);
+						job.setJobData(jobDataMap.getWrappedMap());
+						boolean thresholdsPresent = jobDataMap.containsKey(Constants.THRESHOLD_TIMEUNIT)
+								&& (jobDataMap.containsKey(Constants.THRESHOLD_WARN)
+										|| jobDataMap.containsKey(Constants.THRESHOLD_ERROR));
+						job.setThresholdsPresent(thresholdsPresent);
+						jobList.add(job);
+					}
+				} catch (SchedulerException e) {
+					log.error("error while retrieving job", e);
+				}
 			}
-		} catch (SchedulerException e) {
-			log.error("error while retrieving job", e);
 		}
 		Jobs jobs = new Jobs();
 		jobs.setJobs(jobList);
@@ -159,14 +169,14 @@ public class JobStateRestController implements JobStateApi {
 			return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
 		}
 
-		JobState jobState = getJobState(application, job, site, pageSize, records);
+		JobState jobState = getState(application, job, pageSize, records);
 		if (null != jobState) {
 			return ResponseEntity.ok(jobState);
 		}
 		return ResponseEntity.notFound().build();
 	}
 
-	private JobState getJobState(String application, String job, Site site, Integer pageSize, boolean withRecords) {
+	private JobState getState(String application, String job, Integer pageSize, boolean withRecords) {
 		JobState jobState = null;
 		try {
 			String jobName = job.startsWith(application) ? job : application + "_" + job;

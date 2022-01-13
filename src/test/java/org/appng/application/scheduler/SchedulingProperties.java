@@ -38,6 +38,7 @@ public class SchedulingProperties {
 		properties.put("quartzDriverDelegate", HSQLDBDelegate.class.getName());
 		properties.put("platform." + Platform.Property.JSP_FILE_TYPE, ".jsp");
 		properties.put("site." + SiteProperties.SERVICE_PATH, "/service");
+		properties.put("site.jsonPrettyPrint", "true");
 		return properties;
 	}
 

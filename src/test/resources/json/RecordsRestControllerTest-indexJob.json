@@ -15,6 +15,5 @@
     "siteName" : "appng",
     "enabled" : false,
     "jspFileType" : ".jsp"
-  },
-  "records" : null
+  }
 }

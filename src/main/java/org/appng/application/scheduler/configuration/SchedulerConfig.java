@@ -31,13 +31,18 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.SerializerProvider;
@@ -163,25 +168,45 @@ public class SchedulerConfig {
 		houseKeepingJob.getJobDataMap().put(Constants.JOB_RUN_ONCE, true);
 		return houseKeepingJob;
 	}
-
+	
 	@Bean
+	@Primary
+	// TODO: remove when moved to appNG 1.25.x (see https://appng.org/jira/browse/APPNG-2396)
 	public ObjectMapper objectMapper() {
-		Module dateModule = new SimpleModule().addSerializer(OffsetDateTime.class,
-				new JsonSerializer<OffsetDateTime>() {
-					public void serialize(OffsetDateTime value, JsonGenerator jsonGenerator,
-							SerializerProvider provider) throws IOException {
-						if (value != null) {
-							jsonGenerator.writeString(DateTimeFormatter.ISO_DATE_TIME.format(value));
-						}
-					}
-				});
-		return new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT)
-				.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS).registerModule(dateModule);
+		SimpleModule dateModule = new SimpleModule();
+		dateModule.addSerializer(OffsetDateTime.class, new JsonSerializer<OffsetDateTime>() {
+			@Override
+			public void serialize(OffsetDateTime value, JsonGenerator jsonGenerator, SerializerProvider provider)
+					throws IOException {
+				if (value != null) {
+					jsonGenerator.writeString(DateTimeFormatter.ISO_DATE_TIME.format(value));
+				}
+			}
+		});
+		dateModule.addDeserializer(OffsetDateTime.class, new JsonDeserializer<OffsetDateTime>() {
+			@Override
+			public OffsetDateTime deserialize(JsonParser parser, DeserializationContext ctxt)
+					throws IOException, JacksonException {
+				return OffsetDateTime.parse(parser.getText(), DateTimeFormatter.ISO_DATE_TIME);
+			}
+		});
+		// @formatter:off
+		return new ObjectMapper()
+			.setDefaultPropertyInclusion(Include.NON_ABSENT)
+			.enable(SerializationFeature.INDENT_OUTPUT)
+			.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+			.registerModule(dateModule);
+		// @formatter:on
 	}
 
 	@Bean
-	public MappingJackson2HttpMessageConverter jsonConverter(ObjectMapper objectMapper) {
-		return new MappingJackson2HttpMessageConverter(objectMapper);
+	@Primary
+	// TODO: remove when moved to appNG 1.25.x (see https://appng.org/jira/browse/APPNG-2396)
+	public MappingJackson2HttpMessageConverter jsonConverter(ObjectMapper objectMapper,
+			@Value("${site.jsonPrettyPrint:false}") boolean prettyPrint) {
+		MappingJackson2HttpMessageConverter jsonConverter = new MappingJackson2HttpMessageConverter(objectMapper);
+		jsonConverter.setPrettyPrint(prettyPrint);
+		return jsonConverter;
 	}
 
 }
