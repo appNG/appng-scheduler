@@ -172,7 +172,7 @@ public class SchedulerConfig {
 	@Bean
 	@Primary
 	// TODO: remove when moved to appNG 1.25.x (see https://appng.org/jira/browse/APPNG-2396)
-	public ObjectMapper objectMapper() {
+	public ObjectMapper defaultObjectMapper() {
 		SimpleModule dateModule = new SimpleModule();
 		dateModule.addSerializer(OffsetDateTime.class, new JsonSerializer<OffsetDateTime>() {
 			@Override
@@ -202,7 +202,7 @@ public class SchedulerConfig {
 	@Bean
 	@Primary
 	// TODO: remove when moved to appNG 1.25.x (see https://appng.org/jira/browse/APPNG-2396)
-	public MappingJackson2HttpMessageConverter jsonConverter(ObjectMapper objectMapper,
+	public MappingJackson2HttpMessageConverter defaultJsonConverter(ObjectMapper objectMapper,
 			@Value("${site.jsonPrettyPrint:false}") boolean prettyPrint) {
 		MappingJackson2HttpMessageConverter jsonConverter = new MappingJackson2HttpMessageConverter(objectMapper);
 		jsonConverter.setPrettyPrint(prettyPrint);
