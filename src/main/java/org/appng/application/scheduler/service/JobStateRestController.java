@@ -112,7 +112,8 @@ public class JobStateRestController implements JobStateApi {
 	@Override
 	public ResponseEntity<Jobs> getJobs(
 			@RequestParam(value = "jobdata", required = false, defaultValue = "false") Boolean addJobdata,
-			@RequestParam(value = "all", required = false, defaultValue = "false") Boolean addAll) {
+			@RequestParam(value = "all", required = false, defaultValue = "false") Boolean addAll,
+			@RequestParam(value = "thresholds", required = false) Boolean thresholds) {
 		if (!isAuthorized()) {
 			return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
 		}
@@ -124,7 +125,7 @@ public class JobStateRestController implements JobStateApi {
 					try {
 						Application schedulerApp = site.getApplication(app.getName());
 						if (null != schedulerApp) {
-							addJobs(addJobdata, jobList, site, schedulerApp);
+							addJobs(addJobdata, thresholds, jobList, site, schedulerApp);
 						}
 					} catch (SchedulerException e) {
 						log.error("error while retrieving jobs for site " + site.getName(), e);
@@ -133,7 +134,7 @@ public class JobStateRestController implements JobStateApi {
 			}
 		} else {
 			try {
-				addJobs(addJobdata, jobList, site, app);
+				addJobs(addJobdata, thresholds, jobList, site, app);
 			} catch (SchedulerException e) {
 				log.error("error while retrieving jobs for site " + site.getName(), e);
 			}
@@ -142,35 +143,36 @@ public class JobStateRestController implements JobStateApi {
 		return ResponseEntity.ok(new Jobs().jobs(jobList));
 	}
 
-	protected void addJobs(Boolean addJobdata, List<Job> jobList, Site site, Application schedulerApp)
-			throws SchedulerException {
+	protected void addJobs(Boolean addJobdata, Boolean thresholds, List<Job> jobList, Site site,
+			Application schedulerApp) throws SchedulerException {
 		Scheduler siteScheduler = schedulerApp.getBean(Scheduler.class);
 		Set<JobKey> jobKeys = siteScheduler.getJobKeys(GroupMatcher.jobGroupEquals(site.getName()));
 		for (JobKey jobKey : jobKeys) {
-
 			JobDetail jobDetail = siteScheduler.getJobDetail(jobKey);
-
-			Job job = new Job();
-			job.setSite(site.getName());
-			String name = jobKey.getName();
-			String[] splittedName = name.split("_");
-			job.setApplication(splittedName[0]);
-			job.setJob(splittedName[1]);
-			String servicePath = site.getProperties().getString(SiteProperties.SERVICE_PATH);
-			String detail = String.format("%s%s/%s/appng-scheduler/rest/jobState/%s/%s", site.getDomain(), servicePath,
-					site.getName(), job.getApplication(), job.getJob());
-			job.setSelf(detail);
-
 			JobDataMap jobDataMap = jobDetail.getJobDataMap();
-			if (addJobdata) {
-				job.setJobData(jobDataMap.getWrappedMap());
-			}
-
-			boolean thresholdsPresent = jobDataMap.containsKey(Constants.THRESHOLD_TIMEUNIT)
+			Boolean thresholdsPresent = jobDataMap.containsKey(Constants.THRESHOLD_TIMEUNIT)
 					&& (jobDataMap.containsKey(Constants.THRESHOLD_WARN)
 							|| jobDataMap.containsKey(Constants.THRESHOLD_ERROR));
-			job.setThresholdsPresent(thresholdsPresent);
-			jobList.add(job);
+
+			if (null == thresholds || thresholdsPresent.equals(thresholds)) {
+				Job job = new Job();
+				job.setSite(site.getName());
+				String name = jobKey.getName();
+				String[] splittedName = name.split("_");
+				job.setApplication(splittedName[0]);
+				job.setJob(splittedName[1]);
+				String servicePath = site.getProperties().getString(SiteProperties.SERVICE_PATH);
+				String detail = String.format("%s%s/%s/appng-scheduler/rest/jobState/%s/%s", site.getDomain(),
+						servicePath, site.getName(), job.getApplication(), job.getJob());
+				job.setSelf(detail);
+
+				if (addJobdata) {
+					job.setJobData(jobDataMap.getWrappedMap());
+				}
+
+				job.setThresholdsPresent(thresholdsPresent);
+				jobList.add(job);
+			}
 		}
 	}
 

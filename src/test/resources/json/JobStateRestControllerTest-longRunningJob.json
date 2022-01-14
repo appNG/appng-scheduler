@@ -2,7 +2,7 @@
   "site" : "appng",
   "application" : "appng-scheduler",
   "job" : "appng-scheduler_longRunningJob",
-  "totalRecords" : 3,
+  "totalRecords" : 4,
   "state" : "ERROR",
   "startedAfter" : "2021-09-23T09:01:15.476+02:00",
   "jobData" : {
