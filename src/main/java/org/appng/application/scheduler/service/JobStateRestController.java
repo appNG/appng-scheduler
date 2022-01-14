@@ -31,10 +31,11 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.EnumerationUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
-import org.appng.api.ScheduledJobResult.ExecutionResult;
 import org.appng.api.Environment;
 import org.appng.api.RequestUtil;
+import org.appng.api.ScheduledJobResult.ExecutionResult;
 import org.appng.api.SiteProperties;
+import org.appng.api.model.Application;
 import org.appng.api.model.Site;
 import org.appng.application.scheduler.Constants;
 import org.appng.core.controller.HttpHeaders;
@@ -62,7 +63,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.google.common.collect.Lists;
 
-import io.swagger.annotations.ApiParam;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -77,6 +77,7 @@ public class JobStateRestController implements JobStateApi {
 	private JobRecordService jobRecordService;
 	private Scheduler scheduler;
 	private Site site;
+	private Application app;
 	private Environment env;
 	private @Autowired HttpServletRequest request;
 	private @Value("${bearerToken}") String bearerToken;
@@ -122,32 +123,35 @@ public class JobStateRestController implements JobStateApi {
 			return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
 		}
 		List<Job> jobList = Lists.newArrayList();
-		Set<String> siteNames = RequestUtil.getSiteNames(env);
-		for (String siteName : siteNames) {
+		for (String siteName : RequestUtil.getSiteNames(env)) {
 			Site site = RequestUtil.getSiteByName(env, siteName);
 			if (site.isActive()) {
 				try {
-					Set<JobKey> jobKeys = scheduler.getJobKeys(GroupMatcher.jobGroupEquals(site.getName()));
-					for (JobKey jobKey : jobKeys) {
+					Application schedulerApp = site.getApplication(app.getName());
+					if (null != schedulerApp) {
+						Scheduler siteScheduler = schedulerApp.getBean(Scheduler.class);
+						Set<JobKey> jobKeys = siteScheduler.getJobKeys(GroupMatcher.jobGroupEquals(site.getName()));
+						for (JobKey jobKey : jobKeys) {
 
-						JobDetail jobDetail = scheduler.getJobDetail(jobKey);
-						JobDataMap jobDataMap = jobDetail.getJobDataMap();
+							JobDetail jobDetail = siteScheduler.getJobDetail(jobKey);
+							JobDataMap jobDataMap = jobDetail.getJobDataMap();
 
-						Job job = new Job();
-						job.setSite(site.getName());
-						String name = jobKey.getName();
-						String[] splittedName = name.split("_");
-						job.setApplication(splittedName[0]);
-						job.setJob(name.split("_")[1]);
-						String detail = String.format("%s%s/%s/appng-scheduler/rest/jobState/%s/%s", site.getDomain(),
-								servicePath, site.getName(), job.getApplication(), job.getJob());
-						job.setSelf(detail);
-						job.setJobData(jobDataMap.getWrappedMap());
-						boolean thresholdsPresent = jobDataMap.containsKey(Constants.THRESHOLD_TIMEUNIT)
-								&& (jobDataMap.containsKey(Constants.THRESHOLD_WARN)
-										|| jobDataMap.containsKey(Constants.THRESHOLD_ERROR));
-						job.setThresholdsPresent(thresholdsPresent);
-						jobList.add(job);
+							Job job = new Job();
+							job.setSite(site.getName());
+							String name = jobKey.getName();
+							String[] splittedName = name.split("_");
+							job.setApplication(splittedName[0]);
+							job.setJob(splittedName[1]);
+							String detail = String.format("%s%s/%s/appng-scheduler/rest/jobState/%s/%s",
+									site.getDomain(), servicePath, site.getName(), job.getApplication(), job.getJob());
+							job.setSelf(detail);
+							job.setJobData(jobDataMap.getWrappedMap());
+							boolean thresholdsPresent = jobDataMap.containsKey(Constants.THRESHOLD_TIMEUNIT)
+									&& (jobDataMap.containsKey(Constants.THRESHOLD_WARN)
+											|| jobDataMap.containsKey(Constants.THRESHOLD_ERROR));
+							job.setThresholdsPresent(thresholdsPresent);
+							jobList.add(job);
+						}
 					}
 				} catch (SchedulerException e) {
 					log.error("error while retrieving job", e);
@@ -161,10 +165,13 @@ public class JobStateRestController implements JobStateApi {
 
 	@Override
 	public ResponseEntity<JobState> getJobState(
-			@ApiParam(value = "the site to call", required = true) @PathVariable("application") String application,
-			@ApiParam(value = "the application to call", required = true) @PathVariable("job") String job,
-			@ApiParam(value = "site of the page", defaultValue = "10") @Valid @RequestParam(value = "pageSize", required = false, defaultValue = "10") Integer pageSize,
-			@ApiParam(value = "show records?", defaultValue = "false") @Valid @RequestParam(value = "records", required = false, defaultValue = "false") Boolean records) {
+	// @formatter:off
+			@PathVariable("application") String application,
+			@PathVariable("job") String job,
+			@Valid @RequestParam(value = "pageSize", required = false, defaultValue = "10") Integer pageSize,
+			@Valid @RequestParam(value = "records", required = false, defaultValue = "false") Boolean records
+	// @formatter:on
+	) {
 		if (!isAuthorized()) {
 			return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
 		}
