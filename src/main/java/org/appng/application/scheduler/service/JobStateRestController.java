@@ -79,7 +79,7 @@ public class JobStateRestController implements JobStateApi {
 	private final Scheduler scheduler;
 	private final Site site;
 	private final Application app;
-	private final Environment env;
+	private @Autowired Environment env;
 	private @Autowired HttpServletRequest request;
 	private @Value("${" + PropertyConstants.BEARER_TOKEN + "}") String bearerToken;
 	private @Value("${skipAuth:false}") boolean skipAuth;
@@ -103,10 +103,6 @@ public class JobStateRestController implements JobStateApi {
 				return DateUtils.addDays(now, -1);
 			}
 		}
-	}
-
-	public HttpServletRequest getRequest() {
-		return request;
 	}
 
 	@Override
@@ -286,7 +282,7 @@ public class JobStateRestController implements JobStateApi {
 		if (StringUtils.isBlank(bearerToken)) {
 			return false;
 		}
-		List<String> auths = EnumerationUtils.toList(getRequest().getHeaders(HttpHeaders.AUTHORIZATION));
+		List<String> auths = EnumerationUtils.toList(request.getHeaders(HttpHeaders.AUTHORIZATION));
 		return null != auths && auths.contains("Bearer " + bearerToken);
 	}
 
