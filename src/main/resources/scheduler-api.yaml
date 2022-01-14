@@ -42,7 +42,7 @@ paths:
           required: false
           schema:
             type: boolean
-            default: false  
+            default: false
       responses:
         "200":
           description: the job's state
@@ -54,7 +54,22 @@ paths:
     get:
       tags:
         - JobState
-      operationId: getJobs      
+      operationId: getJobs
+      parameters:
+       - in: query 
+         name: jobdata
+         description: show jobdata?
+         required: false
+         schema:
+           type: boolean
+           default: false
+       - in: query 
+         name: all
+         description: show jobs from all sites?
+         required: false
+         schema:
+           type: boolean
+           default: false
       responses:
         "200":
           description: a list of jobs

@@ -85,7 +85,7 @@ public class JobStateRestControllerTest extends TestBase {
 	@Test
 	public void testJobs() throws Exception {
 		Mockito.when(site.isActive()).thenReturn(true);
-		MockHttpServletRequestBuilder builder = get("/jobState/list")
+		MockHttpServletRequestBuilder builder = get("/jobState/list?jobdata=true&all=true")
 				.header(HttpHeaders.AUTHORIZATION, "Bearer TheBearer").contentType(MediaType.APPLICATION_JSON)
 				.characterEncoding("utf-8");
 		ResultActions response = mvc.perform(builder);

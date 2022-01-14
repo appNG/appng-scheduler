@@ -23,6 +23,7 @@ import org.appng.api.model.Site;
 import org.appng.application.scheduler.PropertyConstants;
 import org.appng.application.scheduler.business.Records;
 import org.appng.application.scheduler.model.JobRecord;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -34,20 +35,19 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import lombok.RequiredArgsConstructor;
+
 /**
  * {@link RestController} providing a REST API to query for job records.
  * 
  * @author Claus Stümke
- *
  */
 @RestController
+@RequiredArgsConstructor
 public class RecordsRestController {
 
-	private JobRecordService jobRecordService;
-
-	public RecordsRestController(JobRecordService jobRecordService) {
-		this.jobRecordService = jobRecordService;
-	}
+	private final JobRecordService jobRecordService;
+	private @Value("${" + PropertyConstants.BEARER_TOKEN + "}") String bearerToken;
 
 	@RequestMapping(value = "/jobRecords", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 	public ResponseEntity<List<JobRecord>> getJobRecords(
@@ -59,22 +59,21 @@ public class RecordsRestController {
 			@RequestParam(required = false, name = "minDuration") Integer duration,
 			@RequestHeader(name = HttpHeaders.AUTHORIZATION, required = false) List<String> auths,
 			Application application, Site site) {
-		if (!verifyToken(application, auths)) {
+		if (!verifyToken(auths)) {
 			return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
 		}
 
-		Page<JobRecord> records = jobRecordService.getRecords(site.getName(), applicationName, jobName, Records.getDate(startedAfter),
-				 Records.getDate(startedBefore), result, duration, null);
+		Page<JobRecord> records = jobRecordService.getRecords(site.getName(), applicationName, jobName,
+				Records.getDate(startedAfter), Records.getDate(startedBefore), result, duration, null);
 		return new ResponseEntity<>(records.getContent(), HttpStatus.OK);
 
 	}
 
-	boolean verifyToken(Application application, List<String> auths) {
+	boolean verifyToken(List<String> auths) {
 		if (null == auths) {
 			return false;
 		}
-		String token = application.getProperties().getString(PropertyConstants.BEARER_TOKEN);
-		return StringUtils.isNotBlank(token) && auths.contains("Bearer " + token);
+		return StringUtils.isNotBlank(bearerToken) && auths.contains("Bearer " + bearerToken);
 	}
 
 }
