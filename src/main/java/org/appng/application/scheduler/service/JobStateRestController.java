@@ -63,6 +63,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.google.common.collect.Lists;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -72,25 +73,19 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 @RestController
+@RequiredArgsConstructor
 public class JobStateRestController implements JobStateApi {
 
-	private JobRecordService jobRecordService;
-	private Scheduler scheduler;
-	private Site site;
-	private Application app;
-	private Environment env;
+	private final JobRecordService jobRecordService;
+	private final Scheduler scheduler;
+	private final Site site;
+	private final Application app;
+	private final Environment env;
 	private @Autowired HttpServletRequest request;
 	private @Value("${bearerToken}") String bearerToken;
 	private @Value("${skipAuth:false}") boolean skipAuth;
 	private @Value("${site." + SiteProperties.SERVICE_PATH + "}") String servicePath;
 	private @Value("${platform.schedulerStateWhitelist:127.0.0.1}") String schedulerStateWhitelist;
-
-	public JobStateRestController(JobRecordService jobRecordService, Scheduler scheduler, Site site, Environment env) {
-		this.jobRecordService = jobRecordService;
-		this.scheduler = scheduler;
-		this.site = site;
-		this.env = env;
-	}
 
 	public enum TimeUnit {
 		YEAR, MONTH, WEEK, DAY, HOUR, MINUTE;
