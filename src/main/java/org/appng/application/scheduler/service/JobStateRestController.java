@@ -24,18 +24,19 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
-import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.collections4.EnumerationUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.appng.api.Environment;
+import org.appng.api.Request;
 import org.appng.api.RequestUtil;
 import org.appng.api.ScheduledJobResult.ExecutionResult;
 import org.appng.api.SiteProperties;
 import org.appng.api.model.Application;
 import org.appng.api.model.Site;
+import org.appng.api.support.environment.DefaultEnvironment;
 import org.appng.application.scheduler.Constants;
 import org.appng.application.scheduler.PropertyConstants;
 import org.appng.core.controller.HttpHeaders;
@@ -51,7 +52,6 @@ import org.quartz.JobKey;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.impl.matchers.GroupMatcher;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Lookup;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
@@ -81,8 +81,6 @@ public class JobStateRestController implements JobStateApi {
 	private final Scheduler scheduler;
 	private final Site site;
 	private final Application app;
-//	private @Autowired Environment env;
-//	private @Autowired HttpServletRequest request;
 	private @Value("${" + PropertyConstants.BEARER_TOKEN + "}") String bearerToken;
 	private @Value("${skipAuth:false}") boolean skipAuth;
 
@@ -108,12 +106,7 @@ public class JobStateRestController implements JobStateApi {
 	}
 
 	@Lookup
-	public ServletRequest getRequest() {
-		return null;
-	}
-
-	@Lookup
-	public Environment getEnvironment() {
+	protected Request getRequest() {
 		return null;
 	}
 
@@ -127,8 +120,9 @@ public class JobStateRestController implements JobStateApi {
 		}
 		List<Job> jobList = Lists.newArrayList();
 		if (addAll) {
-			for (String siteName : new TreeSet<>(RequestUtil.getSiteNames(getEnvironment()))) {
-				Site site = RequestUtil.getSiteByName(getEnvironment(), siteName);
+			Environment env = getRequest().getEnvironment();
+			for (String siteName : new TreeSet<>(RequestUtil.getSiteNames(env))) {
+				Site site = RequestUtil.getSiteByName(env, siteName);
 				if (site.isActive()) {
 					try {
 						Application schedulerApp = site.getApplication(app.getName());
@@ -294,8 +288,9 @@ public class JobStateRestController implements JobStateApi {
 		if (StringUtils.isBlank(bearerToken)) {
 			return false;
 		}
-		List<String> auths = EnumerationUtils
-				.toList(((HttpServletRequest) getRequest()).getHeaders(HttpHeaders.AUTHORIZATION));
+		DefaultEnvironment env = (DefaultEnvironment) getRequest().getEnvironment();
+		HttpServletRequest servletRequest = env.getServletRequest();
+		List<String> auths = EnumerationUtils.toList(servletRequest.getHeaders(HttpHeaders.AUTHORIZATION));
 		return null != auths && auths.contains("Bearer " + bearerToken);
 	}
 
