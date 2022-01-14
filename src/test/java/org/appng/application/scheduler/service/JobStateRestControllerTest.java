@@ -104,12 +104,12 @@ public class JobStateRestControllerTest extends TestBase {
 
 	@Test
 	public void testIndexJob() throws Exception {
-		runTest("indexJob");
+		testJob("indexJob");
 	}
 
 	@Test
 	public void testLongRunningJob() throws Exception {
-		runTest("longRunningJob");
+		testJob("longRunningJob");
 	}
 
 	protected void testJob(String jobName) throws Exception {
