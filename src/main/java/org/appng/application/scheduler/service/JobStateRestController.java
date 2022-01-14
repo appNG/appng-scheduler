@@ -24,6 +24,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
+import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.collections4.EnumerationUtils;
@@ -105,9 +106,9 @@ public class JobStateRestController implements JobStateApi {
 			}
 		}
 	}
-	
+
 	@Lookup
-	public HttpServletRequest getRequest() {
+	public ServletRequest getRequest() {
 		return null;
 	}
 
@@ -115,6 +116,7 @@ public class JobStateRestController implements JobStateApi {
 	public Environment getEnvironment() {
 		return null;
 	}
+
 	@Override
 	public ResponseEntity<Jobs> getJobs(
 			@RequestParam(value = "jobdata", required = false, defaultValue = "false") Boolean addJobdata,
@@ -292,7 +294,8 @@ public class JobStateRestController implements JobStateApi {
 		if (StringUtils.isBlank(bearerToken)) {
 			return false;
 		}
-		List<String> auths = EnumerationUtils.toList(getRequest().getHeaders(HttpHeaders.AUTHORIZATION));
+		List<String> auths = EnumerationUtils
+				.toList(((HttpServletRequest) getRequest()).getHeaders(HttpHeaders.AUTHORIZATION));
 		return null != auths && auths.contains("Bearer " + bearerToken);
 	}
 
