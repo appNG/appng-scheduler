@@ -51,6 +51,7 @@ import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.impl.matchers.GroupMatcher;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Lookup;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -79,8 +80,8 @@ public class JobStateRestController implements JobStateApi {
 	private final Scheduler scheduler;
 	private final Site site;
 	private final Application app;
-	private @Autowired Environment env;
-	private @Autowired HttpServletRequest request;
+//	private @Autowired Environment env;
+//	private @Autowired HttpServletRequest request;
 	private @Value("${" + PropertyConstants.BEARER_TOKEN + "}") String bearerToken;
 	private @Value("${skipAuth:false}") boolean skipAuth;
 
@@ -104,7 +105,16 @@ public class JobStateRestController implements JobStateApi {
 			}
 		}
 	}
+	
+	@Lookup
+	public HttpServletRequest getRequest() {
+		return null;
+	}
 
+	@Lookup
+	public Environment getEnvironment() {
+		return null;
+	}
 	@Override
 	public ResponseEntity<Jobs> getJobs(
 			@RequestParam(value = "jobdata", required = false, defaultValue = "false") Boolean addJobdata,
@@ -115,8 +125,8 @@ public class JobStateRestController implements JobStateApi {
 		}
 		List<Job> jobList = Lists.newArrayList();
 		if (addAll) {
-			for (String siteName : new TreeSet<>(RequestUtil.getSiteNames(env))) {
-				Site site = RequestUtil.getSiteByName(env, siteName);
+			for (String siteName : new TreeSet<>(RequestUtil.getSiteNames(getEnvironment()))) {
+				Site site = RequestUtil.getSiteByName(getEnvironment(), siteName);
 				if (site.isActive()) {
 					try {
 						Application schedulerApp = site.getApplication(app.getName());
@@ -282,7 +292,7 @@ public class JobStateRestController implements JobStateApi {
 		if (StringUtils.isBlank(bearerToken)) {
 			return false;
 		}
-		List<String> auths = EnumerationUtils.toList(request.getHeaders(HttpHeaders.AUTHORIZATION));
+		List<String> auths = EnumerationUtils.toList(getRequest().getHeaders(HttpHeaders.AUTHORIZATION));
 		return null != auths && auths.contains("Bearer " + bearerToken);
 	}
 
