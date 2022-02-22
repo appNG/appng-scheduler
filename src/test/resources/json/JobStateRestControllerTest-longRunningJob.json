@@ -6,7 +6,7 @@
   "state" : 3,
   "stateName" : "ERROR",
   "startedAfter" : "2021-09-23T09:01:15.476+02:00",
-  "message" : "The job succeed 4 time(s) during that last DAY, which is less than the ERROR treshold of 5.",
+  "message" : "The job succeeded 4 time(s) during that last DAY, which is less than the ERROR treshold of 5.",
   "jobData" : {
     "SCHEDULED_JOB" : "org.appng.application.scheduler.job.LongRunningJob",
     "jobBeanName" : "longRunningJob",

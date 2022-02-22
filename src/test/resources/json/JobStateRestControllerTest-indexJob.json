@@ -6,7 +6,7 @@
   "state" : 1,
   "stateName" : "OK",
   "startedAfter" : "2021-09-23T09:01:15.476+02:00",
-  "message" : "The job succeed 1 time(s) during that last DAY, which is greater than/equal to the ERROR treshold of 1.",
+  "message" : "The job succeeded 1 time(s) during that last DAY, which is greater than/equal to the ERROR treshold of 1.",
   "jobData" : {
     "SCHEDULED_JOB" : "org.appng.application.scheduler.job.IndexJob",
     "jobBeanName" : "indexJob",

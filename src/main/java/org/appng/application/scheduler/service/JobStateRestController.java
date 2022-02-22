@@ -250,7 +250,7 @@ public class JobStateRestController implements JobStateApi {
 				boolean hasErrorTreshold = thresholdError > 0;
 				boolean hasWarnTreshold = thresholdWarn > 0;
 				if (hasTimeUnit && (hasWarnTreshold || hasErrorTreshold)) {
-					String messageFormat = "The job succeed %s time(s) during that last %s, which is %s the %s treshold of %s.";
+					String messageFormat = "The job succeeded %s time(s) during that last %s, which is %s the %s treshold of %s.";
 					if (hasErrorTreshold && totalElements < thresholdError) {
 						jobState.setStateName(StateNameEnum.ERROR);
 						message = String.format(messageFormat, totalElements, timeunit, "less than",
