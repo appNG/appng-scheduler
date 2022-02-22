@@ -138,12 +138,19 @@ components:
           type: integer
           description: total number of records
         state:
+            type: integer
+            description: numerical state (0=UNDEFINED, 1=OK, 2=WARN, 3=ERROR)
+        stateName:
             type: string
-            enum: [OK, WARN, ERROR, UNDEFINED]
+            enum: [UNDEFINED, OK, WARN, ERROR]
         startedAfter:
           type: string
           format: date-time
           description: the date after that the records started
+        message:
+          type: string
+          description: A texttual description of the state.
+          example: The job succeed 4 time(s) during that last DAY, which is below the ERROR treshold of 5.
         jobData:
           type: object
           additionalProperties:

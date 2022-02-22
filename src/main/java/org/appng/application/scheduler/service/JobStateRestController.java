@@ -45,6 +45,7 @@ import org.appng.scheduler.openapi.JobStateApi;
 import org.appng.scheduler.openapi.model.Job;
 import org.appng.scheduler.openapi.model.JobRecord;
 import org.appng.scheduler.openapi.model.JobState;
+import org.appng.scheduler.openapi.model.JobState.StateNameEnum;
 import org.appng.scheduler.openapi.model.Jobs;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
@@ -236,25 +237,41 @@ public class JobStateRestController implements JobStateApi {
 						jobKey.getName(), startedAfter, now, null, null, new PageRequest(0, pageSize));
 
 				if (hasTimeUnit) {
-					jobState.setStartedAfter(toLocalTime(startedAfter));
+					jobState.setStartedAfter(toOffsetDateTime(startedAfter));
 				}
-				jobState.setTotalRecords((int) records.getTotalElements());
+				long totalElements = records.getTotalElements();
+				jobState.setTotalRecords((int) totalElements);
 
 				if (withRecords) {
 					jobState.setRecords(records.map(r -> toRecord(r)).getContent());
 				}
 
-				if (hasTimeUnit) {
-					if (thresholdError > 0 && records.getTotalElements() < thresholdError) {
-						jobState.setState(JobState.StateEnum.ERROR);
-					} else if (thresholdWarn > 0 && records.getTotalElements() < thresholdWarn) {
-						jobState.setState(JobState.StateEnum.WARN);
+				String message = "Tresholds and/or time unit have not been definded.";
+				boolean hasErrorTreshold = thresholdError > 0;
+				boolean hasWarnTreshold = thresholdWarn > 0;
+				if (hasTimeUnit && (hasWarnTreshold || hasErrorTreshold)) {
+					String messageFormat = "The job succeed %s time(s) during that last %s, which is %s the %s treshold of %s.";
+					if (hasErrorTreshold && totalElements < thresholdError) {
+						jobState.setStateName(StateNameEnum.ERROR);
+						message = String.format(messageFormat, totalElements, timeunit, "less than",
+								StateNameEnum.ERROR, thresholdError);
+					} else if (hasWarnTreshold && totalElements < thresholdWarn) {
+						jobState.setStateName(StateNameEnum.WARN);
+						message = String.format(messageFormat, totalElements, timeunit, "less than", StateNameEnum.WARN,
+								thresholdWarn);
 					} else {
-						jobState.setState(JobState.StateEnum.OK);
+						jobState.setStateName(StateNameEnum.OK);
+						int treshold = hasWarnTreshold ? thresholdWarn : (hasErrorTreshold ? thresholdError : -1);
+						StateNameEnum state = hasWarnTreshold ? StateNameEnum.WARN
+								: (hasErrorTreshold ? StateNameEnum.ERROR : StateNameEnum.OK);
+						message = String.format(messageFormat, totalElements, timeunit, "greater than/equal to", state,
+								treshold);
 					}
 				} else {
-					jobState.setState(JobState.StateEnum.UNDEFINED);
+					jobState.setStateName(JobState.StateNameEnum.UNDEFINED);
 				}
+				jobState.setMessage(message);
+				jobState.setState(jobState.getStateName().ordinal());
 
 			}
 		} catch (SchedulerException e) {
@@ -266,8 +283,8 @@ public class JobStateRestController implements JobStateApi {
 	private JobRecord toRecord(JobExecutionRecord r) {
 		JobRecord jobRecord = new JobRecord();
 		jobRecord.setId(r.getId());
-		jobRecord.setStart(toLocalTime(r.getStartTime()));
-		jobRecord.setEnd(toLocalTime(r.getEndTime()));
+		jobRecord.setStart(toOffsetDateTime(r.getStartTime()));
+		jobRecord.setEnd(toOffsetDateTime(r.getEndTime()));
 		jobRecord.setRunOnce(r.isRunOnce());
 		jobRecord.setDuration(r.getDuration().intValue());
 		jobRecord.setStacktrace(r.getStacktraces());
@@ -277,7 +294,7 @@ public class JobStateRestController implements JobStateApi {
 		return jobRecord;
 	}
 
-	private OffsetDateTime toLocalTime(Date date) {
+	private OffsetDateTime toOffsetDateTime(Date date) {
 		return date.toInstant().atZone(ZoneId.systemDefault()).toOffsetDateTime();
 	}
 
