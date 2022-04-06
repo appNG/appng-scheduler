@@ -240,11 +240,11 @@ public class SchedulerUtils {
 		persistentJobData.put(Constants.JOB_BEAN_NAME, beanName);
 		if (null != scheduledJob.getJobDataMap()) {
 			persistentJobData.putAll(scheduledJob.getJobDataMap());
-			if (persistentJobData.getBoolean(Constants.JOB_FORCEFULLY_DISABLED)) {
-				enabled = true;
-				persistentJobData.remove(Constants.JOB_FORCEFULLY_DISABLED);
-				log.info("Job {} was disabled forcefully and is being reenabled.", jobDetail.getKey());
-			}
+		}
+		if (persistentJobData.getBoolean(Constants.JOB_FORCEFULLY_DISABLED)) {
+			enabled = true;
+			persistentJobData.remove(Constants.JOB_FORCEFULLY_DISABLED);
+			log.info("Job '{}' was disabled forcefully and is being reenabled.", jobDetail.getKey());
 		}
 
 		boolean forceState = persistentJobData.getBoolean(Constants.JOB_FORCE_STATE);
