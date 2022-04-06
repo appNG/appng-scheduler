@@ -70,7 +70,7 @@ public class SetSchedulerStateAction extends SchedulerAware implements ActionPro
 					schedulerUtils.scheduleJob(jobDetail, id, "", siteName);
 				}
 			} else if (ACTION_UNSCHEDULE.equals(action)) {
-				schedulerUtils.deleteTrigger(jobDetail, id);
+				schedulerUtils.deleteTrigger(jobDetail, id, false);
 			} else if (ACTION_START.equals(action)) {
 				schedulerUtils.addSimpleTrigger(jobDetail, id);
 			} else if (ACTION_DELETE.equals(action)) {

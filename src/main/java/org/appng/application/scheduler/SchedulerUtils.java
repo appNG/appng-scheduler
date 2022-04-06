@@ -115,7 +115,7 @@ public class SchedulerUtils {
 		return false;
 	}
 
-	public boolean deleteTrigger(JobDetail jobDetail, String id) throws SchedulerException {
+	public boolean deleteTrigger(JobDetail jobDetail, String id, boolean forcefullyDisabled) throws SchedulerException {
 		List<? extends Trigger> triggersOfJob = scheduler.getTriggersOfJob(jobDetail.getKey());
 		if (0 == triggersOfJob.size()) {
 			addMessage(request, fp, MessageConstants.JOB_NOT_EXISTS_ERROR, true, false, null, id);
@@ -125,6 +125,10 @@ public class SchedulerUtils {
 			String cronExpression = cronTrigger.getCronExpression();
 			jobDetail.getJobDataMap().put(Constants.JOB_CRON_EXPRESSION, cronExpression);
 			jobDetail.getJobDataMap().put(Constants.JOB_ENABLED, false);
+			if (forcefullyDisabled) {
+				jobDetail.getJobDataMap().put(Constants.JOB_FORCEFULLY_DISABLED, forcefullyDisabled);
+				log.info("Job {} was disabled forcefully.", jobDetail.getKey());
+			}
 			saveJob(jobDetail);
 			boolean unscheduled = scheduler.unscheduleJob(triggersOfJob.get(0).getKey());
 			if (unscheduled) {
@@ -219,32 +223,42 @@ public class SchedulerUtils {
 			jobDetail = new SchedulerJobDetail(jobKey, scheduledJob.getDescription());
 		}
 
-		JobDataMap jobDataMap = jobDetail.getJobDataMap();
-		String cronExpression = jobDataMap.getString(Constants.JOB_CRON_EXPRESSION);
-		boolean enabled = jobDataMap.getBoolean(Constants.JOB_ENABLED);
-
-		jobDataMap.put(Constants.JOB_SCHEDULED_JOB, scheduledJob.getClass().getName());
-		jobDataMap.put(Constants.JOB_ORIGIN, applicationName);
-		jobDataMap.put(Constants.JOB_SITE_NAME, site.getName());
-		jobDataMap.put(Constants.JOB_BEAN_NAME, beanName);
-		if (null != scheduledJob.getJobDataMap()) {
-			jobDataMap.putAll(scheduledJob.getJobDataMap());
-		}
-
-		boolean forceState = jobDataMap.getBoolean(Constants.JOB_FORCE_STATE);
-		if (StringUtils.isNotBlank(cronExpression) && !forceState) {
-			jobDataMap.put(Constants.JOB_CRON_EXPRESSION, cronExpression);
-			jobDataMap.put(Constants.JOB_ENABLED, enabled);
-		}
+		addMetaData(site, applicationName, scheduledJob, beanName, jobDetail);
 		saveJob(jobDetail);
 		return jobDetail;
+	}
+
+	public static void addMetaData(Site site, String applicationName, ScheduledJob scheduledJob, String beanName,
+			JobDetail jobDetail) {
+		JobDataMap persistentJobData = jobDetail.getJobDataMap();
+		String cronExpression = persistentJobData.getString(Constants.JOB_CRON_EXPRESSION);
+		boolean enabled = persistentJobData.getBoolean(Constants.JOB_ENABLED);
+
+		persistentJobData.put(Constants.JOB_SCHEDULED_JOB, scheduledJob.getClass().getName());
+		persistentJobData.put(Constants.JOB_ORIGIN, applicationName);
+		persistentJobData.put(Constants.JOB_SITE_NAME, site.getName());
+		persistentJobData.put(Constants.JOB_BEAN_NAME, beanName);
+		if (null != scheduledJob.getJobDataMap()) {
+			persistentJobData.putAll(scheduledJob.getJobDataMap());
+			if (persistentJobData.getBoolean(Constants.JOB_FORCEFULLY_DISABLED)) {
+				enabled = true;
+				persistentJobData.remove(Constants.JOB_FORCEFULLY_DISABLED);
+				log.info("Job {} was disabled forcefully and is being reenabled.", jobDetail.getKey());
+			}
+		}
+
+		boolean forceState = persistentJobData.getBoolean(Constants.JOB_FORCE_STATE);
+		if (StringUtils.isNotBlank(cronExpression) && !forceState) {
+			persistentJobData.put(Constants.JOB_CRON_EXPRESSION, cronExpression);
+			persistentJobData.put(Constants.JOB_ENABLED, enabled);
+		}
 	}
 
 	public JobDetail getJobDetail(JobKey jobKey) throws SchedulerException {
 		return scheduler.getJobDetail(jobKey);
 	}
 
-	public JobKey getJobKey(String siteName, String applicationName, String jobBeanName) {
+	public static JobKey getJobKey(String siteName, String applicationName, String jobBeanName) {
 		return new JobKey(applicationName + JOB_SEPARATOR + jobBeanName, siteName);
 	}
 

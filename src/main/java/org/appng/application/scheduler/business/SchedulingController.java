@@ -69,17 +69,20 @@ public class SchedulingController extends SchedulerAware implements ApplicationC
 						continue;
 					}
 					try {
-						JobKey jobKey = schedulerUtils.getJobKey(site.getName(), a.getName(), jobBeanName);
+						JobKey jobKey = SchedulerUtils.getJobKey(site.getName(), a.getName(), jobBeanName);
 						JobDetail jobDetail = schedulerUtils.getJobDetail(jobKey, site, a.getName(), scheduledJob,
 								jobBeanName);
 						boolean enabled = jobDetail.getJobDataMap().getBoolean(Constants.JOB_ENABLED);
 						if (enabled) {
 							String description = scheduledJob.getDescription();
 							schedulerUtils.scheduleJob(jobDetail, jobKey.getName(), description, site.getName());
+						} else {
+							log.info("Job '{}' is disabled (site: {}, application: {})", jobBeanName, site.getName(),
+									a.getName());
 						}
 					} catch (Exception e) {
 						log.error(String.format("error starting job '%s' of application %s (type is %s)", jobBeanName,
-								application.getName(), scheduledJob.getClass().getName()), e);
+								a.getName(), scheduledJob.getClass().getName()), e);
 					}
 				}
 			}
@@ -116,7 +119,7 @@ public class SchedulingController extends SchedulerAware implements ApplicationC
 					jobOK = true;
 				}
 				if (!jobOK && null != jobData.getString(Constants.JOB_CRON_EXPRESSION)) {
-					schedulerUtils.deleteTrigger(jobDetail, jobKey.getName());
+					schedulerUtils.deleteTrigger(jobDetail, jobKey.getName(), true);
 				}
 			}
 		} catch (SchedulerException e) {
@@ -182,64 +185,51 @@ public class SchedulingController extends SchedulerAware implements ApplicationC
 			}
 
 			public List<FieldDef> getFields() {
-
 				return null;
 			}
 
 			public FieldDef getField(String fieldBinding) {
-
 				return null;
 			}
 
 			public MetaData getMetaData() {
-
 				return null;
 			}
 
 			public boolean hasField(String fieldBinding) {
-
 				return false;
 			}
 
 			public String getReference() {
-
 				return null;
 			}
 
 			public boolean hasErrors() {
-
 				return false;
 			}
 
 			public boolean hasFieldErrors() {
-
 				return false;
 			}
 
 			public void addLinkPanels(List<Linkpanel> panels) {
-
 			}
 
 			public Linkpanel getLinkPanel(String fieldName) {
-
 				return null;
 			}
 
 			public Messages getMessages() {
-
 				return null;
 			}
 
 			public void clearMessages() {
-
 			}
 
 			public void clearFieldMessages() {
-
 			}
 
 			public void clearFieldMessages(String... fieldBindings) {
-
 			}
 
 			public Pageable getPageable() {
