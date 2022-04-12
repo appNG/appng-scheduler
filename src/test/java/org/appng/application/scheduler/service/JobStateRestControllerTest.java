@@ -10,6 +10,7 @@ import java.util.Properties;
 
 import org.appng.api.ScheduledJobResult;
 import org.appng.api.ScheduledJobResult.ExecutionResult;
+import org.appng.api.support.environment.DefaultEnvironment;
 import org.appng.application.scheduler.SchedulingProperties;
 import org.appng.application.scheduler.business.SchedulingController;
 import org.appng.application.scheduler.business.TestJobRecordings;
@@ -17,6 +18,7 @@ import org.appng.application.scheduler.quartz.RecordingJobListener;
 import org.appng.core.domain.JobExecutionRecord;
 import org.appng.core.repository.JobExecutionRecordRepository;
 import org.appng.testsupport.TestBase;
+import org.appng.testsupport.config.RestTestConfig;
 import org.appng.testsupport.validation.WritingJsonValidator;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
@@ -30,13 +32,12 @@ import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @ContextConfiguration(inheritLocations = false, locations = { TestBase.BEANS_PATH, TestBase.TESTCONTEXT_CORE,
@@ -46,7 +47,6 @@ public class JobStateRestControllerTest extends TestBase {
 	private @Mock JobExecutionContext jobContext;
 	private @Autowired RecordingJobListener listener;
 	private @Autowired SchedulingController schedulerController;
-	private @Autowired MappingJackson2HttpMessageConverter mappingJackson2HttpMessageConverter;
 	private MockMvc mvc;
 
 	public JobStateRestControllerTest() {
@@ -57,9 +57,8 @@ public class JobStateRestControllerTest extends TestBase {
 
 	@Before
 	public void startController() {
-		mvc = MockMvcBuilders.standaloneSetup(context.getBean(JobStateRestController.class))
-				.setCustomArgumentResolvers(getHandlerMethodArgumentResolver())
-				.setMessageConverters(mappingJackson2HttpMessageConverter).build();
+		mvc = RestTestConfig.buildMvc(context, JobStateRestController.class);
+
 		Mockito.when(site.getApplications()).thenReturn(new HashSet<>(Arrays.asList(application)));
 		Mockito.when(site.getApplication("appng-scheduler")).thenReturn(application);
 		schedulerController.start(site, application, environment);
@@ -69,6 +68,9 @@ public class JobStateRestControllerTest extends TestBase {
 				application.getName() + "_indexJob");
 		TestJobRecordings.createJobResult(listener, result, jobContext, site, application,
 				application.getName() + "_longRunningJob");
+		DefaultEnvironment env = (DefaultEnvironment) request.getEnvironment();
+		MockHttpServletRequest servletRequest = (MockHttpServletRequest) env.getServletRequest();
+		servletRequest.addHeader(HttpHeaders.AUTHORIZATION, "Bearer TheBearer");
 	}
 
 	@Override

@@ -249,6 +249,8 @@ public class JobStateRestController implements JobStateApi {
 				String message = "Tresholds and/or time unit have not been definded.";
 				boolean hasErrorTreshold = thresholdError > 0;
 				boolean hasWarnTreshold = thresholdWarn > 0;
+
+				jobState.setStateName(StateNameEnum.OK);
 				if (hasTimeUnit && (hasWarnTreshold || hasErrorTreshold)) {
 					String messageFormat = "The job succeeded %s time(s) during that last %s, which is %s the %s treshold of %s.";
 					if (hasErrorTreshold && totalElements < thresholdError) {
@@ -260,19 +262,16 @@ public class JobStateRestController implements JobStateApi {
 						message = String.format(messageFormat, totalElements, timeunit, "less than", StateNameEnum.WARN,
 								thresholdWarn);
 					} else {
-						jobState.setStateName(StateNameEnum.OK);
 						int treshold = hasWarnTreshold ? thresholdWarn : (hasErrorTreshold ? thresholdError : -1);
 						StateNameEnum state = hasWarnTreshold ? StateNameEnum.WARN
 								: (hasErrorTreshold ? StateNameEnum.ERROR : StateNameEnum.OK);
 						message = String.format(messageFormat, totalElements, timeunit, "greater than/equal to", state,
 								treshold);
 					}
-				} else {
-					jobState.setStateName(JobState.StateNameEnum.UNDEFINED);
 				}
+
 				jobState.setMessage(message);
 				jobState.setState(jobState.getStateName().ordinal());
-
 			}
 		} catch (SchedulerException e) {
 			log.error("error while retrieving job", e);

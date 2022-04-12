@@ -34,7 +34,6 @@ public class SchedulingProperties {
 		properties.put("validateJobsOnStartup", "false");
 		properties.put("houseKeepingEnabled", "false");
 		properties.put("bearerToken", "TheBearer");
-		properties.put("skipAuth", "true");
 		properties.put("quartzDriverDelegate", HSQLDBDelegate.class.getName());
 		properties.put("platform." + Platform.Property.JSP_FILE_TYPE, ".jsp");
 		properties.put("site." + SiteProperties.SERVICE_PATH, "/service");

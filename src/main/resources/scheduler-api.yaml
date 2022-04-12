@@ -142,7 +142,7 @@ components:
             description: numerical state (0=UNDEFINED, 1=OK, 2=WARN, 3=ERROR)
         stateName:
             type: string
-            enum: [UNDEFINED, OK, WARN, ERROR]
+            enum: [OK, WARN, ERROR]
         startedAfter:
           type: string
           format: date-time
