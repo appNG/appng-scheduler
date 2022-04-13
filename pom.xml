@@ -106,9 +106,46 @@
 				</repository>
 			</distributionManagement>
 		</profile>
+		<profile>
+			<id>swagger-ui</id>
+			<activation>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-dependency-plugin</artifactId>
+						<version>3.1.2</version>
+						<executions>
+							<execution>
+								<id>unpack</id>
+								<phase>initialize</phase>
+								<goals>
+									<goal>unpack</goal>
+								</goals>
+								<configuration>
+									<artifactItems>
+										<artifactItem>
+											<groupId>org.webjars</groupId>
+											<artifactId>swagger-ui</artifactId>
+											<version>4.10.3</version>
+											<type>jar</type>
+											<overWrite>true</overWrite>
+											<includes>**/*.js,**/*.css,**/*.png</includes>
+											<outputDirectory>${project.basedir}/application-home/resources/swagger-ui/</outputDirectory>
+											<fileMappers>
+												<fileMapper implementation="org.codehaus.plexus.components.io.filemappers.FlattenFileMapper" />
+											</fileMappers>
+										</artifactItem>
+									</artifactItems>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
 	</profiles>
-
-
 
 	<build>
 		<testResources>
@@ -132,7 +169,7 @@
 				</executions>
 				<configuration>
 					<inputSpec>${basedir}/src/main/resources/scheduler-api.yaml</inputSpec>
-					<!-- templateDirectory>${project.basedir}/openapi</templateDirectory-->
+					<!-- templateDirectory>${project.basedir}/openapi</templateDirectory -->
 					<generatorName>java</generatorName>
 					<library>spring-mvc</library>
 					<generatorName>spring</generatorName>

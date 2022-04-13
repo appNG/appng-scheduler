@@ -1,11 +1,14 @@
 package org.appng.application.scheduler.configuration;
 
+import java.nio.charset.StandardCharsets;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Properties;
 
+import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 
 import org.appng.api.Platform;
@@ -28,6 +31,9 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.MediaType;
+import org.springframework.http.converter.ByteArrayHttpMessageConverter;
+import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 
@@ -150,6 +156,14 @@ public class SchedulerConfig {
 		houseKeepingJob.getJobDataMap().put(Constants.JOB_CRON_EXPRESSION, houseKeepingExpression);
 		houseKeepingJob.getJobDataMap().put(Constants.JOB_RUN_ONCE, true);
 		return houseKeepingJob;
+	}
+
+	@Bean
+	public ByteArrayHttpMessageConverter byteArrayHttpMessageConverter() {
+		ByteArrayHttpMessageConverter byteArrayHttpMessageConverter = new ByteArrayHttpMessageConverter();
+		byteArrayHttpMessageConverter.setDefaultCharset(StandardCharsets.UTF_8);
+		byteArrayHttpMessageConverter.setSupportedMediaTypes(Arrays.asList(MediaType.ALL));
+		return byteArrayHttpMessageConverter;
 	}
 
 }
