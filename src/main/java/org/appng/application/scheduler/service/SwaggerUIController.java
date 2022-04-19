@@ -28,13 +28,11 @@ import org.appng.api.model.Application;
 import org.appng.api.model.Resource;
 import org.appng.api.model.ResourceType;
 import org.appng.api.model.Site;
-import org.appng.core.controller.HttpHeaders;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -56,7 +54,7 @@ public class SwaggerUIController {
 			@RequestHeader(name = HttpHeaders.AUTHORIZATION, required = false) String authorization,
 			@PathVariable(required = true) String path) throws IOException, URISyntaxException {
 
-		MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
+		HttpHeaders headers = new HttpHeaders();
 		if (StringUtils.isNotBlank(basicAuth)) {
 			headers.add(HttpHeaders.WWW_AUTHENTICATE, "Basic realm=\"appNG Scheduler OpenAPI\"");
 			String expectedAuth = "Basic " + Base64.getEncoder().encodeToString(basicAuth.getBytes());
@@ -73,9 +71,9 @@ public class SwaggerUIController {
 				}
 				String spec = new String(IOUtils.toByteArray(is), StandardCharsets.UTF_8);
 				String servicePath = site.getProperties().getString(SiteProperties.SERVICE_PATH);
-				String fullPath = String.format("%s/%s/%s/rest/jobState", servicePath, site.getName(),
+				String fullPath = String.format("  \"%s/%s/%s/rest/jobState", servicePath, site.getName(),
 						application.getName());
-				data = spec.replace("/jobState", fullPath).getBytes();
+				data = spec.replace("  \"/jobState", fullPath).getBytes();
 			}
 
 		} else {
@@ -88,6 +86,6 @@ public class SwaggerUIController {
 			headers.add(HttpHeaders.CONTENT_TYPE, mediaType);
 			data = resource.getBytes();
 		}
-		return new ResponseEntity<byte[]>(data, headers, HttpStatus.OK);
+		return ResponseEntity.ok().headers(headers).body(data);
 	}
 }
