@@ -26,7 +26,7 @@ paths:
         - in: path 
           name: job
           description: name of the job
-          required: true         
+          required: true
           schema:
             type: string
         - in: query 
@@ -94,7 +94,7 @@ components:
       bearerFormat: uuid
   schemas:
     job:
-      type: object    
+      type: object
       properties:
         _self:
           type: string
@@ -123,7 +123,7 @@ components:
           items:
             $ref: "#/components/schemas/job"
     jobState:
-      type: object    
+      type: object
       properties:
         site:
           type: string
