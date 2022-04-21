@@ -8,7 +8,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Properties;
 
-import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 
 import org.appng.api.Platform;
@@ -33,7 +32,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
-import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 
@@ -79,8 +77,10 @@ public class SchedulerConfig {
 			try (Connection connection = dataSource.getConnection()) {
 				String databaseProductName = connection.getMetaData().getDatabaseProductName().toLowerCase();
 				if (databaseProductName.contains("mysql") || databaseProductName.contains("mariadb")) {
+					// https://github.com/quartz-scheduler/quartz/blob/v2.3.2/quartz-core/src/main/java/org/quartz/impl/jdbcjobstore/JobStoreSupport.java#L667
 					lockSql = MYSQL_LOCK_SQL;
-				} else if (databaseProductName.contains("mssql")) {
+				} else if (databaseProductName.contains("microsoft sql server")) {
+					// https://mariadb.com/kb/en/lock-in-share-mode/
 					lockSql = MSSQL_LOCK_SQL;
 					driverDelegate = MSSQLDelegate.class.getName();
 				} else if (databaseProductName.contains("postgres")) {
