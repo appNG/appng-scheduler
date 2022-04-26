@@ -119,7 +119,7 @@ public class SchedulingController extends SchedulerAware implements ApplicationC
 					jobOK = true;
 				}
 				if (!jobOK && null != jobData.getString(Constants.JOB_CRON_EXPRESSION)) {
-					schedulerUtils.deleteTrigger(jobDetail, jobKey.getName(), true);
+					schedulerUtils.deleteCronTrigger(jobDetail, jobKey.getName(), true);
 				}
 			}
 		} catch (SchedulerException e) {
