@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<datasources xmlns="http://www.appng.org/schema/platform"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<datasources xmlns="http://www.appng.org/schema/platform" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://www.appng.org/schema/platform http://www.appng.org/schema/platform/appng-platform.xsd ">
+
 	<datasource id="jobs">
 		<config>
 			<title>jobs</title>
@@ -70,8 +70,7 @@
 					<label>schedule</label>
 					<icon>schedule</icon>
 				</link>
-				<link mode="intern" target="/jobs&#63;form_action=unschedule&#38;id=#{name}" show-disabled="false"
-					id="unschedule">
+				<link mode="intern" target="/jobs&#63;form_action=unschedule&#38;id=#{name}" show-disabled="false" id="unschedule">
 					<condition expression="${current.beanAvailable and current.scheduled and not empty current.nextFireTime}" />
 					<label>unschedule</label>
 					<icon>unschedule</icon>
@@ -230,4 +229,55 @@
 			<option name="id" value="${recordId}" />
 		</bean>
 	</datasource>
+
+	<datasource id="indexInfo">
+		<config>
+			<title id="indexes" />
+			<meta-data bindClass="org.appng.application.scheduler.business.IndexState.IndexInfo">
+				<field name="site" type="text">
+					<label id="site" />
+				</field>
+				<field name="siteRunning" type="image">
+					<label id="site.running" />
+					<icon condition="${current.siteRunning}">led_green</icon>
+					<icon condition="${!current.siteRunning}">led_red</icon>
+				</field>
+				<field name="indexEnabled" type="image">
+					<label id="indexEnabled" />
+					<icon condition="${current.indexEnabled}">led_green</icon>
+					<icon condition="${!current.indexEnabled}">led_red</icon>
+				</field>
+				<field name="location" type="longtext">
+					<label id="location" />
+				</field>
+				<field name="cronExpression" type="text">
+					<label id="cronExpression" />
+				</field>
+				<field name="lastModified" type="date">
+					<label id="lastModified" />
+				</field>
+				<field name="size" type="long">
+					<label id="size" />
+				</field>
+				<field name="files" type="int">
+					<label id="files" />
+				</field>
+				<field name="numDocs" type="long">
+					<label id="numDocs" />
+				</field>
+				<field name="actions" type="linkpanel">
+					<label id="actions"></label>
+				</field>
+			</meta-data>
+			<linkpanel location="inline" id="actions">
+				<link target="${current.link}" mode="extern" default="true">
+					<icon>preview</icon>
+					<label>job.show</label>
+					<condition expression="${not empty current.link}" />
+				</link>
+			</linkpanel>
+		</config>
+		<bean id="indexState" />
+	</datasource>
+
 </datasources>

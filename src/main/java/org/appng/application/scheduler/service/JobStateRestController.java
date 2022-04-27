@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 the original author or authors.
+ * Copyright 2011-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,37 +17,55 @@ package org.appng.application.scheduler.service;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
 
+import javax.servlet.http.HttpServletRequest;
+
+import org.apache.commons.collections4.EnumerationUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
+import org.appng.api.Environment;
+import org.appng.api.Request;
+import org.appng.api.RequestUtil;
 import org.appng.api.ScheduledJobResult.ExecutionResult;
+import org.appng.api.SiteProperties;
+import org.appng.api.model.Application;
 import org.appng.api.model.Site;
+import org.appng.api.support.environment.DefaultEnvironment;
 import org.appng.application.scheduler.Constants;
+import org.appng.application.scheduler.PropertyConstants;
+import org.appng.core.controller.HttpHeaders;
 import org.appng.core.domain.JobExecutionRecord;
+import org.appng.scheduler.openapi.JobStateApi;
+import org.appng.scheduler.openapi.model.Job;
 import org.appng.scheduler.openapi.model.JobRecord;
 import org.appng.scheduler.openapi.model.JobState;
-import org.appng.scheduler.openapi.model.JobState.TimeunitEnum;
+import org.appng.scheduler.openapi.model.JobState.StateNameEnum;
+import org.appng.scheduler.openapi.model.Jobs;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
 import org.quartz.JobKey;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
+import org.quartz.impl.matchers.GroupMatcher;
+import org.springframework.beans.factory.annotation.Lookup;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.google.common.collect.Lists;
+
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -57,37 +75,131 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 @RestController
-public class JobStateRestController {
+@RequiredArgsConstructor
+public class JobStateRestController implements JobStateApi {
 
-	private JobRecordService jobRecordService;
-	private Scheduler scheduler;
-	@Value("${bearerToken}")
-	private String bearerToken;
+	private final JobRecordService jobRecordService;
+	private final Scheduler scheduler;
+	private final Site site;
+	private final Application app;
+	private @Value("${" + PropertyConstants.BEARER_TOKEN + "}") String bearerToken;
+	private @Value("${skipAuth:false}") boolean skipAuth;
 
-	public JobStateRestController(JobRecordService jobRecordService, Scheduler scheduler) {
-		this.jobRecordService = jobRecordService;
-		this.scheduler = scheduler;
+	public enum TimeUnit {
+		YEAR, MONTH, WEEK, DAY, HOUR, MINUTE;
+
+		public Date getStartDate(Date now) {
+			switch (this) {
+			case MINUTE:
+				return DateUtils.addMinutes(now, -1);
+			case HOUR:
+				return DateUtils.addHours(now, -1);
+			case WEEK:
+				return DateUtils.addWeeks(now, -1);
+			case MONTH:
+				return DateUtils.addMonths(now, -1);
+			case YEAR:
+				return DateUtils.addYears(now, -1);
+			default:
+				return DateUtils.addDays(now, -1);
+			}
+		}
 	}
 
-	@RequestMapping(value = "/jobState/{application}/{job}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	@Lookup
+	protected Request getRequest() {
+		return null;
+	}
+
+	@Override
+	public ResponseEntity<Jobs> getJobs(
+			@RequestParam(value = "jobdata", required = false, defaultValue = "false") Boolean addJobdata,
+			@RequestParam(value = "all", required = false, defaultValue = "false") Boolean addAll,
+			@RequestParam(value = "thresholds", required = false) Boolean thresholds) {
+		if (!isAuthorized()) {
+			return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
+		}
+		List<Job> jobList = Lists.newArrayList();
+		if (addAll) {
+			Environment env = getRequest().getEnvironment();
+			for (String siteName : new TreeSet<>(RequestUtil.getSiteNames(env))) {
+				Site site = RequestUtil.getSiteByName(env, siteName);
+				if (site.isActive()) {
+					try {
+						Application schedulerApp = site.getApplication(app.getName());
+						if (null != schedulerApp) {
+							addJobs(addJobdata, thresholds, jobList, site, schedulerApp);
+						}
+					} catch (SchedulerException e) {
+						log.error("error while retrieving jobs for site " + site.getName(), e);
+					}
+				}
+			}
+		} else {
+			try {
+				addJobs(addJobdata, thresholds, jobList, site, app);
+			} catch (SchedulerException e) {
+				log.error("error while retrieving jobs for site " + site.getName(), e);
+			}
+		}
+
+		return ResponseEntity.ok(new Jobs().jobs(jobList));
+	}
+
+	protected void addJobs(Boolean addJobdata, Boolean thresholds, List<Job> jobList, Site site,
+			Application schedulerApp) throws SchedulerException {
+		Scheduler siteScheduler = schedulerApp.getBean(Scheduler.class);
+		Set<JobKey> jobKeys = siteScheduler.getJobKeys(GroupMatcher.jobGroupEquals(site.getName()));
+		for (JobKey jobKey : jobKeys) {
+			JobDetail jobDetail = siteScheduler.getJobDetail(jobKey);
+			JobDataMap jobDataMap = jobDetail.getJobDataMap();
+			Boolean thresholdsPresent = jobDataMap.containsKey(Constants.THRESHOLD_TIMEUNIT)
+					&& (jobDataMap.containsKey(Constants.THRESHOLD_WARN)
+							|| jobDataMap.containsKey(Constants.THRESHOLD_ERROR));
+
+			if (null == thresholds || thresholdsPresent.equals(thresholds)) {
+				Job job = new Job();
+				job.setSite(site.getName());
+				String name = jobKey.getName();
+				String[] splittedName = name.split("_");
+				job.setApplication(splittedName[0]);
+				job.setJob(splittedName[1]);
+				String servicePath = site.getProperties().getString(SiteProperties.SERVICE_PATH);
+				String detail = String.format("%s%s/%s/appng-scheduler/rest/jobState/%s/%s", site.getDomain(),
+						servicePath, site.getName(), job.getApplication(), job.getJob());
+				job.setSelf(detail);
+
+				if (addJobdata) {
+					job.setJobData(jobDataMap.getWrappedMap());
+				}
+
+				job.setThresholdsPresent(thresholdsPresent);
+				jobList.add(job);
+			}
+		}
+	}
+
+	@Override
 	public ResponseEntity<JobState> getJobState(
-			@PathVariable(required = true, name = "application") String applicationName,
-			@PathVariable(required = true, name = "job") String jobName,
-			@RequestParam(required = false, name = "pageSize", defaultValue = "10") Integer pageSize,
-			@RequestParam(required = false, name = "records") boolean withRecords,
-			@RequestHeader(name = HttpHeaders.AUTHORIZATION, required = false) List<String> auths, Site site) {
-		if (!isValidBearer(auths)) {
+	// @formatter:off
+			@PathVariable("application") String application,
+			@PathVariable("job") String job,
+			@RequestParam(value = "pageSize", required = false, defaultValue = "10") Integer pageSize,
+			@RequestParam(value = "records", required = false, defaultValue = "false") Boolean records
+	// @formatter:on
+	) {
+		if (!isAuthorized()) {
 			return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
 		}
 
-		JobState jobState = getJobState(applicationName, jobName, site, pageSize, withRecords);
+		JobState jobState = getState(application, job, pageSize, records);
 		if (null != jobState) {
 			return ResponseEntity.ok(jobState);
 		}
 		return ResponseEntity.notFound().build();
 	}
 
-	private JobState getJobState(String application, String job, Site site, Integer pageSize, boolean withRecords) {
+	private JobState getState(String application, String job, Integer pageSize, boolean withRecords) {
 		JobState jobState = null;
 		try {
 			String jobName = job.startsWith(application) ? job : application + "_" + job;
@@ -101,48 +213,65 @@ public class JobStateRestController {
 				jobState.setJob(jobName);
 
 				JobDataMap jobDataMap = jobDetail.getJobDataMap();
-				boolean hasWarnTreshold = jobDataMap.containsKey(Constants.THRESHOLD_WARN);
-				if (hasWarnTreshold) {
-					jobState.setThresholdWarn(jobDataMap.getInt(Constants.THRESHOLD_WARN));
+				jobState.setJobData(jobDataMap.getWrappedMap());
+
+				int thresholdWarn = -1;
+				int thresholdError = -1;
+				if (jobDataMap.containsKey(Constants.THRESHOLD_WARN)) {
+					thresholdWarn = jobDataMap.getInt(Constants.THRESHOLD_WARN);
 				}
-				boolean hasErrorTreshold = jobDataMap.containsKey(Constants.THRESHOLD_ERROR);
-				if (hasErrorTreshold) {
-					jobState.setThresholdError(jobDataMap.getInt(Constants.THRESHOLD_ERROR));
+				if (jobDataMap.containsKey(Constants.THRESHOLD_ERROR)) {
+					thresholdError = jobDataMap.getInt(Constants.THRESHOLD_ERROR);
 				}
+
+				TimeUnit timeunit = null;
 				if (jobDataMap.containsKey(Constants.THRESHOLD_TIMEUNIT)) {
-					jobState.setTimeunit(
-							TimeunitEnum.valueOf(jobDataMap.getString(Constants.THRESHOLD_TIMEUNIT).toUpperCase()));
+					timeunit = TimeUnit.valueOf(jobDataMap.getString(Constants.THRESHOLD_TIMEUNIT).toUpperCase());
 				}
 
 				Date now = new Date();
-				TimeunitEnum timeunit = jobState.getTimeunit();
 				boolean hasTimeUnit = null != timeunit;
-				Date startedAfter = hasTimeUnit ? getStartDate(timeunit, now) : null;
+				Date startedAfter = hasTimeUnit ? timeunit.getStartDate(now) : null;
 
 				Page<JobExecutionRecord> records = jobRecordService.getJobRecords(site.getName(), application,
 						jobKey.getName(), startedAfter, now, null, null, new PageRequest(0, pageSize));
 
 				if (hasTimeUnit) {
-					jobState.setStartedAfter(toLocalTime(startedAfter));
+					jobState.setStartedAfter(toOffsetDateTime(startedAfter));
 				}
-				jobState.setTotalRecords((int) records.getTotalElements());
+				long totalElements = records.getTotalElements();
+				jobState.setTotalRecords((int) totalElements);
 
 				if (withRecords) {
 					jobState.setRecords(records.map(r -> toRecord(r)).getContent());
 				}
 
-				if (hasTimeUnit) {
-					if (hasErrorTreshold && records.getTotalElements() < jobState.getThresholdError()) {
-						jobState.setState(JobState.StateEnum.ERROR);
-					} else if (hasWarnTreshold && records.getTotalElements() < jobState.getThresholdWarn()) {
-						jobState.setState(JobState.StateEnum.WARN);
+				String message = "Tresholds and/or time unit have not been definded.";
+				boolean hasErrorTreshold = thresholdError > 0;
+				boolean hasWarnTreshold = thresholdWarn > 0;
+
+				jobState.setStateName(StateNameEnum.OK);
+				if (hasTimeUnit && (hasWarnTreshold || hasErrorTreshold)) {
+					String messageFormat = "The job succeeded %s time(s) during that last %s, which is %s the %s treshold of %s.";
+					if (hasErrorTreshold && totalElements < thresholdError) {
+						jobState.setStateName(StateNameEnum.ERROR);
+						message = String.format(messageFormat, totalElements, timeunit, "less than",
+								StateNameEnum.ERROR, thresholdError);
+					} else if (hasWarnTreshold && totalElements < thresholdWarn) {
+						jobState.setStateName(StateNameEnum.WARN);
+						message = String.format(messageFormat, totalElements, timeunit, "less than", StateNameEnum.WARN,
+								thresholdWarn);
 					} else {
-						jobState.setState(JobState.StateEnum.OK);
+						int treshold = hasWarnTreshold ? thresholdWarn : (hasErrorTreshold ? thresholdError : -1);
+						StateNameEnum state = hasWarnTreshold ? StateNameEnum.WARN
+								: (hasErrorTreshold ? StateNameEnum.ERROR : StateNameEnum.OK);
+						message = String.format(messageFormat, totalElements, timeunit, "greater than/equal to", state,
+								treshold);
 					}
-				} else {
-					jobState.setState(JobState.StateEnum.UNDEFINED);
 				}
 
+				jobState.setMessage(message);
+				jobState.setState(jobState.getStateName().ordinal());
 			}
 		} catch (SchedulerException e) {
 			log.error("error while retrieving job", e);
@@ -153,8 +282,8 @@ public class JobStateRestController {
 	private JobRecord toRecord(JobExecutionRecord r) {
 		JobRecord jobRecord = new JobRecord();
 		jobRecord.setId(r.getId());
-		jobRecord.setStart(toLocalTime(r.getStartTime()));
-		jobRecord.setEnd(toLocalTime(r.getEndTime()));
+		jobRecord.setStart(toOffsetDateTime(r.getStartTime()));
+		jobRecord.setEnd(toOffsetDateTime(r.getEndTime()));
 		jobRecord.setRunOnce(r.isRunOnce());
 		jobRecord.setDuration(r.getDuration().intValue());
 		jobRecord.setStacktrace(r.getStacktraces());
@@ -164,28 +293,25 @@ public class JobStateRestController {
 		return jobRecord;
 	}
 
-	private OffsetDateTime toLocalTime(Date date) {
+	private OffsetDateTime toOffsetDateTime(Date date) {
 		return date.toInstant().atZone(ZoneId.systemDefault()).toOffsetDateTime();
 	}
 
-	public Date getStartDate(TimeunitEnum timeunit, Date now) {
-		switch (timeunit) {
-		case MINUTE:
-			return DateUtils.addMinutes(now, -1);
-		case HOUR:
-			return DateUtils.addHours(now, -1);
-		case WEEK:
-			return DateUtils.addWeeks(now, -1);
-		case MONTH:
-			return DateUtils.addMonths(now, -1);
-		case YEAR:
-			return DateUtils.addYears(now, -1);
-		default:
-			return DateUtils.addDays(now, -1);
+	boolean isAuthorized() {
+		if (skipAuth) {
+			return true;
 		}
+		if (StringUtils.isBlank(bearerToken)) {
+			return false;
+		}
+		DefaultEnvironment env = (DefaultEnvironment) getRequest().getEnvironment();
+		HttpServletRequest servletRequest = env.getServletRequest();
+		List<String> auths = EnumerationUtils.toList(servletRequest.getHeaders(HttpHeaders.AUTHORIZATION));
+		return null != auths && auths.contains("Bearer " + bearerToken);
 	}
 
-	boolean isValidBearer(List<String> auths) {
-		return null != auths && StringUtils.isNotBlank(bearerToken) && auths.contains("Bearer " + bearerToken);
+	protected List<String> getCleanedList(String value) {
+		return Arrays.asList(StringUtils.trimToEmpty(value).split(",")).stream().map(StringUtils::trim)
+				.collect(Collectors.toList());
 	}
 }

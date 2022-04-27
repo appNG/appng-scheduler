@@ -1,3 +1,19 @@
+Release Notes - appNG Scheduler - Version 1.15.0 (2022-04-27)
+-------------------------------------------------------------
+* [SCHED-35] - Misleading Job state in a clustered environment
+* [SCHED-44] - Rework transaction management for quartz scheduler
+* [SCHED-45] - Jobs that got forcefully deactivated must be reenabled
+* [SCHED-48] - Jobdata not always updated when jobs is being rescheduled
+* [SCHED-47] - Provide an overview for site indexes
+* [SCHED-43] - Distinct API for Monitoring of scheduled Jobs
+* [SCHED-49] - Update license headers to 2022
+
+Release Notes - appNG Scheduler - Version 1.14.0 (2021-10-13)
+-------------------------------------------------------------
+* [SCHED-44] - Rework transaction management for quartz scheduler
+* [SCHED-43] - Distinct API for Monitoring of scheduled Jobs
+* [SCHED-42] - Remove obsolete property 'quartzIsClustered'
+
 Release Notes - appNG Scheduler - Version 1.13.0 (2020-05-29)
 -------------------------------------------------------------
 * [SCHED-41] - Release of 1.13.0

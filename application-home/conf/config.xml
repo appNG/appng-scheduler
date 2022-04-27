@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<applicationRootConfig xmlns="http://www.appng.org/schema/platform"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<applicationRootConfig xmlns="http://www.appng.org/schema/platform" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://www.appng.org/schema/platform http://www.appng.org/schema/platform/appng-platform.xsd">
 	<name>Scheduler</name>
 	<config>
@@ -127,6 +126,13 @@
 								<param name="path">/jobs/update/${id}</param>
 								<param name="tab">#tab_records</param>
 							</params>
+						</datasource>
+					</element>
+				</section>
+				<section>
+					<element>
+						<datasource id="indexInfo">
+						<condition expression="${empty action}"/>
 						</datasource>
 					</element>
 				</section>

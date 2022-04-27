@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 the original author or authors.
+ * Copyright 2011-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import org.appng.api.support.CallableDataSource;
 import org.appng.application.scheduler.SchedulingProperties;
 import org.appng.application.scheduler.model.JobResult;
 import org.appng.application.scheduler.quartz.RecordingJobListener;
+import org.appng.application.scheduler.service.JobStateRestControllerTest;
 import org.appng.core.domain.JobExecutionRecord;
 import org.appng.core.repository.JobExecutionRecordRepository;
 import org.appng.testsupport.TestBase;
@@ -51,8 +52,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-@ContextConfiguration(locations = { TestBase.TESTCONTEXT_CORE, TestBase.TESTCONTEXT_JPA,
-		"classpath:beans-test-core.xml" }, initializers = TestJobRecordings.class)
+@ContextConfiguration(inheritLocations = false, locations = { TestBase.BEANS_PATH, TestBase.TESTCONTEXT_CORE,
+		TestBase.TESTCONTEXT_JPA, "classpath:beans-test-core.xml" }, initializers = JobStateRestControllerTest.class)
 public class TestJobRecordings extends TestBase {
 
 	private @Mock JobExecutionContext jobContext;

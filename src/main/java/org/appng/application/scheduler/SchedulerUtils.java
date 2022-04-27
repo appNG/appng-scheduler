@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 the original author or authors.
+ * Copyright 2011-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@ package org.appng.application.scheduler;
 
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.appng.api.FieldProcessor;
@@ -64,7 +65,8 @@ public class SchedulerUtils {
 			addMessage(request, fp, MessageConstants.JOB_RUNNING_ERROR, true, false, "", id);
 		} else {
 			JobKey key = jobDetail.getKey();
-			Trigger trigger = TriggerBuilder.newTrigger().withIdentity("simpletrigger-" + hashCode(), key.getGroup())
+			Trigger trigger = TriggerBuilder.newTrigger()
+					.withIdentity(new TriggerKey(id + "-simpletrigger-" + hashCode(), jobDetail.getKey().getGroup()))
 					.startNow().forJob(key).build();
 			scheduler.scheduleJob(trigger);
 			log.info("Created trigger '{}' for job '{}' with start time '{}'", trigger.getKey(),
@@ -75,7 +77,7 @@ public class SchedulerUtils {
 
 	public void scheduleJob(JobDetail jobDetail, String id, String jobDesc, String triggerGroup)
 			throws SchedulerException {
-		List<? extends Trigger> triggersOfJob = scheduler.getTriggersOfJob(jobDetail.getKey());
+		List<? extends Trigger> triggersOfJob = getTriggers(jobDetail);
 		if (0 == triggersOfJob.size()) {
 			String cronExpression = jobDetail.getJobDataMap().getString(Constants.JOB_CRON_EXPRESSION);
 			jobDetail.getJobDataMap().put(Constants.JOB_ENABLED, true);
@@ -88,45 +90,50 @@ public class SchedulerUtils {
 
 	public void rescheduleJob(JobDetail jobDetail, String cronExpression, String id, String jobDesc,
 			String triggerGroup) throws SchedulerException {
-		TriggerKey triggerKey = getTriggerKey(jobDetail);
 		jobDetail.getJobDataMap().put(Constants.JOB_CRON_EXPRESSION, cronExpression);
-		if (triggerKey != null) {
-			CronTrigger cronTrigger = getCronTrigger(jobDetail, cronExpression, id, jobDesc, triggerGroup);
-			if (cronTrigger != null) {
-				scheduler.rescheduleJob(triggerKey, cronTrigger);
-				addMessage(request, fp, MessageConstants.JOB_UPDATED, false, false, null, id);
-				return;
-			} else {
-				addMessage(request, fp, MessageConstants.JOB_UPDATE_ERROR, true, false, null, id);
-				return;
-			}
-		} else {
-			saveJob(jobDetail);
-			addMessage(request, fp, MessageConstants.JOB_UPDATED, false, false, null, id);
+		CronTrigger cronTrigger = getCronTrigger(jobDetail);
+		if (cronTrigger != null) {
+			cronTrigger = createCronTrigger(jobDetail, cronExpression, cronTrigger.getKey());
+			scheduler.rescheduleJob(cronTrigger.getKey(), cronTrigger);
 		}
+		saveJob(jobDetail);
+		addMessage(request, fp, MessageConstants.JOB_UPDATED, false, false, null, id);
+	}
+
+	protected CronTrigger getCronTrigger(JobDetail jobDetail) throws SchedulerException {
+		CronTrigger cronTrigger = getTriggers(jobDetail).stream().filter(t -> (t instanceof CronTrigger))
+				.map(CronTrigger.class::cast).findFirst().orElse(null);
+		return cronTrigger;
+	}
+
+	protected List<? extends Trigger> getTriggers(JobDetail jobDetail) throws SchedulerException {
+		return scheduler.getTriggersOfJob(jobDetail.getKey());
 	}
 
 	public boolean isRunning(JobDetail jobDetail) throws SchedulerException {
-		TriggerKey triggerKey = getTriggerKey(jobDetail);
-		if (null != triggerKey) {
-			TriggerState triggerState = scheduler.getTriggerState(triggerKey);
-			return TriggerState.COMPLETE.equals(triggerState);
+		List<TriggerKey> triggerKeys = getTriggers(jobDetail).stream().map(Trigger::getKey)
+				.collect(Collectors.toList());
+		for (TriggerKey triggerKey : triggerKeys) {
+			if (TriggerState.COMPLETE.equals(scheduler.getTriggerState(triggerKey))) {
+				return true;
+			}
 		}
 		return false;
 	}
 
-	public boolean deleteTrigger(JobDetail jobDetail, String id) throws SchedulerException {
-		List<? extends Trigger> triggersOfJob = scheduler.getTriggersOfJob(jobDetail.getKey());
-		if (0 == triggersOfJob.size()) {
-			addMessage(request, fp, MessageConstants.JOB_NOT_EXISTS_ERROR, true, false, null, id);
-			return false;
-		} else {
-			CronTrigger cronTrigger = (CronTrigger) triggersOfJob.get(0);
+	public boolean deleteCronTrigger(JobDetail jobDetail, String id, boolean forcefullyDisabled)
+			throws SchedulerException {
+		CronTrigger cronTrigger = getCronTrigger(jobDetail);
+		if (null != cronTrigger) {
 			String cronExpression = cronTrigger.getCronExpression();
 			jobDetail.getJobDataMap().put(Constants.JOB_CRON_EXPRESSION, cronExpression);
 			jobDetail.getJobDataMap().put(Constants.JOB_ENABLED, false);
+			if (forcefullyDisabled) {
+				jobDetail.getJobDataMap().put(Constants.JOB_FORCEFULLY_DISABLED, forcefullyDisabled);
+				log.info("Job {} was disabled forcefully.", jobDetail.getKey());
+			}
 			saveJob(jobDetail);
-			boolean unscheduled = scheduler.unscheduleJob(triggersOfJob.get(0).getKey());
+			boolean unscheduled = scheduler.unscheduleJob(cronTrigger.getKey());
 			if (unscheduled) {
 				log.info("Deleted trigger '{}' for job '{}' with expression '{}'", cronTrigger.getKey(),
 						jobDetail.getKey(), cronExpression);
@@ -134,38 +141,33 @@ public class SchedulerUtils {
 			}
 			return unscheduled;
 		}
-	}
-
-	public TriggerKey getTriggerKey(JobDetail jobDetail) throws SchedulerException {
-		List<? extends Trigger> triggersOfJob = scheduler.getTriggersOfJob(jobDetail.getKey());
-		if (triggersOfJob.size() > 0) {
-			return triggersOfJob.get(0).getKey();
-		}
-		return null;
+		addMessage(request, fp, MessageConstants.JOB_NOT_EXISTS_ERROR, true, false, null, id);
+		return false;
 	}
 
 	public void addCronTrigger(JobDetail jobDetail, String cronExpression, String id, String jobDesc,
 			String triggerGroup) throws SchedulerException {
-		if (isValidExpression(cronExpression)) {
-			CronTrigger cronTrigger = getCronTrigger(jobDetail, cronExpression, id, jobDesc, triggerGroup);
-			if (cronTrigger != null) {
-				scheduler.scheduleJob(cronTrigger);
-				log.info("Created trigger '{}' for job '{}' with expression '{}'", cronTrigger.getKey(),
-						jobDetail.getKey(), cronExpression);
-				addMessage(request, fp, MessageConstants.JOB_SCHEDULED_EXPR, false, false, null, id, cronExpression);
-			}
+		CronTrigger cronTrigger = createCronTrigger(jobDetail, cronExpression, id, jobDesc, triggerGroup);
+		if (cronTrigger != null) {
+			scheduler.scheduleJob(cronTrigger);
+			log.info("Created trigger '{}' for job '{}' with expression '{}'", cronTrigger.getKey(), jobDetail.getKey(),
+					cronExpression);
+			addMessage(request, fp, MessageConstants.JOB_SCHEDULED_EXPR, false, false, null, id, cronExpression);
 		}
 	}
 
-	public CronTrigger getCronTrigger(JobDetail jobDetail, String cronExpression, String id, String jobDesc,
+	public CronTrigger createCronTrigger(JobDetail jobDetail, String cronExpression, String id, String jobDesc,
 			String triggerGroup) {
 		if (isValidExpression(cronExpression)) {
 			TriggerKey triggerKey = new TriggerKey(id + "-crontrigger-" + hashCode(), triggerGroup);
-			CronTrigger cronTrigger = TriggerBuilder.newTrigger().withIdentity(triggerKey)
-					.withSchedule(CronScheduleBuilder.cronSchedule(cronExpression)).forJob(jobDetail).build();
-			return cronTrigger;
+			return createCronTrigger(jobDetail, cronExpression, triggerKey);
 		}
 		return null;
+	}
+
+	protected CronTrigger createCronTrigger(JobDetail jobDetail, String cronExpression, TriggerKey triggerKey) {
+		return TriggerBuilder.newTrigger().withIdentity(triggerKey)
+				.withSchedule(CronScheduleBuilder.cronSchedule(cronExpression)).forJob(jobDetail).build();
 	}
 
 	public boolean isValidExpression(String cronExpression) {
@@ -219,32 +221,42 @@ public class SchedulerUtils {
 			jobDetail = new SchedulerJobDetail(jobKey, scheduledJob.getDescription());
 		}
 
-		JobDataMap jobDataMap = jobDetail.getJobDataMap();
-		String cronExpression = jobDataMap.getString(Constants.JOB_CRON_EXPRESSION);
-		boolean enabled = jobDataMap.getBoolean(Constants.JOB_ENABLED);
-
-		jobDataMap.put(Constants.JOB_SCHEDULED_JOB, scheduledJob.getClass().getName());
-		jobDataMap.put(Constants.JOB_ORIGIN, applicationName);
-		jobDataMap.put(Constants.JOB_SITE_NAME, site.getName());
-		jobDataMap.put(Constants.JOB_BEAN_NAME, beanName);
-		if (null != scheduledJob.getJobDataMap()) {
-			jobDataMap.putAll(scheduledJob.getJobDataMap());
-		}
-
-		boolean forceState = jobDataMap.getBoolean(Constants.JOB_FORCE_STATE);
-		if (StringUtils.isNotBlank(cronExpression) && !forceState) {
-			jobDataMap.put(Constants.JOB_CRON_EXPRESSION, cronExpression);
-			jobDataMap.put(Constants.JOB_ENABLED, enabled);
-		}
+		addMetaData(site, applicationName, scheduledJob, beanName, jobDetail);
 		saveJob(jobDetail);
 		return jobDetail;
+	}
+
+	public static void addMetaData(Site site, String applicationName, ScheduledJob scheduledJob, String beanName,
+			JobDetail jobDetail) {
+		JobDataMap persistentJobData = jobDetail.getJobDataMap();
+		String cronExpression = persistentJobData.getString(Constants.JOB_CRON_EXPRESSION);
+		boolean enabled = persistentJobData.getBoolean(Constants.JOB_ENABLED);
+
+		persistentJobData.put(Constants.JOB_SCHEDULED_JOB, scheduledJob.getClass().getName());
+		persistentJobData.put(Constants.JOB_ORIGIN, applicationName);
+		persistentJobData.put(Constants.JOB_SITE_NAME, site.getName());
+		persistentJobData.put(Constants.JOB_BEAN_NAME, beanName);
+		if (null != scheduledJob.getJobDataMap()) {
+			persistentJobData.putAll(scheduledJob.getJobDataMap());
+		}
+		if (persistentJobData.getBoolean(Constants.JOB_FORCEFULLY_DISABLED)) {
+			enabled = true;
+			persistentJobData.remove(Constants.JOB_FORCEFULLY_DISABLED);
+			log.info("Job '{}' was disabled forcefully and is being reenabled.", jobDetail.getKey());
+		}
+
+		boolean forceState = persistentJobData.getBoolean(Constants.JOB_FORCE_STATE);
+		if (StringUtils.isNotBlank(cronExpression) && !forceState) {
+			persistentJobData.put(Constants.JOB_CRON_EXPRESSION, cronExpression);
+			persistentJobData.put(Constants.JOB_ENABLED, enabled);
+		}
 	}
 
 	public JobDetail getJobDetail(JobKey jobKey) throws SchedulerException {
 		return scheduler.getJobDetail(jobKey);
 	}
 
-	public JobKey getJobKey(String siteName, String applicationName, String jobBeanName) {
+	public static JobKey getJobKey(String siteName, String applicationName, String jobBeanName) {
 		return new JobKey(applicationName + JOB_SEPARATOR + jobBeanName, siteName);
 	}
 

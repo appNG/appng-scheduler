@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 the original author or authors.
+ * Copyright 2011-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ public class Constants {
 	public static final String JOB_CRON_EXPRESSION = "cronExpression";
 	public static final String JOB_SCHEDULED_JOB = "SCHEDULED_JOB";
 	public static final String JOB_ENABLED = "enabled";
+	public static final String JOB_FORCEFULLY_DISABLED = "forcefullyDisabled";
 	public static final String JOB_HARD_INTERRUPTABLE = "hardInterruptable";
 	public static final String JOB_RUN_ONCE = "runOnce";
 	public static final String JOB_ALLOW_CONCURRENT_EXECUTIONS = "allowConcurrentExecutions";

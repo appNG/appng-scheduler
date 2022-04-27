@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 the original author or authors.
+ * Copyright 2011-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import org.appng.api.ScheduledJob;
 import org.appng.api.model.Application;
 import org.appng.api.model.Site;
 import org.appng.application.scheduler.Constants;
-import org.appng.scheduler.openapi.model.JobState;
+import org.appng.application.scheduler.service.JobStateRestController.TimeUnit;
 import org.springframework.stereotype.Component;
 
 import lombok.Getter;
@@ -41,7 +41,7 @@ public class LongRunningJob implements ScheduledJob {
 		getJobDataMap().put(Constants.JOB_ENABLED, true);
 		getJobDataMap().put(Constants.JOB_FORCE_STATE, true);
 		getJobDataMap().put(Constants.THRESHOLD_ERROR, 5);
-		getJobDataMap().put(Constants.THRESHOLD_TIMEUNIT, JobState.TimeunitEnum.DAY.name());
+		getJobDataMap().put(Constants.THRESHOLD_TIMEUNIT, TimeUnit.DAY.name());
 	}
 
 	public void execute(Site site, Application application) throws Exception {

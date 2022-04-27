@@ -1,0 +1,15 @@
+{
+  "jobs" : [ {
+    "_self" : "https://appng.org/service/appng/appng-scheduler/rest/jobState/appng-scheduler/longRunningJob",
+    "site" : "appng",
+    "application" : "appng-scheduler",
+    "job" : "longRunningJob",
+    "thresholdsPresent" : true
+  }, {
+    "_self" : "https://appng.org/service/appng/appng-scheduler/rest/jobState/appng-scheduler/indexJob",
+    "site" : "appng",
+    "application" : "appng-scheduler",
+    "job" : "indexJob",
+    "thresholdsPresent" : true
+  } ]
+}

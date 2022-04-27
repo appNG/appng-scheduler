@@ -1,11 +1,10 @@
 package org.appng.application.scheduler.configuration;
 
-import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.time.OffsetDateTime;
-import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Properties;
 
@@ -19,7 +18,7 @@ import org.appng.application.scheduler.job.JobRecordHouseKeepingJob;
 import org.appng.application.scheduler.quartz.DriverDelegateWrapper;
 import org.appng.application.scheduler.quartz.SpringQuartzSchedulerFactory;
 import org.appng.application.scheduler.service.JobRecordService;
-import org.appng.scheduler.openapi.model.JobState.TimeunitEnum;
+import org.appng.application.scheduler.service.JobStateRestController.TimeUnit;
 import org.quartz.impl.StdSchedulerFactory;
 import org.quartz.impl.jdbcjobstore.HSQLDBDelegate;
 import org.quartz.impl.jdbcjobstore.MSSQLDelegate;
@@ -31,17 +30,10 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.http.MediaType;
+import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.scheduling.quartz.SchedulerFactoryBean;
-
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.Module;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.SerializerProvider;
-import com.fasterxml.jackson.databind.module.SimpleModule;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -67,8 +59,7 @@ public class SchedulerConfig {
 	}
 
 	@Bean
-	public SchedulerFactoryBean scheduler(JobFactory jobFactory,
-			@Value("${quartzDriverDelegate}") String quartzDriverDelegate, @Value("${site.name}") String siteName,
+	public SchedulerFactoryBean scheduler(JobFactory jobFactory, @Value("${site.name}") String siteName,
 			DataSourceTransactionManager quartzTransactionManager, Properties quartzProperties) throws SQLException {
 		DataSource dataSource = quartzTransactionManager.getDataSource();
 		SchedulerFactoryBean scheduler = new SchedulerFactoryBean();
@@ -86,8 +77,10 @@ public class SchedulerConfig {
 			try (Connection connection = dataSource.getConnection()) {
 				String databaseProductName = connection.getMetaData().getDatabaseProductName().toLowerCase();
 				if (databaseProductName.contains("mysql") || databaseProductName.contains("mariadb")) {
+					// https://github.com/quartz-scheduler/quartz/blob/v2.3.2/quartz-core/src/main/java/org/quartz/impl/jdbcjobstore/JobStoreSupport.java#L667
 					lockSql = MYSQL_LOCK_SQL;
-				} else if (databaseProductName.contains("mssql")) {
+				} else if (databaseProductName.contains("microsoft sql server")) {
+					// https://mariadb.com/kb/en/lock-in-share-mode/
 					lockSql = MSSQL_LOCK_SQL;
 					driverDelegate = MSSQLDelegate.class.getName();
 				} else if (databaseProductName.contains("postgres")) {
@@ -148,7 +141,7 @@ public class SchedulerConfig {
 		indexJob.getJobDataMap().put(Constants.JOB_ENABLED, indexEnabled);
 		indexJob.getJobDataMap().put(Constants.JOB_CRON_EXPRESSION, indexExpression);
 		indexJob.getJobDataMap().put(Platform.Property.JSP_FILE_TYPE, jspFileType);
-		indexJob.getJobDataMap().put(Constants.THRESHOLD_TIMEUNIT, TimeunitEnum.DAY.name());
+		indexJob.getJobDataMap().put(Constants.THRESHOLD_TIMEUNIT, TimeUnit.DAY.name());
 		indexJob.getJobDataMap().put(Constants.THRESHOLD_ERROR, 1);
 		return indexJob;
 	}
@@ -166,23 +159,11 @@ public class SchedulerConfig {
 	}
 
 	@Bean
-	public ObjectMapper objectMapper() {
-		Module dateModule = new SimpleModule().addSerializer(OffsetDateTime.class,
-				new JsonSerializer<OffsetDateTime>() {
-					public void serialize(OffsetDateTime value, JsonGenerator jsonGenerator,
-							SerializerProvider provider) throws IOException {
-						if (value != null) {
-							jsonGenerator.writeString(DateTimeFormatter.ISO_DATE_TIME.format(value));
-						}
-					}
-				});
-		return new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT)
-				.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS).registerModule(dateModule);
-	}
-
-	@Bean
-	public MappingJackson2HttpMessageConverter jsonConverter(ObjectMapper objectMapper) {
-		return new MappingJackson2HttpMessageConverter(objectMapper);
+	public ByteArrayHttpMessageConverter byteArrayHttpMessageConverter() {
+		ByteArrayHttpMessageConverter byteArrayHttpMessageConverter = new ByteArrayHttpMessageConverter();
+		byteArrayHttpMessageConverter.setDefaultCharset(StandardCharsets.UTF_8);
+		byteArrayHttpMessageConverter.setSupportedMediaTypes(Arrays.asList(MediaType.ALL));
+		return byteArrayHttpMessageConverter;
 	}
 
 }

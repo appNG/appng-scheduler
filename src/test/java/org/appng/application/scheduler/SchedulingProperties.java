@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2021 the original author or authors.
+ * Copyright 2011-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.appng.application.scheduler;
 import java.util.Properties;
 
 import org.appng.api.Platform;
+import org.appng.api.SiteProperties;
 import org.quartz.impl.jdbcjobstore.HSQLDBDelegate;
 
 public class SchedulingProperties {
@@ -35,6 +36,8 @@ public class SchedulingProperties {
 		properties.put("bearerToken", "TheBearer");
 		properties.put("quartzDriverDelegate", HSQLDBDelegate.class.getName());
 		properties.put("platform." + Platform.Property.JSP_FILE_TYPE, ".jsp");
+		properties.put("site." + SiteProperties.SERVICE_PATH, "/service");
+		properties.put("site.jsonPrettyPrint", "true");
 		return properties;
 	}
 

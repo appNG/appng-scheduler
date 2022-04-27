@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 the original author or authors.
+ * Copyright 2011-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,7 +70,7 @@ public class SetSchedulerStateAction extends SchedulerAware implements ActionPro
 					schedulerUtils.scheduleJob(jobDetail, id, "", siteName);
 				}
 			} else if (ACTION_UNSCHEDULE.equals(action)) {
-				schedulerUtils.deleteTrigger(jobDetail, id);
+				schedulerUtils.deleteCronTrigger(jobDetail, id, false);
 			} else if (ACTION_START.equals(action)) {
 				schedulerUtils.addSimpleTrigger(jobDetail, id);
 			} else if (ACTION_DELETE.equals(action)) {
