@@ -95,7 +95,6 @@ public class SchedulerUtils {
 		if (cronTrigger != null) {
 			cronTrigger = createCronTrigger(jobDetail, cronExpression, cronTrigger.getKey());
 			scheduler.rescheduleJob(cronTrigger.getKey(), cronTrigger);
-			return;
 		}
 		saveJob(jobDetail);
 		addMessage(request, fp, MessageConstants.JOB_UPDATED, false, false, null, id);
