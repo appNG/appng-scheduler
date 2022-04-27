@@ -239,8 +239,8 @@
 				</field>
 				<field name="siteRunning" type="image">
 					<label id="site.running" />
-					<icon condition="${current.indexEnabled}">led_green</icon>
-					<icon condition="${!current.indexEnabled}">led_red</icon>
+					<icon condition="${current.siteRunning}">led_green</icon>
+					<icon condition="${!current.siteRunning}">led_red</icon>
 				</field>
 				<field name="indexEnabled" type="image">
 					<label id="indexEnabled" />

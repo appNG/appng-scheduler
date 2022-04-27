@@ -1,3 +1,18 @@
+/*
+ * Copyright 2011-2022 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.appng.application.scheduler.business;
 
 import java.io.File;
@@ -18,22 +33,34 @@ import org.appng.api.FieldProcessor;
 import org.appng.api.Options;
 import org.appng.api.Platform;
 import org.appng.api.Request;
-import org.appng.api.ScheduledJob;
 import org.appng.api.Scope;
 import org.appng.api.SiteProperties;
 import org.appng.api.model.Application;
 import org.appng.api.model.Site;
 import org.appng.api.model.Site.SiteState;
 import org.appng.application.scheduler.Constants;
+import org.appng.application.scheduler.SchedulerUtils;
+import org.appng.application.scheduler.job.IndexJob;
+import org.quartz.JobDetail;
+import org.quartz.JobKey;
+import org.quartz.Scheduler;
+import org.quartz.SchedulerException;
 import org.springframework.stereotype.Component;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * A {@link DataProvider} showing the state of the Lucene Index written by {@link IndexJob}.
+ */
 @Slf4j
 @Component
-public class IndexState implements DataProvider {
+public class IndexState extends SchedulerAware implements DataProvider {
+
+	public IndexState(Scheduler scheduler) {
+		super(scheduler);
+	}
 
 	@Override
 	public DataContainer getData(Site site, Application application, Environment env, Options options, Request request,
@@ -44,20 +71,22 @@ public class IndexState implements DataProvider {
 		new TreeSet<>(siteMap.keySet()).forEach(siteName -> {
 			Site theSite = siteMap.get(siteName);
 
-			log.warn("########## {}", theSite);
-
 			Application schedulerApp = theSite.getApplication(application.getName());
 			if (null != schedulerApp) {
-
-				log.warn("########## {}", schedulerApp);
 
 				IndexInfo indexInfo = new IndexInfo(siteName);
 				indexInfo.siteRunning = theSite.hasState(SiteState.STARTED);
 
 				try {
-					ScheduledJob indexJob = schedulerApp.getBean("indexJob", ScheduledJob.class);
-					if (null != indexJob) {
-						Map<String, Object> indexJobData = indexJob.getJobDataMap();
+					if (indexInfo.siteRunning) {
+
+						Scheduler scheduler = schedulerApp.getBean(Scheduler.class);
+						SchedulerUtils schedulerUtils = new SchedulerUtils(scheduler, fp, request);
+
+						JobKey jobKey = SchedulerUtils.getJobKey(siteName, application.getName(), "indexJob");
+						JobDetail jobDetail = schedulerUtils.getJobDetail(jobKey);
+
+						Map<String, Object> indexJobData = jobDetail.getJobDataMap();
 						indexInfo.indexEnabled = (Boolean) indexJobData.get(Constants.JOB_ENABLED);
 						indexInfo.cronExpression = (String) indexJobData.get(Constants.JOB_CRON_EXPRESSION);
 
@@ -65,7 +94,7 @@ public class IndexState implements DataProvider {
 								"/manager/%s/appng-scheduler/jobs/update/appng-scheduler_indexJob#sections_jobs=tab_update",
 								siteName);
 					}
-				} catch (Exception e) {
+				} catch (SchedulerException e) {
 					log.error("error reading index for site " + siteName, e);
 				}
 
@@ -76,7 +105,7 @@ public class IndexState implements DataProvider {
 
 				if (indexPath.exists()) {
 					try (FSDirectory dir = FSDirectory.open(indexPath.toPath(), NoLockFactory.INSTANCE);
-							DirectoryReader reader = DirectoryReader.open(dir);) {
+							DirectoryReader reader = DirectoryReader.open(dir)) {
 						for (File file : indexPath.listFiles()) {
 							indexInfo.files++;
 							indexInfo.size += file.length();
@@ -90,6 +119,7 @@ public class IndexState implements DataProvider {
 						log.error("error reading index for site " + siteName, e);
 					}
 				}
+				indexInfo.size %= 1000; // size in KB
 				data.add(indexInfo);
 			}
 
