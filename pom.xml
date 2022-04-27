@@ -2,7 +2,7 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>appng-scheduler</artifactId>
-	<version>1.15.0-SNAPSHOT</version>
+	<version>1.15.0</version>
 	<name>Scheduler</name>
 	<description>Scheduling using Quartz Scheduler</description>
 	<url>https://www.appng.org</url>
