@@ -90,16 +90,15 @@ public class SchedulerUtils {
 
 	public void rescheduleJob(JobDetail jobDetail, String cronExpression, String id, String jobDesc,
 			String triggerGroup) throws SchedulerException {
+		jobDetail.getJobDataMap().put(Constants.JOB_CRON_EXPRESSION, cronExpression);
 		CronTrigger cronTrigger = getCronTrigger(jobDetail);
 		if (cronTrigger != null) {
+			cronTrigger = createCronTrigger(jobDetail, cronExpression, cronTrigger.getKey());
 			scheduler.rescheduleJob(cronTrigger.getKey(), cronTrigger);
-			addMessage(request, fp, MessageConstants.JOB_UPDATED, false, false, null, id);
 			return;
-		} else {
-			jobDetail.getJobDataMap().put(Constants.JOB_CRON_EXPRESSION, cronExpression);
-			saveJob(jobDetail);
-			addMessage(request, fp, MessageConstants.JOB_UPDATED, false, false, null, id);
 		}
+		saveJob(jobDetail);
+		addMessage(request, fp, MessageConstants.JOB_UPDATED, false, false, null, id);
 	}
 
 	protected CronTrigger getCronTrigger(JobDetail jobDetail) throws SchedulerException {
@@ -149,26 +148,27 @@ public class SchedulerUtils {
 
 	public void addCronTrigger(JobDetail jobDetail, String cronExpression, String id, String jobDesc,
 			String triggerGroup) throws SchedulerException {
-		if (isValidExpression(cronExpression)) {
-			CronTrigger cronTrigger = getCronTrigger(jobDetail, cronExpression, id, jobDesc, triggerGroup);
-			if (cronTrigger != null) {
-				scheduler.scheduleJob(cronTrigger);
-				log.info("Created trigger '{}' for job '{}' with expression '{}'", cronTrigger.getKey(),
-						jobDetail.getKey(), cronExpression);
-				addMessage(request, fp, MessageConstants.JOB_SCHEDULED_EXPR, false, false, null, id, cronExpression);
-			}
+		CronTrigger cronTrigger = createCronTrigger(jobDetail, cronExpression, id, jobDesc, triggerGroup);
+		if (cronTrigger != null) {
+			scheduler.scheduleJob(cronTrigger);
+			log.info("Created trigger '{}' for job '{}' with expression '{}'", cronTrigger.getKey(), jobDetail.getKey(),
+					cronExpression);
+			addMessage(request, fp, MessageConstants.JOB_SCHEDULED_EXPR, false, false, null, id, cronExpression);
 		}
 	}
 
-	public CronTrigger getCronTrigger(JobDetail jobDetail, String cronExpression, String id, String jobDesc,
+	public CronTrigger createCronTrigger(JobDetail jobDetail, String cronExpression, String id, String jobDesc,
 			String triggerGroup) {
 		if (isValidExpression(cronExpression)) {
 			TriggerKey triggerKey = new TriggerKey(id + "-crontrigger-" + hashCode(), triggerGroup);
-			CronTrigger cronTrigger = TriggerBuilder.newTrigger().withIdentity(triggerKey)
-					.withSchedule(CronScheduleBuilder.cronSchedule(cronExpression)).forJob(jobDetail).build();
-			return cronTrigger;
+			return createCronTrigger(jobDetail, cronExpression, triggerKey);
 		}
 		return null;
+	}
+
+	protected CronTrigger createCronTrigger(JobDetail jobDetail, String cronExpression, TriggerKey triggerKey) {
+		return TriggerBuilder.newTrigger().withIdentity(triggerKey)
+				.withSchedule(CronScheduleBuilder.cronSchedule(cronExpression)).forJob(jobDetail).build();
 	}
 
 	public boolean isValidExpression(String cronExpression) {
