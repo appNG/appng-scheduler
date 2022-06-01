@@ -29,6 +29,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.collections4.EnumerationUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
+import org.apache.commons.lang3.time.FastDateFormat;
 import org.appng.api.Environment;
 import org.appng.api.Request;
 import org.appng.api.RequestUtil;
@@ -79,6 +80,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class JobStateRestController implements JobStateApi {
 
+	private static final FastDateFormat DATE_FORMAT = FastDateFormat.getInstance("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
 	private final JobRecordService jobRecordService;
 	private final Scheduler scheduler;
 	private final Site site;
@@ -245,13 +247,13 @@ public class JobStateRestController implements JobStateApi {
 				if (hasTimeUnit) {
 					jobState.setStartedAfter(toOffsetDateTime(startedAfter));
 				}
-				long totalSuccess = okRecords.getTotalElements();
-				long totalFailed = failedRecords.getTotalElements();
-				long total = totalSuccess + totalFailed;
+				int totalSuccess = (int) okRecords.getTotalElements();
+				int totalFailed = (int) failedRecords.getTotalElements();
+				int total = totalSuccess + totalFailed;
 
-				jobState.setTotalFailed((int) totalFailed);
-				jobState.setTotalSuccess((int) totalSuccess);
-				jobState.setTotalRecords((int) total);
+				jobState.setTotalFailed(totalFailed);
+				jobState.setTotalSuccess(totalSuccess);
+				jobState.setTotalRecords(total);
 
 				if (withRecords) {
 					Page<JobExecutionRecord> allRecords = jobRecordService.getJobRecords(site.getName(), application,
@@ -271,9 +273,10 @@ public class JobStateRestController implements JobStateApi {
 					JobExecutionRecord firstRun = jobRecordService.getFirstRun(site.getName(), application,
 							jobKey.getName());
 					if (checkFirstRun && null != firstRun && firstRun.getStartTime().after(startedAfter)) {
+
 						message = String.format(
 								"Job first run at %s, so not enough data to validate tresholds based on %s.",
-								firstRun.getStartTime(), startedAfter);
+								DATE_FORMAT.format(firstRun.getStartTime()), DATE_FORMAT.format(startedAfter));
 					} else {
 						String messageFormat = "The job failed %s time(s) and succeeded %s time(s) during the last %s, which is %s the %s treshold of %s.";
 						if (hasErrorTreshold && totalSuccess < thresholdError) {
