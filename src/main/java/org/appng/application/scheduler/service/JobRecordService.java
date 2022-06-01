@@ -37,7 +37,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -45,6 +44,7 @@ import org.springframework.transaction.annotation.Transactional;
  * Service class to deal with saving, deleting and querying for saved job execution records.
  * 
  * @author Claus Stümke
+ * @author Matthias Müller
  */
 @Component
 @Transactional(transactionManager = "coreTxManager")
@@ -110,6 +110,20 @@ public class JobRecordService {
 
 	public Page<JobExecutionRecord> getJobRecords(String siteName, String applicationFilter, String jobFilter,
 			Date start, Date end, String result, Integer duration, Pageable pageable) {
+		return recordRepository.search(
+				getRecordSearchQuery(siteName, applicationFilter, jobFilter, start, end, result, duration), pageable);
+	}
+
+	public JobExecutionRecord getFirstRun(String siteName, String applicationFilter, String jobFilter) {
+		SearchQuery<JobExecutionRecord> query = getRecordSearchQuery(siteName, applicationFilter, jobFilter, null, null,
+				null, null);
+		Page<JobExecutionRecord> oldestRun = recordRepository.search(query,
+				new PageRequest(0, 1, new Sort("startTime")));
+		return oldestRun.hasContent() ? oldestRun.getContent().get(0) : null;
+	}
+
+	public SearchQuery<JobExecutionRecord> getRecordSearchQuery(String siteName, String applicationFilter,
+			String jobFilter, Date start, Date end, String result, Integer duration) {
 		SearchQuery<JobExecutionRecord> query = recordRepository.createSearchQuery();
 		query.equals(FIELD_SITE, siteName);
 		query.equals(FIELD_APPLICATION, applicationFilter);
@@ -118,7 +132,7 @@ public class JobRecordService {
 		query.greaterEquals(FIELD_START, start);
 		query.lessEquals(FIELD_START, end);
 		query.greaterEquals(FIELD_DURATION, duration);
-		return recordRepository.search(query, pageable);
+		return query;
 	}
 
 	public Integer cleanUp(Site site, Application application) {
@@ -139,19 +153,6 @@ public class JobRecordService {
 
 	public JobRecord getRecord(Integer recordId) {
 		return JobRecord.fromDomain(recordRepository.findOne(recordId));
-	}
-
-	public Page<JobRecord> getNonFailedRecords(String site, String application, String job, Date startedAfter,
-			Integer pageSize) {
-		SearchQuery<JobExecutionRecord> query = recordRepository.createSearchQuery();
-		query.equals(FIELD_SITE, site);
-		query.equals(FIELD_APPLICATION, application);
-		query.equals(FIELD_JOB_NAME, job);
-		query.greaterEquals(FIELD_START, startedAfter);
-		query.notEquals(FIELD_RESULT, ExecutionResult.FAIL.toString());
-
-		PageRequest pageable = new PageRequest(0, pageSize, new Sort(Direction.DESC, "startTime"));
-		return recordRepository.search(query, pageable).map(r -> JobRecord.fromDomain(r));
 	}
 
 }
