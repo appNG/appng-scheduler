@@ -273,7 +273,6 @@ public class JobStateRestController implements JobStateApi {
 					JobExecutionRecord firstRun = jobRecordService.getFirstRun(site.getName(), application,
 							jobKey.getName());
 					if (checkFirstRun && null != firstRun && firstRun.getStartTime().after(startedAfter)) {
-
 						message = String.format(
 								"Job first run at %s, so not enough data to validate tresholds based on %s.",
 								DATE_FORMAT.format(firstRun.getStartTime()), DATE_FORMAT.format(startedAfter));
