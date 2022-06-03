@@ -41,6 +41,7 @@ import org.appng.api.model.Site.SiteState;
 import org.appng.api.support.environment.DefaultEnvironment;
 import org.appng.application.scheduler.Constants;
 import org.appng.application.scheduler.PropertyConstants;
+import org.appng.application.scheduler.SchedulerUtils;
 import org.appng.core.controller.HttpHeaders;
 import org.appng.core.domain.JobExecutionRecord;
 import org.appng.scheduler.openapi.JobStateApi;
@@ -165,9 +166,9 @@ public class JobStateRestController implements JobStateApi {
 				Job job = new Job();
 				job.setSite(site.getName());
 				String name = jobKey.getName();
-				String[] splittedName = name.split("_");
-				job.setApplication(splittedName[0]);
-				job.setJob(splittedName[1]);
+				String application = name.substring(0, name.indexOf(SchedulerUtils.JOB_SEPARATOR));
+				job.setApplication(application);
+				job.setJob(name.substring(application.length() + 1, name.length()));
 				String servicePath = site.getProperties().getString(SiteProperties.SERVICE_PATH);
 				String detail = String.format("%s%s/%s/appng-scheduler/rest/jobState/%s/%s", site.getDomain(),
 						servicePath, site.getName(), job.getApplication(), job.getJob());
@@ -206,7 +207,7 @@ public class JobStateRestController implements JobStateApi {
 	private JobState getState(String application, String job, Integer pageSize, boolean withRecords) {
 		JobState jobState = null;
 		try {
-			String jobName = job.startsWith(application) ? job : application + "_" + job;
+			String jobName = job.startsWith(application) ? job : application + SchedulerUtils.JOB_SEPARATOR + job;
 			JobKey jobKey = new JobKey(jobName, site.getName());
 			JobDetail jobDetail = scheduler.getJobDetail(jobKey);
 			if (null != jobDetail) {
