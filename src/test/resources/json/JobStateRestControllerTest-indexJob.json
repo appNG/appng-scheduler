@@ -3,10 +3,12 @@
   "application" : "appng-scheduler",
   "job" : "appng-scheduler_indexJob",
   "totalRecords" : 1,
+  "totalSuccess" : 1,
+  "totalFailed" : 0,
   "state" : 0,
   "stateName" : "OK",
   "startedAfter" : "2021-09-23T09:01:15.476+02:00",
-  "message" : "The job succeeded 1 time(s) during that last DAY, which is greater than/equal to the ERROR treshold of 1.",
+  "message" : "The job failed 0 time(s) and succeeded 1 time(s) during the last DAY, which is greater than/equal to the ERROR treshold of 1.",
   "jobData" : {
     "SCHEDULED_JOB" : "org.appng.application.scheduler.job.IndexJob",
     "jobBeanName" : "indexJob",

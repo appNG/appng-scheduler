@@ -10,6 +10,7 @@ import java.util.Properties;
 
 import org.appng.api.ScheduledJobResult;
 import org.appng.api.ScheduledJobResult.ExecutionResult;
+import org.appng.api.model.Site.SiteState;
 import org.appng.api.support.environment.DefaultEnvironment;
 import org.appng.application.scheduler.SchedulingProperties;
 import org.appng.application.scheduler.business.SchedulingController;
@@ -61,6 +62,8 @@ public class JobStateRestControllerTest extends TestBase {
 
 		Mockito.when(site.getApplications()).thenReturn(new HashSet<>(Arrays.asList(application)));
 		Mockito.when(site.getApplication("appng-scheduler")).thenReturn(application);
+		Mockito.when(site.isActive()).thenReturn(true);
+		Mockito.when(site.getState()).thenReturn(SiteState.STARTED);
 		schedulerController.start(site, application, environment);
 		ScheduledJobResult result = new ScheduledJobResult();
 		result.setResult(ExecutionResult.SUCCESS);

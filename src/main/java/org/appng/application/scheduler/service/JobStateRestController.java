@@ -29,6 +29,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.collections4.EnumerationUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
+import org.apache.commons.lang3.time.FastDateFormat;
 import org.appng.api.Environment;
 import org.appng.api.Request;
 import org.appng.api.RequestUtil;
@@ -36,9 +37,11 @@ import org.appng.api.ScheduledJobResult.ExecutionResult;
 import org.appng.api.SiteProperties;
 import org.appng.api.model.Application;
 import org.appng.api.model.Site;
+import org.appng.api.model.Site.SiteState;
 import org.appng.api.support.environment.DefaultEnvironment;
 import org.appng.application.scheduler.Constants;
 import org.appng.application.scheduler.PropertyConstants;
+import org.appng.application.scheduler.SchedulerUtils;
 import org.appng.core.controller.HttpHeaders;
 import org.appng.core.domain.JobExecutionRecord;
 import org.appng.scheduler.openapi.JobStateApi;
@@ -78,12 +81,14 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class JobStateRestController implements JobStateApi {
 
+	private static final FastDateFormat DATE_FORMAT = FastDateFormat.getInstance("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
 	private final JobRecordService jobRecordService;
 	private final Scheduler scheduler;
 	private final Site site;
 	private final Application app;
 	private @Value("${" + PropertyConstants.BEARER_TOKEN + "}") String bearerToken;
 	private @Value("${skipAuth:false}") boolean skipAuth;
+	private @Value("${checkFirstRun:true}") boolean checkFirstRun;
 
 	public enum TimeUnit {
 		YEAR, MONTH, WEEK, DAY, HOUR, MINUTE;
@@ -124,7 +129,7 @@ public class JobStateRestController implements JobStateApi {
 			Environment env = getRequest().getEnvironment();
 			for (String siteName : new TreeSet<>(RequestUtil.getSiteNames(env))) {
 				Site site = RequestUtil.getSiteByName(env, siteName);
-				if (site.isActive()) {
+				if (site.isActive() && SiteState.STARTED.equals(site.getState())) {
 					try {
 						Application schedulerApp = site.getApplication(app.getName());
 						if (null != schedulerApp) {
@@ -161,9 +166,9 @@ public class JobStateRestController implements JobStateApi {
 				Job job = new Job();
 				job.setSite(site.getName());
 				String name = jobKey.getName();
-				String[] splittedName = name.split("_");
-				job.setApplication(splittedName[0]);
-				job.setJob(splittedName[1]);
+				String application = name.substring(0, name.indexOf(SchedulerUtils.JOB_SEPARATOR));
+				job.setApplication(application);
+				job.setJob(name.substring(application.length() + 1, name.length()));
 				String servicePath = site.getProperties().getString(SiteProperties.SERVICE_PATH);
 				String detail = String.format("%s%s/%s/appng-scheduler/rest/jobState/%s/%s", site.getDomain(),
 						servicePath, site.getName(), job.getApplication(), job.getJob());
@@ -202,7 +207,7 @@ public class JobStateRestController implements JobStateApi {
 	private JobState getState(String application, String job, Integer pageSize, boolean withRecords) {
 		JobState jobState = null;
 		try {
-			String jobName = job.startsWith(application) ? job : application + "_" + job;
+			String jobName = job.startsWith(application) ? job : application + SchedulerUtils.JOB_SEPARATOR + job;
 			JobKey jobKey = new JobKey(jobName, site.getName());
 			JobDetail jobDetail = scheduler.getJobDetail(jobKey);
 			if (null != jobDetail) {
@@ -233,45 +238,66 @@ public class JobStateRestController implements JobStateApi {
 				boolean hasTimeUnit = null != timeunit;
 				Date startedAfter = hasTimeUnit ? timeunit.getStartDate(now) : null;
 
-				Page<JobExecutionRecord> records = jobRecordService.getJobRecords(site.getName(), application,
-						jobKey.getName(), startedAfter, now, null, null, new PageRequest(0, pageSize));
+				Page<JobExecutionRecord> okRecords = jobRecordService.getJobRecords(site.getName(), application,
+						jobKey.getName(), startedAfter, now, ExecutionResult.SUCCESS.name(), null,
+						new PageRequest(0, 1));
+
+				Page<JobExecutionRecord> failedRecords = jobRecordService.getJobRecords(site.getName(), application,
+						jobKey.getName(), startedAfter, now, ExecutionResult.FAIL.name(), null, new PageRequest(0, 1));
 
 				if (hasTimeUnit) {
 					jobState.setStartedAfter(toOffsetDateTime(startedAfter));
 				}
-				long totalElements = records.getTotalElements();
-				jobState.setTotalRecords((int) totalElements);
+				int totalSuccess = (int) okRecords.getTotalElements();
+				int totalFailed = (int) failedRecords.getTotalElements();
+				int total = totalSuccess + totalFailed;
+
+				jobState.setTotalFailed(totalFailed);
+				jobState.setTotalSuccess(totalSuccess);
+				jobState.setTotalRecords(total);
 
 				if (withRecords) {
-					jobState.setRecords(records.map(r -> toRecord(r)).getContent());
+					Page<JobExecutionRecord> allRecords = jobRecordService.getJobRecords(site.getName(), application,
+							jobKey.getName(), startedAfter, now, null, null, new PageRequest(0, pageSize));
+					jobState.setRecords(allRecords.map(r -> toRecord(r)).getContent());
 				}
 
 				String message = "Tresholds and/or time unit have not been definded.";
 				boolean hasErrorTreshold = thresholdError > 0;
 				boolean hasWarnTreshold = thresholdWarn > 0;
+				StateNameEnum state = StateNameEnum.OK;
+				StateNameEnum logState = state;
+				int treshold;
+				String operand = "less than";
 
-				jobState.setStateName(StateNameEnum.OK);
 				if (hasTimeUnit && (hasWarnTreshold || hasErrorTreshold)) {
-					String messageFormat = "The job succeeded %s time(s) during that last %s, which is %s the %s treshold of %s.";
-					if (hasErrorTreshold && totalElements < thresholdError) {
-						jobState.setStateName(StateNameEnum.ERROR);
-						message = String.format(messageFormat, totalElements, timeunit, "less than",
-								StateNameEnum.ERROR, thresholdError);
-					} else if (hasWarnTreshold && totalElements < thresholdWarn) {
-						jobState.setStateName(StateNameEnum.WARN);
-						message = String.format(messageFormat, totalElements, timeunit, "less than", StateNameEnum.WARN,
-								thresholdWarn);
+					JobExecutionRecord firstRun = jobRecordService.getFirstRun(site.getName(), application,
+							jobKey.getName());
+					if (checkFirstRun && null != firstRun && firstRun.getStartTime().after(startedAfter)) {
+						message = String.format(
+								"Job first run at %s, so not enough data to validate tresholds based on %s.",
+								DATE_FORMAT.format(firstRun.getStartTime()), DATE_FORMAT.format(startedAfter));
 					} else {
-						int treshold = hasWarnTreshold ? thresholdWarn : (hasErrorTreshold ? thresholdError : -1);
-						StateNameEnum state = hasWarnTreshold ? StateNameEnum.WARN
-								: (hasErrorTreshold ? StateNameEnum.ERROR : StateNameEnum.OK);
-						message = String.format(messageFormat, totalElements, timeunit, "greater than/equal to", state,
+						String messageFormat = "The job failed %s time(s) and succeeded %s time(s) during the last %s, which is %s the %s treshold of %s.";
+						if (hasErrorTreshold && totalSuccess < thresholdError) {
+							logState = state = StateNameEnum.ERROR;
+							treshold = thresholdError;
+						} else if (hasWarnTreshold && totalSuccess < thresholdWarn) {
+							logState = state = StateNameEnum.WARN;
+							treshold = thresholdWarn;
+						} else {
+							treshold = hasWarnTreshold ? thresholdWarn : (hasErrorTreshold ? thresholdError : -1);
+							logState = hasWarnTreshold ? StateNameEnum.WARN
+									: (hasErrorTreshold ? StateNameEnum.ERROR : StateNameEnum.OK);
+							operand = "greater than/equal to";
+						}
+						message = String.format(messageFormat, totalFailed, totalSuccess, timeunit, operand, logState,
 								treshold);
 					}
 				}
-
+				jobState.setStateName(state);
+				jobState.setState(state.ordinal());
 				jobState.setMessage(message);
-				jobState.setState(jobState.getStateName().ordinal());
 			}
 		} catch (SchedulerException e) {
 			log.error("error while retrieving job", e);

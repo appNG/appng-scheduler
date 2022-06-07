@@ -136,7 +136,13 @@ components:
           description: name of the job
         totalRecords:
           type: integer
-          description: total number of records
+          description: total number of job executions within the actual time frame
+        totalSuccess:
+          type: integer
+          description: total number of succesful job executions within the actual time frame
+        totalFailed:
+          type: integer
+          description: total number of failed job executions within the actual time frame
         state:
             type: integer
             description: numerical state (0=UNDEFINED, 1=OK, 2=WARN, 3=ERROR)
@@ -150,7 +156,7 @@ components:
         message:
           type: string
           description: A texttual description of the state.
-          example: The job succeed 4 time(s) during that last DAY, which is below the ERROR treshold of 5.
+          example: The job failed 4 time(s) and succeed 4 time(s) during the last DAY, which is below the ERROR treshold of 5.
         jobData:
           type: object
           additionalProperties:
