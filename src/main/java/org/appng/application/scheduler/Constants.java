@@ -39,6 +39,7 @@ public class Constants {
 	public static final String FORM_ACTION = "form_action";
 	public static final String JOB_FORCE_STATE = "forceState";
 
+	public static final String THRESHOLDS_DISABLED = "thresholdsDisabled";
 	public static final String THRESHOLD_TIMEUNIT = "thresholdTimeunit";
 	public static final String THRESHOLD_ERROR = "thresholdError";
 	public static final String THRESHOLD_WARN = "thresholdWarn";

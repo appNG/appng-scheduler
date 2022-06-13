@@ -33,8 +33,8 @@ import org.apache.commons.lang3.time.FastDateFormat;
 import org.appng.api.Environment;
 import org.appng.api.Request;
 import org.appng.api.RequestUtil;
-import org.appng.api.ScheduledJobResult.ExecutionResult;
 import org.appng.api.SiteProperties;
+import org.appng.api.ScheduledJobResult.ExecutionResult;
 import org.appng.api.model.Application;
 import org.appng.api.model.Site;
 import org.appng.api.model.Site.SiteState;
@@ -48,8 +48,8 @@ import org.appng.scheduler.openapi.JobStateApi;
 import org.appng.scheduler.openapi.model.Job;
 import org.appng.scheduler.openapi.model.JobRecord;
 import org.appng.scheduler.openapi.model.JobState;
-import org.appng.scheduler.openapi.model.JobState.StateNameEnum;
 import org.appng.scheduler.openapi.model.Jobs;
+import org.appng.scheduler.openapi.model.JobState.StateNameEnum;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
 import org.quartz.JobKey;
@@ -262,15 +262,14 @@ public class JobStateRestController implements JobStateApi {
 					jobState.setRecords(allRecords.map(r -> toRecord(r)).getContent());
 				}
 
-				String message = "Tresholds and/or time unit have not been definded.";
-				boolean hasErrorTreshold = thresholdError > 0;
-				boolean hasWarnTreshold = thresholdWarn > 0;
+				String message = "Thresholds and/or time unit have not been definded.";
+				boolean hasErrorThreshold = thresholdError > 0;
+				boolean hasWarnThreshold = thresholdWarn > 0;
 				StateNameEnum state = StateNameEnum.OK;
-				StateNameEnum logState = state;
-				int treshold;
-				String operand = "less than";
 
-				if (hasTimeUnit && (hasWarnTreshold || hasErrorTreshold)) {
+				if (jobDataMap.getBoolean(Constants.THRESHOLDS_DISABLED)) {
+					message = "Thresholds are disabled";
+				} else if (hasTimeUnit && (hasWarnThreshold || hasErrorThreshold)) {
 					JobExecutionRecord firstRun = jobRecordService.getFirstRun(site.getName(), application,
 							jobKey.getName());
 					if (checkFirstRun && null != firstRun && firstRun.getStartTime().after(startedAfter)) {
@@ -278,17 +277,20 @@ public class JobStateRestController implements JobStateApi {
 								"Job first run at %s, so not enough data to validate tresholds based on %s.",
 								DATE_FORMAT.format(firstRun.getStartTime()), DATE_FORMAT.format(startedAfter));
 					} else {
+						int treshold;
+						String operand = "less than";
+						StateNameEnum logState = state;
 						String messageFormat = "The job failed %s time(s) and succeeded %s time(s) during the last %s, which is %s the %s treshold of %s.";
-						if (hasErrorTreshold && totalSuccess < thresholdError) {
+						if (hasErrorThreshold && totalSuccess < thresholdError) {
 							logState = state = StateNameEnum.ERROR;
 							treshold = thresholdError;
-						} else if (hasWarnTreshold && totalSuccess < thresholdWarn) {
+						} else if (hasWarnThreshold && totalSuccess < thresholdWarn) {
 							logState = state = StateNameEnum.WARN;
 							treshold = thresholdWarn;
 						} else {
-							treshold = hasWarnTreshold ? thresholdWarn : (hasErrorTreshold ? thresholdError : -1);
-							logState = hasWarnTreshold ? StateNameEnum.WARN
-									: (hasErrorTreshold ? StateNameEnum.ERROR : StateNameEnum.OK);
+							treshold = hasWarnThreshold ? thresholdWarn : (hasErrorThreshold ? thresholdError : -1);
+							logState = hasWarnThreshold ? StateNameEnum.WARN
+									: (hasErrorThreshold ? StateNameEnum.ERROR : StateNameEnum.OK);
 							operand = "greater than/equal to";
 						}
 						message = String.format(messageFormat, totalFailed, totalSuccess, timeunit, operand, logState,
