@@ -43,7 +43,6 @@ import org.appng.application.scheduler.Constants;
 import org.appng.application.scheduler.PropertyConstants;
 import org.appng.application.scheduler.SchedulerUtils;
 import org.appng.core.controller.HttpHeaders;
-import org.appng.core.domain.JobExecutionRecord;
 import org.appng.scheduler.openapi.JobStateApi;
 import org.appng.scheduler.openapi.model.Job;
 import org.appng.scheduler.openapi.model.JobRecord;
@@ -238,11 +237,11 @@ public class JobStateRestController implements JobStateApi {
 				boolean hasTimeUnit = null != timeunit;
 				Date startedAfter = hasTimeUnit ? timeunit.getStartDate(now) : null;
 
-				Page<JobExecutionRecord> okRecords = jobRecordService.getJobRecords(site.getName(), application,
+				Page<org.appng.core.domain.JobRecord> okRecords = jobRecordService.getJobRecords(site.getName(), application,
 						jobKey.getName(), startedAfter, now, ExecutionResult.SUCCESS.name(), null,
 						new PageRequest(0, 1));
 
-				Page<JobExecutionRecord> failedRecords = jobRecordService.getJobRecords(site.getName(), application,
+				Page<org.appng.core.domain.JobRecord> failedRecords = jobRecordService.getJobRecords(site.getName(), application,
 						jobKey.getName(), startedAfter, now, ExecutionResult.FAIL.name(), null, new PageRequest(0, 1));
 
 				if (hasTimeUnit) {
@@ -257,7 +256,7 @@ public class JobStateRestController implements JobStateApi {
 				jobState.setTotalRecords(total);
 
 				if (withRecords) {
-					Page<JobExecutionRecord> allRecords = jobRecordService.getJobRecords(site.getName(), application,
+					Page<org.appng.core.domain.JobRecord> allRecords = jobRecordService.getJobRecords(site.getName(), application,
 							jobKey.getName(), startedAfter, now, null, null, new PageRequest(0, pageSize));
 					jobState.setRecords(allRecords.map(r -> toRecord(r)).getContent());
 				}
@@ -270,7 +269,7 @@ public class JobStateRestController implements JobStateApi {
 				if (jobDataMap.getBoolean(Constants.THRESHOLDS_DISABLED)) {
 					message = "Thresholds are disabled";
 				} else if (hasTimeUnit && (hasWarnThreshold || hasErrorThreshold)) {
-					JobExecutionRecord firstRun = jobRecordService.getFirstRun(site.getName(), application,
+					org.appng.core.domain.JobRecord firstRun = jobRecordService.getFirstRun(site.getName(), application,
 							jobKey.getName());
 					if (checkFirstRun && null != firstRun && firstRun.getStartTime().after(startedAfter)) {
 						message = String.format(
@@ -307,14 +306,13 @@ public class JobStateRestController implements JobStateApi {
 		return jobState;
 	}
 
-	private JobRecord toRecord(JobExecutionRecord r) {
+	private JobRecord toRecord(org.appng.core.domain.JobRecord r) {
 		JobRecord jobRecord = new JobRecord();
 		jobRecord.setId(r.getId());
 		jobRecord.setStart(toOffsetDateTime(r.getStartTime()));
 		jobRecord.setEnd(toOffsetDateTime(r.getEndTime()));
 		jobRecord.setRunOnce(r.isRunOnce());
 		jobRecord.setDuration(r.getDuration().intValue());
-		jobRecord.setStacktrace(r.getStacktraces());
 		ExecutionResult execResult = ExecutionResult.valueOf(r.getResult());
 		jobRecord.setState(
 				ExecutionResult.SUCCESS.equals(execResult) ? JobRecord.StateEnum.OK : JobRecord.StateEnum.ERROR);
