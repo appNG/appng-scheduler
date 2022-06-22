@@ -66,4 +66,21 @@ public class JobRecord extends JobResult {
 		return jobRecord;
 	}
 
+	public static JobRecord fromDomain(org.appng.core.domain.JobRecord r) {
+		JobRecord jobRecord = new JobRecord();
+		jobRecord.setId(r.getId());
+		jobRecord.setApplicationName(r.getApplication());
+		jobRecord.setSiteName(r.getSite());
+		jobRecord.setJobName(r.getJobName());
+		jobRecord.setTriggerName(r.getTriggername());
+		jobRecord.setStart(r.getStartTime());
+		jobRecord.setEnd(r.getEndTime());
+		jobRecord.setRunOnce(r.isRunOnce());
+		jobRecord.setDuration(r.getDuration().longValue());
+		ScheduledJobResult scheduledJobResult = new ScheduledJobResult();
+		scheduledJobResult.setResult(ExecutionResult.valueOf(r.getResult()));
+		jobRecord.setScheduledJobResult(scheduledJobResult);
+		return jobRecord;
+	}
+
 }

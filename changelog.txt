@@ -1,3 +1,15 @@
+Release Notes - appNG Scheduler - Version 1.16.2 (2022-06-22)
+-------------------------------------------------------------
+* [SCHED-52] - Avoid reading custom data when retrieving job states
+
+Release Notes - appNG Scheduler - Version 1.16.1 (2022-06-14)
+-------------------------------------------------------------
+* [SCHED-51] - Allow disabling thresholds for a job
+
+Release Notes - appNG Scheduler - Version 1.16.0 (2022-06-07)
+-------------------------------------------------------------
+* [SCHED-50] - Improve REST-API
+
 Release Notes - appNG Scheduler - Version 1.15.0 (2022-04-27)
 -------------------------------------------------------------
 * [SCHED-35] - Misleading Job state in a clustered environment

@@ -2,7 +2,7 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>appng-scheduler</artifactId>
-	<version>1.16.1</version>
+	<version>1.16.2</version>
 	<name>Scheduler</name>
 	<description>Scheduling using Quartz Scheduler</description>
 	<url>https://www.appng.org</url>
@@ -10,7 +10,7 @@
 	<parent>
 		<groupId>org.appng</groupId>
 		<artifactId>appng-application-parent</artifactId>
-		<version>1.24.4</version>
+		<version>1.24.5</version>
 		<relativePath />
 	</parent>
 
@@ -75,7 +75,7 @@
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-gpg-plugin</artifactId>
-						<version>1.6</version>
+						<version>3.0.1</version>
 						<executions>
 							<execution>
 								<id>sign-artifacts</id>

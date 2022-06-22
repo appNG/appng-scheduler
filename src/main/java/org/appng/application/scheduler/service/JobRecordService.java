@@ -30,6 +30,7 @@ import org.appng.application.scheduler.model.JobRecord;
 import org.appng.application.scheduler.model.JobResult;
 import org.appng.core.domain.JobExecutionRecord;
 import org.appng.core.repository.JobExecutionRecordRepository;
+import org.appng.core.repository.JobRecordRepository;
 import org.appng.persistence.repository.SearchQuery;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionException;
@@ -40,13 +41,17 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import lombok.RequiredArgsConstructor;
+
 /**
- * Service class to deal with saving, deleting and querying for saved job execution records.
+ * Service class to deal with saving, deleting and querying for saved job
+ * execution records.
  * 
  * @author Claus Stümke
  * @author Matthias Müller
  */
 @Component
+@RequiredArgsConstructor
 @Transactional(transactionManager = "coreTxManager")
 public class JobRecordService {
 
@@ -57,11 +62,9 @@ public class JobRecordService {
 	private static final String FIELD_SITE = "site";
 	private static final String FIELD_APPLICATION = "application";
 
-	private JobExecutionRecordRepository recordRepository;
+	private final JobExecutionRecordRepository recordRepositoryFull;
 
-	public JobRecordService(JobExecutionRecordRepository recordRepository) {
-		this.recordRepository = recordRepository;
-	}
+	private final JobRecordRepository recordRepository;
 
 	public void recordJob(JobResult jobResult, Date fireTime, Date endTime, long jobRunTime, JobDataMap jobDataMap,
 			JobExecutionException jobException, String triggerName) {
@@ -80,7 +83,7 @@ public class JobRecordService {
 		record.setCustomData(jobResult.getCustomData());
 		record.setTriggername(triggerName);
 
-		recordRepository.save(record);
+		recordRepositoryFull.save(record);
 	}
 
 	private ExecutionResult getResult(JobResult jobResult, JobExecutionException jobException) {
@@ -108,23 +111,23 @@ public class JobRecordService {
 				.map(r -> JobRecord.fromDomain(r));
 	}
 
-	public Page<JobExecutionRecord> getJobRecords(String siteName, String applicationFilter, String jobFilter,
+	public Page<org.appng.core.domain.JobRecord> getJobRecords(String siteName, String applicationFilter, String jobFilter,
 			Date start, Date end, String result, Integer duration, Pageable pageable) {
 		return recordRepository.search(
 				getRecordSearchQuery(siteName, applicationFilter, jobFilter, start, end, result, duration), pageable);
 	}
 
-	public JobExecutionRecord getFirstRun(String siteName, String applicationFilter, String jobFilter) {
-		SearchQuery<JobExecutionRecord> query = getRecordSearchQuery(siteName, applicationFilter, jobFilter, null, null,
+	public org.appng.core.domain.JobRecord getFirstRun(String siteName, String applicationFilter, String jobFilter) {
+		SearchQuery<org.appng.core.domain.JobRecord> query = getRecordSearchQuery(siteName, applicationFilter, jobFilter, null, null,
 				null, null);
-		Page<JobExecutionRecord> oldestRun = recordRepository.search(query,
+		Page<org.appng.core.domain.JobRecord> oldestRun = recordRepository.search(query,
 				new PageRequest(0, 1, new Sort("startTime")));
 		return oldestRun.hasContent() ? oldestRun.getContent().get(0) : null;
 	}
 
-	public SearchQuery<JobExecutionRecord> getRecordSearchQuery(String siteName, String applicationFilter,
+	public SearchQuery<org.appng.core.domain.JobRecord> getRecordSearchQuery(String siteName, String applicationFilter,
 			String jobFilter, Date start, Date end, String result, Integer duration) {
-		SearchQuery<JobExecutionRecord> query = recordRepository.createSearchQuery();
+		SearchQuery<org.appng.core.domain.JobRecord> query = recordRepository.createSearchQuery();
 		query.equals(FIELD_SITE, siteName);
 		query.equals(FIELD_APPLICATION, applicationFilter);
 		query.equals(FIELD_JOB_NAME, StringUtils.trimToNull(jobFilter));
@@ -141,9 +144,9 @@ public class JobRecordService {
 
 			Date outdated = DateUtils.addDays(new Date(), -lifetime);
 
-			SearchQuery<JobExecutionRecord> query = recordRepository.createSearchQuery()
+			SearchQuery<org.appng.core.domain.JobRecord> query = recordRepository.createSearchQuery()
 					.equals(FIELD_SITE, site.getName()).lessEquals(FIELD_START, outdated);
-			Page<JobExecutionRecord> outdatedRecords = recordRepository.search(query, null);
+			Page<org.appng.core.domain.JobRecord> outdatedRecords = recordRepository.search(query, null);
 			recordRepository.delete(outdatedRecords);
 
 			return (int) outdatedRecords.getTotalElements();
@@ -152,7 +155,7 @@ public class JobRecordService {
 	}
 
 	public JobRecord getRecord(Integer recordId) {
-		return JobRecord.fromDomain(recordRepository.findOne(recordId));
+		return JobRecord.fromDomain(recordRepositoryFull.findOne(recordId));
 	}
 
 }
