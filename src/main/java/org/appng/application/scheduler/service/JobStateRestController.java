@@ -313,6 +313,7 @@ public class JobStateRestController implements JobStateApi {
 		jobRecord.setEnd(toOffsetDateTime(r.getEndTime()));
 		jobRecord.setRunOnce(r.isRunOnce());
 		jobRecord.setDuration(r.getDuration().intValue());
+		jobRecord.setNode(r.getNode());
 		ExecutionResult execResult = ExecutionResult.valueOf(r.getResult());
 		jobRecord.setState(
 				ExecutionResult.SUCCESS.equals(execResult) ? JobRecord.StateEnum.OK : JobRecord.StateEnum.ERROR);

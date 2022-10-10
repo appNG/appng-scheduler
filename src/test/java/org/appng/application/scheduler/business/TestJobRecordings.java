@@ -24,6 +24,7 @@ import java.util.List;
 
 import org.appng.api.ScheduledJobResult;
 import org.appng.api.ScheduledJobResult.ExecutionResult;
+import org.appng.api.messaging.Messaging;
 import org.appng.api.model.Application;
 import org.appng.api.model.Site;
 import org.appng.api.support.CallableDataSource;
@@ -70,6 +71,7 @@ public class TestJobRecordings extends TestBase {
 		setUseFullClassname(false);
 		setEntityPackage(JobExecutionRecord.class.getPackage().getName());
 		setRepositoryBase(JobExecutionRecordRepository.class.getPackage().getName());
+		System.setProperty(Messaging.APPNG_NODE_ID, "appNG-01");
 	}
 
 	@Override
@@ -125,8 +127,8 @@ public class TestJobRecordings extends TestBase {
 		CallableDataSource datasource = getDataSource("record").withParam("recordId", "1").getCallableDataSource();
 		datasource.perform("page");
 		XPathDifferenceHandler diffHandler = new XPathDifferenceHandler(false);
-		diffHandler.ignoreDifference("/datasource[1]/data[1]/result[1]/field[7]/value[1]/text()[1]");
 		diffHandler.ignoreDifference("/datasource[1]/data[1]/result[1]/field[8]/value[1]/text()[1]");
+		diffHandler.ignoreDifference("/datasource[1]/data[1]/result[1]/field[9]/value[1]/text()[1]");
 		validate(datasource.getDatasource(), diffHandler);
 	}
 
@@ -152,8 +154,8 @@ public class TestJobRecordings extends TestBase {
 
 	private XPathDifferenceHandler getResultsetDiffHandler() {
 		XPathDifferenceHandler diffHandler = new XPathDifferenceHandler(false);
-		diffHandler.ignoreDifference("/datasource[1]/data[1]/resultset[1]/result[1]/field[4]/value[1]/text()[1]");
 		diffHandler.ignoreDifference("/datasource[1]/data[1]/resultset[1]/result[1]/field[5]/value[1]/text()[1]");
+		diffHandler.ignoreDifference("/datasource[1]/data[1]/resultset[1]/result[1]/field[6]/value[1]/text()[1]");
 		return diffHandler;
 	}
 

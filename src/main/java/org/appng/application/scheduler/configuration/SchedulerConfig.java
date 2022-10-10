@@ -77,10 +77,10 @@ public class SchedulerConfig {
 			try (Connection connection = dataSource.getConnection()) {
 				String databaseProductName = connection.getMetaData().getDatabaseProductName().toLowerCase();
 				if (databaseProductName.contains("mysql") || databaseProductName.contains("mariadb")) {
-					// https://github.com/quartz-scheduler/quartz/blob/v2.3.2/quartz-core/src/main/java/org/quartz/impl/jdbcjobstore/JobStoreSupport.java#L667
+					// https://mariadb.com/kb/en/lock-in-share-mode/
 					lockSql = MYSQL_LOCK_SQL;
 				} else if (databaseProductName.contains("microsoft sql server")) {
-					// https://mariadb.com/kb/en/lock-in-share-mode/
+					// https://github.com/quartz-scheduler/quartz/blob/v2.3.2/quartz-core/src/main/java/org/quartz/impl/jdbcjobstore/JobStoreSupport.java#L667
 					lockSql = MSSQL_LOCK_SQL;
 					driverDelegate = MSSQLDelegate.class.getName();
 				} else if (databaseProductName.contains("postgres")) {

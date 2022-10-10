@@ -45,6 +45,8 @@ public class JobRecord extends JobResult {
 	@JsonFormat(shape = JsonFormat.Shape.NUMBER_FLOAT)
 	private Long duration;
 
+	private String node;
+
 	private String stacktraces;
 
 	public static JobRecord fromDomain(JobExecutionRecord r) {
@@ -57,6 +59,7 @@ public class JobRecord extends JobResult {
 		jobRecord.setStart(r.getStartTime());
 		jobRecord.setEnd(r.getEndTime());
 		jobRecord.setRunOnce(r.isRunOnce());
+		jobRecord.setNode(r.getNode());
 		jobRecord.setDuration(r.getDuration().longValue());
 		jobRecord.setStacktraces(r.getStacktraces());
 		ScheduledJobResult scheduledJobResult = new ScheduledJobResult();
@@ -76,6 +79,7 @@ public class JobRecord extends JobResult {
 		jobRecord.setStart(r.getStartTime());
 		jobRecord.setEnd(r.getEndTime());
 		jobRecord.setRunOnce(r.isRunOnce());
+		jobRecord.setNode(r.getNode());
 		jobRecord.setDuration(r.getDuration().longValue());
 		ScheduledJobResult scheduledJobResult = new ScheduledJobResult();
 		scheduledJobResult.setResult(ExecutionResult.valueOf(r.getResult()));

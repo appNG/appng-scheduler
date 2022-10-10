@@ -185,6 +185,9 @@ components:
         runOnce:
           type: boolean
           description: run once flag
+        node:
+          type: string
+          description: the node on which the job was executed
         stacktrace:
           type: string
           description: the stacktrace

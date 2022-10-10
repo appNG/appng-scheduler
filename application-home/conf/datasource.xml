@@ -146,6 +146,10 @@
 					<sort />
 					<label>record.jobName</label>
 				</field>
+				<field name="node" type="text">
+					<sort />
+					<label>record.node</label>
+				</field>
 				<field name="duration" type="int">
 					<sort />
 					<label>record.duration</label>
@@ -196,6 +200,9 @@
 				</field>
 				<field name="jobName" type="text" readonly="true">
 					<label>record.jobName</label>
+				</field>
+				<field name="node" type="text" readonly="true">
+					<label>record.node</label>
 				</field>
 				<field name="triggerName" type="text" readonly="true">
 					<label>record.triggerName</label>

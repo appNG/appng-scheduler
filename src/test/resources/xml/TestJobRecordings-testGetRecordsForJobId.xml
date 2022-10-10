@@ -16,6 +16,10 @@
 				<sort />
 				<label id="record.jobName">Job Name</label>
 			</field>
+			<field name="node" type="text" binding="node">
+				<sort />
+				<label id="record.node">Node</label>
+			</field>
 			<field name="duration" type="int" format="#" binding="duration">
 				<sort />
 				<label id="record.duration">Duration (sec)</label>
@@ -39,15 +43,14 @@
 			</field>
 		</meta-data>
 		<linkpanel id="actions" location="inline">
-			<link id="actions[1]" mode="intern" target="/${current.id}" default="true">
+			<link id="actions[1]" target="/${current.id}" mode="intern" default="true">
 				<label id="record.details">Show Details</label>
 				<icon>preview</icon>
 			</link>
 		</linkpanel>
 	</config>
 	<data>
-		<resultset chunk="0" chunkname="records" chunksize="25" nextchunk="0" previouschunk="0" firstchunk="0"
-			lastchunk="0" hits="1">
+		<resultset chunk="0" chunkname="records" chunksize="25" nextchunk="0" previouschunk="0" firstchunk="0" lastchunk="0" hits="1">
 			<result>
 				<field name="applicationName" type="text">
 					<value>appng-scheduler</value>
@@ -55,21 +58,24 @@
 				<field name="jobName" type="text">
 					<value>thejob</value>
 				</field>
+				<field name="node" type="text">
+					<value>appNG-01</value>
+				</field>
 				<field name="duration" type="int">
 					<value>0</value>
 				</field>
 				<field name="start" type="date">
-					<value>2019-09-09 12:22:12</value>
+					<value>2022-10-10 11:36:13</value>
 				</field>
 				<field name="end" type="date">
-					<value>2019-09-09 12:22:12</value>
+					<value>2022-10-10 11:36:13</value>
 				</field>
 				<field name="result" type="image">
 					<value>SUCCESS</value>
 					<icon type="class">led_green</icon>
 				</field>
 				<linkpanel id="actions" location="inline">
-					<link id="actions[1]" mode="intern" target="/1" default="true">
+					<link id="actions[1]" target="/1" mode="intern" default="true">
 						<label id="record.details">Show Details</label>
 						<icon>preview</icon>
 					</link>

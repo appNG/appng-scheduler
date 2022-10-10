@@ -22,6 +22,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.appng.api.ScheduledJobResult.ExecutionResult;
+import org.appng.api.messaging.Messaging;
 import org.appng.api.model.Application;
 import org.appng.api.model.Site;
 import org.appng.application.scheduler.Constants;
@@ -82,6 +83,7 @@ public class JobRecordService {
 		record.setStacktraces(null == jobException ? null : ExceptionUtils.getStackTrace(jobException));
 		record.setCustomData(jobResult.getCustomData());
 		record.setTriggername(triggerName);
+		record.setNode(System.getProperty(Messaging.APPNG_NODE_ID));
 
 		recordRepositoryFull.save(record);
 	}

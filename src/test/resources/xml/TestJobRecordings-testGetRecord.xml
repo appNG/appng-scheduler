@@ -15,6 +15,9 @@
 			<field name="jobName" type="text" readonly="true" binding="jobName">
 				<label id="record.jobName">Job Name</label>
 			</field>
+			<field name="node" type="text" readonly="true" binding="node">
+				<label id="record.node">Node</label>
+			</field>
 			<field name="triggerName" type="text" readonly="true" binding="triggerName">
 				<label id="record.triggerName">Trigger Name</label>
 			</field>
@@ -54,6 +57,9 @@
 			<field name="jobName" type="text">
 				<value>thejob</value>
 			</field>
+			<field name="node" type="text">
+				<value>appNG-01</value>
+			</field>
 			<field name="triggerName" type="text">
 				<value>appng-scheduler.localhost</value>
 			</field>
@@ -64,10 +70,10 @@
 				<value>false</value>
 			</field>
 			<field name="start" type="date">
-				<value>2020-05-29 08:47:29</value>
+				<value>2022-10-10 11:28:48</value>
 			</field>
 			<field name="end" type="date">
-				<value>2020-05-29 08:47:29</value>
+				<value>2022-10-10 11:28:48</value>
 			</field>
 			<field name="customData" type="longtext">
 				<value></value>
