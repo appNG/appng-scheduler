@@ -49,42 +49,6 @@
 					<element>
 						<datasource id="jobs" />
 					</element>
-					<element>
-						<action id="schedule" eventId="jobEvent" onSuccess="/jobs#tab_jobs">
-							<condition expression="${false}" />
-							<params>
-								<param name="form_action">${form_action}</param>
-								<param name="id">${id}</param>
-							</params>
-						</action>
-					</element>
-					<element>
-						<action id="unschedule" eventId="jobEvent" onSuccess="/jobs#tab_jobs">
-							<condition expression="${false}" />
-							<params>
-								<param name="form_action">${form_action}</param>
-								<param name="id">${id}</param>
-							</params>
-						</action>
-					</element>
-					<element>
-						<action id="start" eventId="jobEvent" onSuccess="/jobs#tab_jobs">
-							<condition expression="${false}" />
-							<params>
-								<param name="form_action">${form_action}</param>
-								<param name="id">${id}</param>
-							</params>
-						</action>
-					</element>
-					<element>
-						<action id="delete" eventId="jobEvent" onSuccess="/jobs#tab_jobs">
-							<condition expression="${false}" />
-							<params>
-								<param name="form_action">${form_action}</param>
-								<param name="id">${id}</param>
-							</params>
-						</action>
-					</element>
 				</section>
 
 				<!-- create -->
@@ -98,6 +62,7 @@
 						</action>
 					</element>
 				</section>
+				<!-- update -->
 				<section>
 					<element>
 						<action id="update" eventId="jobEvent" onSuccess="/jobs#tab_jobs">
@@ -132,8 +97,48 @@
 				<section>
 					<element>
 						<datasource id="indexInfo">
-						<condition expression="${empty action}"/>
+							<condition expression="${empty action}" />
 						</datasource>
+					</element>
+				</section>
+
+				<!-- hidden actions for (un)scheduling, starting and deleting jobs -->
+				<section hidden="true">
+					<element>
+						<action id="schedule" eventId="jobEvent" onSuccess="/jobs#tab_jobs">
+							<condition expression="${not empty form_action and not empty id}" />
+							<params>
+								<param name="form_action">${form_action}</param>
+								<param name="id">${id}</param>
+							</params>
+						</action>
+					</element>
+					<element>
+						<action id="unschedule" eventId="jobEvent" onSuccess="/jobs#tab_jobs">
+							<condition expression="${not empty form_action and not empty id}" />
+							<params>
+								<param name="form_action">${form_action}</param>
+								<param name="id">${id}</param>
+							</params>
+						</action>
+					</element>
+					<element>
+						<action id="start" eventId="jobEvent" onSuccess="/jobs#tab_jobs">
+							<condition expression="${not empty form_action and not empty id}" />
+							<params>
+								<param name="form_action">${form_action}</param>
+								<param name="id">${id}</param>
+							</params>
+						</action>
+					</element>
+					<element>
+						<action id="delete" eventId="jobEvent" onSuccess="/jobs#tab_jobs">
+							<condition expression="${not empty form_action and not empty id}" />
+							<params>
+								<param name="form_action">${form_action}</param>
+								<param name="id">${id}</param>
+							</params>
+						</action>
 					</element>
 				</section>
 			</structure>
