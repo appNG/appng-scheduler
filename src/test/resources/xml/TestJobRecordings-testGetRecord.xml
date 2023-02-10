@@ -33,10 +33,10 @@
 			<field name="end" type="date" format="yyyy-MM-dd HH:mm:ss" readonly="true" binding="end">
 				<label id="record.end">End Time</label>
 			</field>
-			<field name="customData" type="longtext" readonly="true" binding="customData">
+			<field name="customData" type="longtext" format="preformatted" readonly="true" binding="customData">
 				<label id="record.customData">Custom Data</label>
 			</field>
-			<field name="stacktraces" type="longtext" readonly="true" binding="stacktraces">
+			<field name="stacktraces" type="longtext" format="preformatted" readonly="true" binding="stacktraces">
 				<label id="record.stacktraces">Stacktrace</label>
 			</field>
 			<field name="result" type="image" readonly="true" binding="result">
@@ -70,10 +70,10 @@
 				<value>false</value>
 			</field>
 			<field name="start" type="date">
-				<value>2022-10-10 11:28:48</value>
+				<value>2023-02-10 12:59:50</value>
 			</field>
 			<field name="end" type="date">
-				<value>2022-10-10 11:28:48</value>
+				<value>2023-02-10 12:59:50</value>
 			</field>
 			<field name="customData" type="longtext">
 				<value></value>

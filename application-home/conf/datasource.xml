@@ -219,10 +219,10 @@
 				<field name="end" type="date" readonly="true">
 					<label>record.end</label>
 				</field>
-				<field name="customData" type="longtext" readonly="true">
+				<field name="customData" type="longtext" readonly="true" format="preformatted">
 					<label>record.customData</label>
 				</field>
-				<field name="stacktraces" type="longtext" readonly="true">
+				<field name="stacktraces" type="longtext" readonly="true" format="preformatted">
 					<label>record.stacktraces</label>
 				</field>
 				<field name="result" type="image" readonly="true">
