@@ -8,7 +8,7 @@
 	<bean id="server" primary="true" class="java.lang.Object" />
 	<bean id="dataSource" parent="datasource" primary="true" />
 	<bean id="datasource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
-		<constructor-arg type="java.lang.String" value="jdbc:hsqldb:mem:${database:hsql-testdb}" />
+		<constructor-arg type="java.lang.String" value="jdbc:hsqldb:mem:${database:hsql-testdb};hsqldb.tx=mvcc" />
 		<constructor-arg type="java.lang.String" value="sa" />
 		<constructor-arg type="java.lang.String" value="" />
 	</bean>
