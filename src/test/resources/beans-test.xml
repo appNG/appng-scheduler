@@ -19,7 +19,7 @@
 		http://www.springframework.org/schema/util/spring-util.xsd">
 
 	<bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
-		<constructor-arg value="jdbc:hsqldb:mem:scheduler" />
+		<constructor-arg value="jdbc:hsqldb:mem:scheduler;hsqldb.tx=mvcc" />
 		<constructor-arg value="sa" />
 		<constructor-arg value="" />
 	</bean>

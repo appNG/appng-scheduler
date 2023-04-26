@@ -87,9 +87,7 @@ public class SchedulerConfig {
 					driverDelegate = PostgreSQLDelegate.class.getName();
 				} else if (databaseProductName.contains("hsql")) {
 					// http://www.hsqldb.org/doc/2.0/guide/sessions-chapt.html#snc_tx_mvcc
-					try (CallableStatement stmt = connection.prepareCall("SET DATABASE TRANSACTION CONTROL MVCC")) {
-						stmt.execute();
-					}
+					// this is handled by adding ';hsqldb.tx=mvcc' to the JDBC-URL
 					driverDelegate = HSQLDBDelegate.class.getName();
 				}
 			}
