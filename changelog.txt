@@ -1,3 +1,10 @@
+Release Notes - appNG Scheduler - Version 1.17.0 (2023-04-26)
+-------------------------------------------------------------
+* [SCHED-57] - Move actions to hidden section and fix conditions
+* [SCHED-58] - No linebreak in customdata and stacktrace for JobRecords
+* [SCHED-56] - Show the node where a job was executed
+* [SCHED-59] - For HSQL, set MVCC transactions via JDC-URL
+
 Release Notes - appNG Scheduler - Version 1.16.2 (2022-06-22)
 -------------------------------------------------------------
 * [SCHED-52] - Avoid reading custom data when retrieving job states
