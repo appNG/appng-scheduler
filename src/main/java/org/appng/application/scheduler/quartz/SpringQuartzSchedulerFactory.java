@@ -67,8 +67,8 @@ public class SpringQuartzSchedulerFactory extends AdaptableJobFactory {
 		final JobKey jobKey = jobDetail.getKey();
 		OperableTrigger trigger = bundle.getTrigger();
 		JobDataMap triggerJobData = trigger.getJobDataMap();
-		log.debug("creating job instance for job {} with jobdata {} and trigger jobdata {}", jobKey,
-				jobDetail.getJobDataMap(), triggerJobData.getWrappedMap());
+		log.debug("creating job instance for job {} with jobdata {} and trigger jobdata {}.", jobKey,
+				jobDetail.getJobDataMap().getWrappedMap(), triggerJobData.getWrappedMap());
 
 		org.appng.core.model.ApplicationContext appngAppContext = (org.appng.core.model.ApplicationContext) applicationContext;
 		final Site site = appngAppContext.getSite();
