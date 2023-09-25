@@ -21,7 +21,6 @@
 		<urlAlias>scheduler</urlAlias>
 		<displayName>Scheduler</displayName>
 		<longDescription><![CDATA[An application for scheduling using Quartz]]></longDescription>
-		<application.homeFolder>application-home</application.homeFolder>
 	</properties>
 
 	<scm>
@@ -183,7 +182,7 @@
 					</execution>
 				</executions>
 				<configuration>
-					<inputSpec>${basedir}/src/main/resources/scheduler-api.yaml</inputSpec>
+					<inputSpec>${project.basedir}/src/main/resources/scheduler-api.yaml</inputSpec>
 					<!-- templateDirectory>${project.basedir}/openapi</templateDirectory -->
 					<generatorName>java</generatorName>
 					<library>spring-mvc</library>
@@ -276,7 +275,7 @@
 							<goal>generateApplicationConstants</goal>
 						</goals>						
 						<configuration>
-							<filePath>${application.homeFolder}/application.xml</filePath>
+							<filePath>${project.basedir}/application-home/application.xml</filePath>
 							<targetClass>org.appng.application.scheduler.PropertyConstants</targetClass>
 							<outfolder>${application.constants.generatedOutputFolder}</outfolder>
 						</configuration>
@@ -287,7 +286,7 @@
 							<goal>generateMessageConstants</goal>
 						</goals>
 						<configuration>
-							<filePath>${application.homeFolder}/dictionary/messages-scheduler.properties</filePath>
+							<filePath>${project.basedir}/application-home/dictionary/messages-scheduler.properties</filePath>
 							<targetClass>org.appng.application.scheduler.MessageConstants</targetClass>
 							<outfolder>${application.constants.generatedOutputFolder}</outfolder>
 						</configuration>

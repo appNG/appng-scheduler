@@ -15,6 +15,8 @@
  */
 package org.appng.application.scheduler.quartz;
 
+import java.util.Map;
+
 import org.appng.api.BusinessException;
 import org.appng.api.Environment;
 import org.appng.api.InvalidConfigurationException;
@@ -37,14 +39,16 @@ public class RunJobEvent extends Event {
 
 	private static final long serialVersionUID = 3439557609209638189L;
 	private static final String SCHEDULER_APPLICATION = "schedulerApplication";
-	private String id;
-	private JobKey jobKey;
+	private final String id;
+	private final JobKey jobKey;
+	private final Map<String, Object> triggerJobData;
 	private JobResult jobResult;
 
-	public RunJobEvent(String id, JobKey jobKey, String siteName) {
+	public RunJobEvent(String id, JobKey jobKey, String siteName, Map<String, Object> triggerJobData) {
 		super(siteName);
 		this.id = id;
 		this.jobKey = jobKey;
+		this.triggerJobData = triggerJobData;
 	}
 
 	public JobResult getJobResult() {
@@ -68,6 +72,7 @@ public class RunJobEvent extends Event {
 				throw new BusinessException("ScheduledJob " + beanName + " not found in application " + appName);
 			}
 			job.setJobDataMap(jobDetail.getJobDataMap());
+			job.getJobDataMap().putAll(triggerJobData);
 
 			this.jobResult = new JobResult(new ScheduledJobResult(), appName, site.getName(), jobKey.getName());
 			StopWatch sw = new StopWatch();

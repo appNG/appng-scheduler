@@ -15,6 +15,7 @@
  */
 package org.appng.application.scheduler.quartz;
 
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.servlet.ServletContext;
@@ -29,6 +30,7 @@ import org.appng.api.support.environment.DefaultEnvironment;
 import org.appng.application.scheduler.Constants;
 import org.quartz.InterruptableJob;
 import org.quartz.Job;
+import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -36,13 +38,14 @@ import org.quartz.JobKey;
 import org.quartz.Scheduler;
 import org.quartz.UnableToInterruptJobException;
 import org.quartz.spi.JobFactory;
+import org.quartz.spi.OperableTrigger;
 import org.quartz.spi.TriggerFiredBundle;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.scheduling.quartz.AdaptableJobFactory;
 import org.springframework.web.context.WebApplicationContext;
+
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * A {@link JobFactory} that creates Quartz {@link Job}s that are build from {@link ScheduledJob}s.
@@ -50,9 +53,8 @@ import org.springframework.web.context.WebApplicationContext;
  * @author Matthias Müller
  * @author Claus Stümke
  */
+@Slf4j
 public class SpringQuartzSchedulerFactory extends AdaptableJobFactory {
-
-	private static final Logger LOGGER = LoggerFactory.getLogger(SpringQuartzSchedulerFactory.class);
 
 	@Autowired
 	private ApplicationContext applicationContext;
@@ -63,7 +65,10 @@ public class SpringQuartzSchedulerFactory extends AdaptableJobFactory {
 	protected Job createJobInstance(TriggerFiredBundle bundle) throws Exception {
 		final JobDetail jobDetail = bundle.getJobDetail();
 		final JobKey jobKey = jobDetail.getKey();
-		LOGGER.debug("creating job instance for job {}", jobKey);
+		OperableTrigger trigger = bundle.getTrigger();
+		JobDataMap triggerJobData = trigger.getJobDataMap();
+		log.debug("creating job instance for job {} with jobdata {} and trigger jobdata {}", jobKey,
+				jobDetail.getJobDataMap(), triggerJobData.getWrappedMap());
 
 		org.appng.core.model.ApplicationContext appngAppContext = (org.appng.core.model.ApplicationContext) applicationContext;
 		final Site site = appngAppContext.getSite();
@@ -73,9 +78,9 @@ public class SpringQuartzSchedulerFactory extends AdaptableJobFactory {
 
 		final String eventId = hashCode() + "-" + id.getAndIncrement();
 		if (jobDetail.getJobDataMap().getBoolean(Constants.JOB_HARD_INTERRUPTABLE)) {
-			return getInterruptableJob(jobDetail, jobKey, site, environment, eventId);
+			return getInterruptableJob(jobDetail, jobKey, site, environment, eventId, triggerJobData);
 		} else {
-			return getJob(jobDetail, jobKey, site, environment, eventId);
+			return getJob(jobDetail, jobKey, site, environment, eventId, triggerJobData);
 		}
 	}
 
@@ -83,10 +88,10 @@ public class SpringQuartzSchedulerFactory extends AdaptableJobFactory {
 	 * Returns a regular {@link Job} which cannot be interrupted
 	 */
 	private Job getJob(final JobDetail jobDetail, final JobKey jobKey, final Site site, final Environment environment,
-			final String eventId) {
+			final String eventId, final Map<String, Object> triggerJobData) {
 		return new Job() {
 			public void execute(JobExecutionContext context) throws JobExecutionException {
-				RunJobEvent runJobEvent = new RunJobEvent(eventId, jobKey, site.getName());
+				RunJobEvent runJobEvent = new RunJobEvent(eventId, jobKey, site.getName(), triggerJobData);
 				try {
 					runJobEvent.perform(environment, site);
 					context.setResult(runJobEvent.getJobResult());
@@ -108,7 +113,7 @@ public class SpringQuartzSchedulerFactory extends AdaptableJobFactory {
 	 * interrupting its thread.
 	 */
 	private Job getInterruptableJob(final JobDetail jobDetail, final JobKey jobKey, final Site site,
-			final Environment environment, final String eventId) {
+			final Environment environment, final String eventId, final Map<String, Object> triggerJobData) {
 		Properties platformProps = environment.getAttribute(Scope.PLATFORM, Platform.Environment.PLATFORM_CONFIG);
 		// this is a 'secret' platform-property
 		final Integer waitTime = platformProps.getInteger("interruptableWaitTime", 5000);
@@ -117,7 +122,7 @@ public class SpringQuartzSchedulerFactory extends AdaptableJobFactory {
 			private Thread thread;
 
 			public void execute(JobExecutionContext context) throws JobExecutionException {
-				final RunJobEvent runJobEvent = new RunJobEvent(eventId, jobKey, site.getName());
+				final RunJobEvent runJobEvent = new RunJobEvent(eventId, jobKey, site.getName(), triggerJobData);
 				Runnable runnable = new Runnable() {
 					@Override
 					public void run() {
@@ -126,7 +131,7 @@ public class SpringQuartzSchedulerFactory extends AdaptableJobFactory {
 							context.setResult(runJobEvent.getJobResult());
 						} catch (Exception e) {
 							context.setResult(runJobEvent.getJobResult());
-							LOGGER.error("Caught Exception on job execution: ", e);
+							log.error("Caught Exception on job execution: ", e);
 						}
 						sendRunOnceEvent(jobDetail, jobKey, site, runJobEvent);
 					}
@@ -139,7 +144,7 @@ public class SpringQuartzSchedulerFactory extends AdaptableJobFactory {
 					try {
 						Thread.sleep(waitTime);
 					} catch (InterruptedException e) {
-						LOGGER.info("Thread " + thread.getName() + " was interrupted while sleeping");
+						log.info("Thread " + thread.getName() + " was interrupted while sleeping");
 					}
 					keepGoing = (thread.isAlive() && !thread.isInterrupted());
 				}
@@ -154,10 +159,10 @@ public class SpringQuartzSchedulerFactory extends AdaptableJobFactory {
 	private void sendRunOnceEvent(final JobDetail jobDetail, final JobKey jobKey, final Site site,
 			RunJobEvent runJobEvent) {
 		if (jobDetail.getJobDataMap().getBoolean(Constants.JOB_RUN_ONCE)) {
-			LOGGER.info("job {} has option '{}' set, no event will be send.", jobKey, Constants.JOB_RUN_ONCE);
+			log.info("job {} has option '{}' set, no event will be send.", jobKey, Constants.JOB_RUN_ONCE);
 		} else {
 			site.sendEvent(runJobEvent);
-			LOGGER.info("sending {}", runJobEvent);
+			log.info("sending {}", runJobEvent);
 		}
 	}
 }
