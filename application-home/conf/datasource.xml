@@ -131,21 +131,21 @@
 
 	<datasource id="runningJobs">
 		<config>
-			<title>triggers.running</title>
-			<meta-data bindClass="org.quartz.Trigger">
-				<field name="key.name" type="longtext" readonly="true">
+			<title>Running Jobs</title>
+			<meta-data bindClass="org.appng.application.scheduler.model.TriggerModel">
+				<field name="trigger" type="text" readonly="true">
 					<label id="trigger" />
 				</field>
-				<field name="jobKey.name" type="longtext" readonly="true">
+				<field name="description" type="text" readonly="true">
+					<label id="description" />
+				</field>
+				<field name="job" type="text" readonly="true">
 					<label id="job" />
 				</field>
-				<field name="startTime" type="date" readonly="true">
+				<field name="started" type="date" readonly="true">
 					<label id="start" />
-				</field>
-				<field name="endTime" type="date" readonly="true">
-					<label id="end" />
-				</field>
-				<field name="jobDataMap.wrappedMap" type="longtext" readonly="true">
+				</field>			
+				<field name="data" type="longtext" readonly="true">
 					<label id="jobData" />
 				</field>
 			</meta-data>

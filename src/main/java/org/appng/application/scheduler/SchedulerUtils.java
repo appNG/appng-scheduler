@@ -24,6 +24,7 @@ import org.appng.api.FieldProcessor;
 import org.appng.api.Request;
 import org.appng.api.ScheduledJob;
 import org.appng.api.model.Site;
+import org.appng.application.scheduler.model.TriggerModel;
 import org.appng.application.scheduler.quartz.SchedulerJobDetail;
 import org.appng.xml.platform.FieldDef;
 import org.quartz.CronExpression;
@@ -121,7 +122,7 @@ public class SchedulerUtils {
 		return false;
 	}
 
-	public List<? extends Trigger> getRunningTriggers(Site site) throws SchedulerException {
+	public List<TriggerModel> getRunningTriggers(Site site) throws SchedulerException {
 		Set<TriggerKey> triggerKeys = scheduler.getTriggerKeys(GroupMatcher.triggerGroupEquals(site.getName()));
 		List<TriggerKey> runningTriggers = triggerKeys.stream().filter(t -> {
 			try {
@@ -139,7 +140,8 @@ public class SchedulerUtils {
 				log.error("Failed retrieving trigger", e);
 			}
 			return null;
-		}).filter(t -> null != t).collect(Collectors.toList());
+		}).filter(t -> null != t).map(t -> new TriggerModel(t.getKey().getName(), t.getDescription(), t.getJobKey().getName(),
+				t.getStartTime(), t.getJobDataMap().getWrappedMap().toString())).collect(Collectors.toList());
 	}
 
 	public boolean deleteCronTrigger(JobDetail jobDetail, String id, boolean forcefullyDisabled)
