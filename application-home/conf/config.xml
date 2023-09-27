@@ -96,6 +96,11 @@
 				</section>
 				<section>
 					<element>
+						<datasource id="runningJobs" />
+					</element>
+				</section>
+				<section>
+					<element>
 						<datasource id="indexInfo">
 							<condition expression="${empty action}" />
 						</datasource>

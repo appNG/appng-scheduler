@@ -129,6 +129,26 @@
 		</bean>
 	</datasource>
 
+	<datasource id="runningJobs">
+		<config>
+			<title>triggers.running</title>
+			<meta-data bindClass="org.quartz.Trigger">
+				<field name="key.name" type="longtext" readonly="true">
+					<label id="name" />
+				</field>
+				<field name="jobKey.name" type="longtext" readonly="true">
+					<label id="job" />
+				</field>
+				<field name="jobDataMap.wrappedMap" type="longtext" readonly="true">
+					<label id="jobData" />
+				</field>
+			</meta-data>
+		</config>
+		<bean id="jobs">
+			<option name="action" id="running" />
+		</bean>
+	</datasource>
+
 	<datasource id="records">
 		<config>
 			<title>records.list</title>
@@ -171,7 +191,6 @@
 				<field name="actions" type="linkpanel">
 					<label>actions</label>
 				</field>
-
 			</meta-data>
 			<linkpanel id="actions" location="inline">
 				<link mode="intern" target="${path}/${current.id}${tab}" default="true">

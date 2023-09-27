@@ -121,6 +121,27 @@ public class SchedulerUtils {
 		return false;
 	}
 
+	public List<? extends Trigger> getRunningTriggers(Site site) throws SchedulerException {
+		Set<TriggerKey> triggerKeys = scheduler.getTriggerKeys(GroupMatcher.triggerGroupEquals(site.getName()));
+		List<TriggerKey> runningTriggers = triggerKeys.stream().filter(t -> {
+			try {
+				return TriggerState.COMPLETE.equals(scheduler.getTriggerState(t));
+			} catch (SchedulerException e) {
+				log.error("Failed retrieving state for trigger", e);
+				return false;
+			}
+		}).collect(Collectors.toList());
+
+		return runningTriggers.stream().map(t -> {
+			try {
+				return scheduler.getTrigger(t);
+			} catch (SchedulerException e) {
+				log.error("Failed retrieving trigger", e);
+			}
+			return null;
+		}).filter(t -> null != t).collect(Collectors.toList());
+	}
+
 	public boolean deleteCronTrigger(JobDetail jobDetail, String id, boolean forcefullyDisabled)
 			throws SchedulerException {
 		CronTrigger cronTrigger = getCronTrigger(jobDetail);

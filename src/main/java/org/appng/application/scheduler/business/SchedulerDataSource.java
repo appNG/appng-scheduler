@@ -78,41 +78,41 @@ public class SchedulerDataSource extends SchedulerAware implements DataProvider 
 			if (StringUtils.isNotBlank(jobId) && !ACTION_DELETE.equals(actionForm)) {
 				JobModel job = JobModel.getJob(scheduler, messageSource, env.getLocale(), jobId, site);
 				data.setItem(job);
-			} else {
-				if (ACTION_CREATE.equals(actionId)) {
-					JobModel jobModel = new JobModel();
-					jobModel.setName(StringUtils.EMPTY);
-					jobModel.setDescription(StringUtils.EMPTY);
-					jobModel.setCronExpression(StringUtils.EMPTY);
-					JobForm jobForm = new JobForm(jobModel);
-					data.setItem(jobForm);
+			} else if (ACTION_CREATE.equals(actionId)) {
+				JobModel jobModel = new JobModel();
+				jobModel.setName(StringUtils.EMPTY);
+				jobModel.setDescription(StringUtils.EMPTY);
+				jobModel.setCronExpression(StringUtils.EMPTY);
+				JobForm jobForm = new JobForm(jobModel);
+				data.setItem(jobForm);
 
-					Selection selection = new Selection();
-					selection.setId(AVAILABLE_JOB);
-					selection.setType(SelectionType.SELECT);
-					Label label = new Label();
-					label.setId(AVAILABLE_JOB);
-					selection.setTitle(label);
+				Selection selection = new Selection();
+				selection.setId(AVAILABLE_JOB);
+				selection.setType(SelectionType.SELECT);
+				Label label = new Label();
+				label.setId(AVAILABLE_JOB);
+				selection.setTitle(label);
 
-					OptionGroupFactory optionGroupFactory = new OptionGroupFactory();
-					for (Application a : site.getApplications()) {
-						String[] jobClasses = a.getBeanNames(ScheduledJob.class);
-						if (jobClasses.length > 0) {
-							List<Named<String>> jobs = new ArrayList<Named<String>>();
-							for (int i = 0; i < jobClasses.length; i++) {
-								jobs.add(new NamedJob(jobClasses[i],
-										a.getName() + SchedulerUtils.JOB_SEPARATOR + jobClasses[i]));
-							}
-							OptionGroup applicationJobs = optionGroupFactory.fromNamed(a.getName(), a.getName(), jobs,
-									(Named<String>) null);
-							selection.getOptionGroups().add(applicationJobs);
+				OptionGroupFactory optionGroupFactory = new OptionGroupFactory();
+				for (Application a : site.getApplications()) {
+					String[] jobClasses = a.getBeanNames(ScheduledJob.class);
+					if (jobClasses.length > 0) {
+						List<Named<String>> jobs = new ArrayList<Named<String>>();
+						for (int i = 0; i < jobClasses.length; i++) {
+							jobs.add(new NamedJob(jobClasses[i],
+									a.getName() + SchedulerUtils.JOB_SEPARATOR + jobClasses[i]));
 						}
+						OptionGroup applicationJobs = optionGroupFactory.fromNamed(a.getName(), a.getName(), jobs,
+								(Named<String>) null);
+						selection.getOptionGroups().add(applicationJobs);
 					}
-					data.getSelections().add(selection);
-				} else {
-					List<JobModel> jobs = JobModel.getJobs(scheduler, site, messageSource, env.getLocale());
-					data.setPage(jobs, fp.getPageable());
 				}
+				data.getSelections().add(selection);
+			} else if ("running".equals(actionId)) {
+				data.setItems(new SchedulerUtils(scheduler, fp).getRunningTriggers(site));
+			} else {
+				List<JobModel> jobs = JobModel.getJobs(scheduler, site, messageSource, env.getLocale());
+				data.setPage(jobs, fp.getPageable());
 			}
 		} catch (SchedulerException e) {
 			throw new ApplicationException("error while retrieving job(s)", e);
