@@ -134,10 +134,16 @@
 			<title>triggers.running</title>
 			<meta-data bindClass="org.quartz.Trigger">
 				<field name="key.name" type="longtext" readonly="true">
-					<label id="name" />
+					<label id="trigger" />
 				</field>
 				<field name="jobKey.name" type="longtext" readonly="true">
 					<label id="job" />
+				</field>
+				<field name="startTime" type="date" readonly="true">
+					<label id="start" />
+				</field>
+				<field name="endTime" type="date" readonly="true">
+					<label id="end" />
 				</field>
 				<field name="jobDataMap.wrappedMap" type="longtext" readonly="true">
 					<label id="jobData" />
